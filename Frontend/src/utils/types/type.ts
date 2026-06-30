@@ -1,7 +1,7 @@
 export type Category = {
   id: string;
   name: string;
-  photo: string | null;
+  photo: string;
   slug: string;
 }
 
@@ -39,8 +39,9 @@ export type Profile = {
   role: string;
 }
 
-export type Order = {
+export type orders = {
   id: string;
+  order_number: number;
   user_id: string;
   address_id: string;
   status: string;
@@ -70,6 +71,7 @@ export type Discount = {
   value: number;
   type: string;
   created_at: string;
+  is_active: boolean
 }
 
 export type Paginated<T> = {

@@ -5,6 +5,7 @@ import {
   ValidateNested,
   Min,
   isNumber,
+  IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -18,10 +19,28 @@ export class cartItemDto {
 }
 export class CreateOrderDto {
   @IsString()
-  address_id!: string;
+  city!: string;
 
+  @IsString()
+  area!: string;
+
+  @IsString()
+  address!: string; // Street address / building details
+
+  @IsString()
+  @IsOptional()
+  floorNumber?: string;
+
+  @IsString()
+  @IsOptional()
+  apartmentNumber?: string;
+
+  @IsString()
+  @IsOptional()
+  couponCode?: string;
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => cartItemDto)
   items!: cartItemDto[];
+
 }

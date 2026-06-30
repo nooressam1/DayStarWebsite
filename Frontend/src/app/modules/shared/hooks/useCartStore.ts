@@ -6,7 +6,9 @@ export const useCartStore = create<CartState>()(
   persist(
     (set) => ({
       cart: [],
-      addToCart: (newItem) =>
+      discount: null, setDiscount: (discount) => set({ discount }),
+
+      addToCart: (newItem, quantity = 1) =>
         set((state) => {
           const existing = state.cart.find(
             (item) => item.variant_id === newItem.variant_id,
@@ -15,12 +17,12 @@ export const useCartStore = create<CartState>()(
             return {
               cart: state.cart.map((item) =>
                 item.variant_id === newItem.variant_id
-                  ? { ...item, quantity: item.quantity + 1 }
+                  ? { ...item, quantity: item.quantity + quantity }
                   : item,
               ),
             };
           }
-          return { cart: [...state.cart, { ...newItem, quantity: 1 }] };
+          return { cart: [...state.cart, { ...newItem, quantity }] };
         }),
       removeFromCart: (variant_id: string) => set((state) => ({
         cart: state.cart.filter((item) => item.variant_id !== variant_id)
@@ -34,7 +36,7 @@ export const useCartStore = create<CartState>()(
           .filter((item) => item.quantity > 0)
       })),
 
-      clearCart: () => set({ cart: [] }),
+      clearCart: () => set({ cart: [], discount: null }),
     }),
     { name: "daystore-cart-storage" },
   ),

@@ -12,6 +12,10 @@ export class ProductController {
     return this.productService.allProducts(query);
   }
   // NOTE: specific routes MUST come before dynamic `:slug` to avoid shadowing
+  @Get('best-sellers')
+  async getBestSellers(): Promise<Product[]> {
+    return this.productService.getBestSellers();
+  }
   @Get(':id/variants')
   async getVariantsbyID(@Param('id') id: string): Promise<Variant[]> {
     return this.productService.getVariantbyProductId(id);
@@ -20,4 +24,5 @@ export class ProductController {
   async getProductBySlug(@Param('slug') slug: string): Promise<Product> {
     return this.productService.findBySlug(slug);
   }
+
 }

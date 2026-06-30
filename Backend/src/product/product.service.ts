@@ -35,10 +35,22 @@ export class ProductService {
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    const { count, error: countError } = await this.supabaseService.admin
+    if (params.collection === 'best-sellers') {
+      const allBestSellers = await this.getBestSellers(100);
+      const total = allBestSellers.length;
+      const paginatedItems = allBestSellers.slice(from, from + limit);
+      return { items: paginatedItems, total };
+    }
+
+    let countQuery = this.supabaseService.admin
       .from('product')
       .select('*', { count: 'exact', head: true })
       .eq('is_active', true);
+    if (params.categoryId) {
+      countQuery = countQuery.eq('category_id', params.categoryId);
+    }
+    const { count, error: countError } = await countQuery;
+
 
     if (countError) {
       throw new InternalServerErrorException('Failed to fetch products');
@@ -50,10 +62,16 @@ export class ProductService {
       return { items: [], total };
     }
 
-    const { data, error } = await this.supabaseService.admin
+    let dataQuery = this.supabaseService.admin
       .from('product')
       .select('*')
-      .eq('is_active', true)
+      .eq('is_active', true);
+
+    if (params.categoryId) {
+      dataQuery = dataQuery.eq('category_id', params.categoryId);
+    }
+
+    const { data, error } = await dataQuery
       .order('created_at', { ascending: false })
       .range(from, to);
 
@@ -70,4 +88,20 @@ export class ProductService {
     }
     return data as Variant[];
   }
+  // in product.service.ts
+  async getBestSellers(limit = 4): Promise<Product[]> {
+    const { data, error } = await this.supabaseService.admin.rpc('get_best_sellers', { p_limit: limit });
+
+    if (error || !data || data.length === 0) {
+      const { data: newest } = await this.supabaseService.admin
+        .from('product')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      return (newest ?? []) as Product[];
+    }
+    return data as Product[];
+  }
+
 }

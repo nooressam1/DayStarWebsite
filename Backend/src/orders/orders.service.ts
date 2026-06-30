@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/cartDto';
 import { SupabaseService } from '../supabase/supabase.service';
+import { orders } from './orders.interface';
 
 @Injectable()
 export class OrdersService {
@@ -13,116 +14,227 @@ export class OrdersService {
 
   async processCheckout(userId: string, createOrderDto: CreateOrderDto) {
     const client = this.supabaseService.admin;
-    const { items, address_id } = createOrderDto;
+    const { items, city, area, address, floorNumber, apartmentNumber, couponCode } = createOrderDto;
 
-    // 1. Gather all variant IDs sent by the frontend
+    // 1. Validate items and fetch pricing info
+    const { subTotal, orderItemsPayload } = await this.validateCartItems(client, items);
+
+    // 2. Validate and calculate promo code discount
+    const { discountId, discountAmount } = await this.validateAndCalculateDiscount(client, couponCode, subTotal);
+    const finalTotal = Math.max(0, subTotal - discountAmount);
+
+    try {
+      // 3. Persist shipping address
+      const addressId = await this.createAddress(client, userId, { city, area, address, floorNumber, apartmentNumber });
+
+      // 4. Create parent order header
+      const orderId = await this.createOrder(client, userId, addressId, finalTotal, discountId, discountAmount);
+
+      // 5. Insert order line items
+      await this.createOrderItems(client, orderId, orderItemsPayload);
+
+      return {
+        success: true,
+        orderId,
+        total: finalTotal,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) throw error;
+      console.error('Checkout transaction failure:', error);
+      throw new InternalServerErrorException('Transaction execution engine error.');
+    }
+  }
+
+  private async validateCartItems(client: any, items: any[]) {
     const variantIds = items.map((item) => item.variant_id);
 
-    /* 2. SECURE TRUTH VERIFICATION: Fetch from variants, joining their parent product profiles 
-       This allows us to fetch the accurate, un-tamperable item prices from the server. */
     const { data: fetchedVariants, error: fetchError } = await client
       .from('variants')
-      .select(
-        `
+      .select(`
         id,
         stock,
-        products (
+        product (
           id,
           price
         )
-      `,
-      )
+      `)
       .in('id', variantIds);
 
     if (fetchError || !fetchedVariants) {
       throw new BadRequestException('Could not verify cart items metadata.');
     }
 
-    // 3. Process inventory metrics and compile calculation arrays
-    let totalOrderAmount = 0;
-    const orderItemsPayload: {
-      variant_id: string;
-      quantity: number;
-      unit_price_snapshot: number;
-    }[] = [];
+    let subTotal = 0;
+    const orderItemsPayload: { variant_id: string; quantity: number; unit_price_snapshot: number }[] = [];
 
     for (const item of items) {
       const dbVariant = fetchedVariants.find((v) => v.id === item.variant_id);
 
       if (!dbVariant) {
-        throw new BadRequestException(
-          `Selected variant package ${item.variant_id} is no longer available.`,
-        );
+        throw new BadRequestException(`Selected variant package ${item.variant_id} is no longer available.`);
       }
 
-      // Check live database stock restrictions before confirming the sale
       if (dbVariant.stock < item.quantity) {
-        throw new BadRequestException(
-          `Insufficient inventory stock for this item allocation request.`,
-        );
+        throw new BadRequestException(`Insufficient inventory stock for this item allocation request.`);
       }
 
-      // Safeguard nested relational product reference typing
-      const parentProduct = dbVariant.products as unknown as {
-        id: string;
-        price: number;
-      };
+      const parentProduct = dbVariant.product as unknown as { id: string; price: number };
       const secureLivePrice = parentProduct.price;
 
-      // Increment aggregate order cost totals
-      totalOrderAmount += secureLivePrice * item.quantity;
+      subTotal += secureLivePrice * item.quantity;
 
-      // Format payload directly into your 'order_items' table model layout
       orderItemsPayload.push({
         variant_id: item.variant_id,
         quantity: item.quantity,
-        unit_price_snapshot: secureLivePrice, // 🟢 Historical price locked safely
+        unit_price_snapshot: secureLivePrice,
       });
     }
 
-    try {
-      /* 4. COMMIT TRANSACTIONS PHASE A: WRITE RECEIPT HEADER 
-         Writes straight into your 'orders' table model schema */
-      const { data: insertedOrder, error: orderError } = await client
-        .from('orders')
-        .insert({
-          user_id: userId,
-          address_id: address_id,
-          status: 'pending',
-          total: totalOrderAmount,
-        })
-        .select()
+    return { subTotal, orderItemsPayload };
+  }
+
+  private async validateAndCalculateDiscount(client: any, couponCode: string | undefined, subTotal: number) {
+    let discountId: number | null = null;
+    let discountAmount = 0;
+
+    if (couponCode) {
+      const { data: discountRecord, error: discountError } = await client
+        .from('discount')
+        .select('id, type, value, is_active')
+        .eq('code', couponCode)
+        .eq('is_active', true)
         .single();
 
-      if (orderError || !insertedOrder) throw orderError;
+      if (discountError || !discountRecord) {
+        throw new BadRequestException('The promo code is invalid or has expired.');
+      }
 
-      // 5. Append generated parent Order identity across line item elements
-      const finalizedOrderItems = orderItemsPayload.map((item) => ({
-        ...item,
-        order_id: insertedOrder.id, // Linking child records straight to parent receipt id
-      }));
+      discountId = discountRecord.id;
 
-      /* 6. COMMIT TRANSACTIONS PHASE B: WRITE LINE ITEMS
-         Writes straight into your 'order_items' table model schema */
-      const { error: itemsError } = await client
-        .from('order_items')
-        .insert(finalizedOrderItems);
+      if (discountRecord.type === 'percent') {
+        discountAmount = subTotal * (discountRecord.value / 100);
+      } else {
+        discountAmount = discountRecord.value;
+      }
+    }
 
-      if (itemsError) throw itemsError;
+    return { discountId, discountAmount };
+  }
 
-      // 7. OPTIONAL INVENTORY REDUCTION STEP
-      // For each item processed, you can choose to decrement variants.stock by item.quantity here!
+  private async createAddress(client: any, userId: string, details: { city: string; area: string; address: string; floorNumber?: string; apartmentNumber?: string }) {
+    const { data: insertedAddress, error: addressError } = await client
+      .from('addresses')
+      .insert({
+        user_id: userId,
+        street: `${details.address} (Area: ${details.area})`,
+        building_no: `Floor: ${details.floorNumber || '-'}, Apt: ${details.apartmentNumber || '-'}`,
+        city: details.city,
+        country: 'Egypt',
+      })
+      .select()
+      .single();
 
-      return {
-        success: true,
-        orderId: insertedOrder.id,
-        total: insertedOrder.total,
-      };
-    } catch (dbError) {
-      console.error('Checkout pipeline failure:', dbError);
-      throw new InternalServerErrorException(
-        'Transaction execution engine error.',
-      );
+    if (addressError || !insertedAddress) {
+      console.error('Address creation failure:', addressError);
+      throw new BadRequestException('Could not save shipping address.');
+    }
+
+    return insertedAddress.id;
+  }
+
+  private async createOrder(client: any, userId: string, addressId: number, finalTotal: number, discountId: number | null, discountAmount: number) {
+    const { data: insertedOrder, error: orderError } = await client
+      .from('orders')
+      .insert({
+        user_id: userId,
+        address_id: addressId,
+        status: 'pending',
+        total: finalTotal,
+        discount_amount: discountAmount,
+        discount_id: discountId,
+      })
+      .select()
+      .single();
+
+    if (orderError || !insertedOrder) {
+      console.error('Order header creation failure:', orderError);
+      throw new BadRequestException('Could not create order.');
+    }
+
+    return insertedOrder.id;
+  }
+
+  private async createOrderItems(client: any, orderId: string, orderItemsPayload: any[]) {
+    const finalizedOrderItems = orderItemsPayload.map((item) => ({
+      ...item,
+      order_id: orderId,
+    }));
+
+    const { error: itemsError } = await client
+      .from('order_item')
+      .insert(finalizedOrderItems);
+
+    if (itemsError) {
+      console.error('Line items insertion failure:', itemsError);
+      throw new BadRequestException('Could not create order items.');
     }
   }
+
+  async getOrderById(userId: string, orderId: string) {
+    const client = this.supabaseService.admin;
+
+    const { data: orders, error: orderError } = await client
+      .from('orders')
+      .select(`
+        id,
+        user_id,
+        order_number,
+        status,
+        total,
+        discount_amount,
+        created_at,
+        addresses (
+          id,
+          street,
+          building_no,
+          city,
+          country
+        )
+      `)
+      .eq('id', orderId)
+      .eq('user_id', userId)
+      .single();
+
+    if (orderError || !orders) {
+      throw new BadRequestException('Order not found or access denied.');
+    }
+
+    const { data: items, error: itemsError } = await client
+      .from('order_item')
+      .select(`
+        id,
+        quantity,
+        unit_price_snapshot,
+        variants (
+          id,
+          size,
+          product (
+            id,
+            name,
+            images
+          )
+        )
+      `)
+      .eq('order_id', orderId);
+
+    if (itemsError) {
+      throw new BadRequestException('Could not retrieve order items.');
+    }
+
+    return {
+      ...orders,
+      items,
+    };
+  }
 }
+

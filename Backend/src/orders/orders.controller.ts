@@ -1,0 +1,29 @@
+import { Controller, Post, Body, UseGuards, Get, Param } from '@nestjs/common';
+import { OrdersService } from './orders.service';
+import { CreateOrderDto } from './dto/cartDto';
+import { SupabaseAuthGuard } from '../auth/supabase-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+
+@Controller('orders')
+@UseGuards(SupabaseAuthGuard)
+export class OrdersController {
+  constructor(private readonly ordersService: OrdersService) {}
+
+  @Post('checkout')
+  async checkout(
+    @CurrentUser() user: any,
+    @Body() createOrderDto: CreateOrderDto,
+  ) {
+    const userId = user.sub;
+    return this.ordersService.processCheckout(userId, createOrderDto);
+  }
+
+  @Get(':id')
+  async getOrder(
+    @CurrentUser() user: any,
+    @Param('id') orderId: string,
+  ) {
+    const userId = user.sub;
+    return this.ordersService.getOrderById(userId, orderId);
+  }
+}

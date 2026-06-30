@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Inter, Work_Sans, Libre_Baskerville } from "next/font/google";
 import Navbar from "./modules/shared/component/NavBar";
+import { Footer } from "./modules/shared/component/Footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -40,6 +41,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <Navbar />
         <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );

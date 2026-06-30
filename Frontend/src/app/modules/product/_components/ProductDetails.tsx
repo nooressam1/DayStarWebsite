@@ -79,7 +79,7 @@ export default function ProductDetails({ product, variants }: { product: Product
                 price: product.price,
                 size: selectedSize.size,
                 photo: product.images[0],
-              })
+              }, quantity)
             }}
             className="py-4 px-2 w-full  flex-1 text-sm font-normal rounded-lg "
           >

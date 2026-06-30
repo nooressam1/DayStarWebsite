@@ -1,23 +1,21 @@
 "use client";
 import React, { useState } from "react";
+import Link from "next/link";
 import { useCartStore } from "../shared/hooks/useCartStore";
 import ProductCartCard from "./_components/ProductCartCard";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import CustomButton from "../shared/component/CustomButton";
 import { Discount } from "@/utils/types/type";
 import DiscountButton from "./_components/DiscountButton";
-const shoppingcart = () => {
-  const { cart, incrementItem, decrementItem, removeFromCart } = useCartStore();
-  const [discount, setDiscount] = useState<Discount | null>(null);
+import { usePricing } from "@/app/modules/shared/hooks/usePricing";
 
-  const DELIVERY_FEE = 1000;
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const discountAmount = discount
-    ? discount.type === 'percent'
-      ? subtotal * (discount.value / 100)
-      : discount.value
-    : 0;
-  const total = subtotal - discountAmount + DELIVERY_FEE;
+const shoppingcart = () => {
+  const { cart, incrementItem, decrementItem, removeFromCart, discount, setDiscount } = useCartStore();
+
+  const { subTotal: subtotal, deliveryFee: DELIVERY_FEE, discount: discountAmount, total } = usePricing(cart, {
+    deliveryFee: 1000,
+    discount,
+  });
   return (
 
     <div className="p-10 flex flex-row gap-5 h-screen">
@@ -74,9 +72,11 @@ const shoppingcart = () => {
 
 
         </div>
-        <CustomButton className="w-full py-4" variant="solid" colorScheme="secondary">
-          Proceed to Checkout
-        </CustomButton></div>
+        <Link href="/modules/checkout" className="w-full">
+          <CustomButton className="w-full py-4" variant="solid" colorScheme="secondary">
+            Proceed to Checkout
+          </CustomButton>
+        </Link></div>
     </div>
   );
 };
