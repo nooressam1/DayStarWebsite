@@ -46,7 +46,7 @@ export function ProductCard({ product }: { product: Product }) {
                     >
                         View
                     </CustomButton>
-                    <FavoriteButton productId={product.id}></FavoriteButton>
+                    <FavoriteButton product={product}></FavoriteButton>
                 </div>
             </div>
         </div >

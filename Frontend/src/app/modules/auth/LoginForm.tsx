@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
 import CustomButton from '../shared/component/CustomButton';
 
 interface LoginFormProps {
@@ -10,6 +11,7 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onSwitch, onSuccess }: LoginFormProps) {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +30,7 @@ export default function LoginForm({ onSwitch, onSuccess }: LoginFormProps) {
       setError(error.message);
       return;
     }
+    router.refresh();
     onSuccess();
   }
 

@@ -236,5 +236,21 @@ export class OrdersService {
       items,
     };
   }
+  async getAllOrders(userId: string) {
+    const client = this.supabaseService.admin;
+    const { data: orders, error: orderError } = await client.from("orders").select(`
+        id,
+        user_id,
+        order_number,
+        status,
+        total,
+        discount_amount,
+        created_at
+      `).eq("user_id", userId).order('created_at', { ascending: true });
+    if (orderError) {
+      throw new BadRequestException('could not retrieve orders');
+    }
+    return orders;
+  }
 }
 

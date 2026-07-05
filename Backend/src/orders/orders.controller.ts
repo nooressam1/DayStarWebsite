@@ -7,7 +7,7 @@ import { CurrentUser } from '../auth/current-user.decorator';
 @Controller('orders')
 @UseGuards(SupabaseAuthGuard)
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private readonly ordersService: OrdersService) { }
 
   @Post('checkout')
   async checkout(
@@ -25,5 +25,12 @@ export class OrdersController {
   ) {
     const userId = user.sub;
     return this.ordersService.getOrderById(userId, orderId);
+  }
+  @Get('')
+  async getAllOrders(
+    @CurrentUser() user: any,
+  ) {
+    const userId = user.sub;
+    return this.ordersService.getAllOrders(userId);
   }
 }

@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/supabase/auth-provider";
-import { User, ShoppingBag, MapPin, CreditCard, LogOut } from "lucide-react";
+import { User, ShoppingBag, MapPin, CreditCard, LogOut, Heart } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -31,6 +31,11 @@ export default function DashboardLayout({
       name: "Orders",
       href: "/modules/dashboard/orders",
       icon: ShoppingBag,
+    },
+    {
+      name: "Favorites",
+      href: "/modules/dashboard/favorites",
+      icon: Heart,
     },
     {
       name: "Addresses",

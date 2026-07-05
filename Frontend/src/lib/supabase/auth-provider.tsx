@@ -22,6 +22,10 @@ export function AuthProvider({
   const [loading, setLoading] = useState(!initialUser);
 
   useEffect(() => {
+    setUser(initialUser);
+  }, [initialUser]);
+
+  useEffect(() => {
     const supabase = createClient();
 
     // If we didn't get an initial user server-side, fetch it client-side

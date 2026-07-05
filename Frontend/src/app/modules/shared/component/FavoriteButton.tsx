@@ -1,29 +1,30 @@
-// src/app/modules/product/_components/FavoriteButton.tsx
 "use client";
-
-import React, { useState } from "react";
+ 
+import React from "react";
 import CustomButton from "./CustomButton";
 import { Heart } from "lucide-react";
+import { Product } from "@/utils/types/type";
+import { useFavoritesStore } from "../hooks/useFavoritesStore";
 
-interface FavoriteButtonProps {
-  productId: string;
-}
+export default function FavoriteButton({ product }: { product: Product }) {
+  const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
+  const isLiked = isFavorite(product.id);
 
-export default function FavoriteButton({ productId }: { productId: string }) {
-  const [isLiked, setIsLiked] = useState(false);
-
-  const handleToggle = async () => {
-    setIsLiked(!isLiked);
-    // Optional: await axios.post(`/api/wishlist`, { productId });
+  const handleToggle = () => {
+    if (isLiked) {
+      removeFavorite(product.id);
+    } else {
+      addFavorite(product);
+    }
   };
 
   return (
     <CustomButton
       variant={isLiked ? "solid" : "outline"}
-      colorScheme={isLiked ? "primary" : "primary"}
+      colorScheme="primary"
       icon={Heart}
       onClick={handleToggle}
-      className="px-8 "
+      className="px-8"
       aria-label="Toggle Wishlist"
     />
   );

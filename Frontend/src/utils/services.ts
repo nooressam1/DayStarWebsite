@@ -132,3 +132,12 @@ export async function getOrder(id: string): Promise<any> {
         return null;
     }
 }
+export async function getOrders(): Promise<any[]> {
+    try {
+        return await apiFetch('/orders');
+
+    } catch (error) {
+        console.error("Error fetching orders", error);
+        return [];
+    }
+}

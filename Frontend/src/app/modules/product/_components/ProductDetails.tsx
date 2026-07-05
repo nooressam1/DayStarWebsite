@@ -98,7 +98,7 @@ export default function ProductDetails({ product, variants }: { product: Product
           >
             Add to Cart
           </CustomButton>
-          <FavoriteButton productId={product.id}></FavoriteButton>
+          <FavoriteButton product={product}></FavoriteButton>
         </div>
       </div>
     </div>
