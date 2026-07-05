@@ -12,17 +12,30 @@ export default function ProductDetails({ product, variants }: { product: Product
   const [selectedSize, setSelectedSize] = useState<Variant | null>(variants[0] || null); // Default to 50ml
   const [quantity, setQuantity] = useState<number>(1);
   const { addToCart } = useCartStore();
+
+  const displayPrice = product.on_sale && product.sale_price
+    ? product.sale_price
+    : product.price;
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="flex flex-col gap-2">
         <h1 className="text-brand-primary-brown font-medium font-serif text-xl">
           {product.name}
         </h1>
-        <div>
-          <h1 className=" text-brand-light-brown font-work  text-xl">
-            {formatMoney(product.price)}
-          </h1>
-          {/*add sale stuff here*/}
+        <div className="flex items-center gap-2 mt-1">
+          <span className="font-serif font-bold text-brand-primary-brown text-xl">
+            {formatMoney(displayPrice)}
+          </span>
+          {product.on_sale && (
+            <span className="line-through text-xs text-gray-400 font-sans">
+              {formatMoney(product.price)}
+            </span>
+          )}
+          {product.on_sale && (
+            <span className="bg-[#c94a29] text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase shadow-sm ml-1">
+              Sale
+            </span>
+          )}
         </div>
         <p className=" text-brand-gray font-sans text-md">
           {" "}

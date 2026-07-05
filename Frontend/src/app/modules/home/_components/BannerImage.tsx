@@ -1,6 +1,7 @@
 import React from 'react'
 import Image from 'next/image'
 import CustomButton from '../../shared/component/CustomButton'
+import Link from 'next/link'
 
 export default function BannerImage() {
     return (
@@ -18,13 +19,18 @@ export default function BannerImage() {
                     Destination for everything <br className="hidden sm:inline" />
                     that is reliable, effective and safe <br className="hidden sm:inline" /> for your skin
                 </h1>
-                <CustomButton 
-                    className='px-8 py-3 text-lg md:px-15 md:py-4 md:text-2xl font-serif' 
-                    variant='opacity' 
-                    colorScheme='secondary'
+                <Link
+                    href="/product"
+                    className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-80 transition-opacity"
                 >
-                    Shop Now
-                </CustomButton>
+                    <CustomButton
+                        className='px-8 py-3 text-lg md:px-15 md:py-4 md:text-2xl font-serif'
+                        variant='opacity'
+                        colorScheme='secondary'
+                    >
+                        Shop Now
+                    </CustomButton>
+                </Link>
             </div>
         </div >
     )

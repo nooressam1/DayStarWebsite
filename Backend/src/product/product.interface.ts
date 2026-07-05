@@ -1,12 +1,15 @@
 export interface Product {
   id: string;
-  slug: string;
+  category_id: string | null;
   name: string;
+  description: string | null;
   images: string[];
-  description?: string;
-  price: number; // stored in cents (e.g., 1999 for $19.99)
+  slug: string;
+  price: number;
   created_at: string;
   is_active: boolean;
+  on_sale?: boolean;         // <-- Add this
+  sale_price?: number | null; // <-- Add this
 }
 
 export interface Variant {
@@ -16,3 +19,4 @@ export interface Variant {
   price: number;
   sku: string;
 }
+

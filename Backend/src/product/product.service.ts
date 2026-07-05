@@ -41,6 +41,26 @@ export class ProductService {
       const paginatedItems = allBestSellers.slice(from, from + limit);
       return { items: paginatedItems, total };
     }
+    if (params.collection === 'on-sale' || params.collection === 'sale') {
+      let countQuery = this.supabaseService.admin.from('product').select('*', { count: 'exact', head: true })
+        .eq('is_active', true).eq('on_sale', true);
+      if (params.categoryId) {
+        countQuery = countQuery.eq('category_id', params.categoryId);
+      }
+      const { count, error: countError } = await countQuery;
+      if (countError) throw new InternalServerErrorException('Failed to fetch count');
+
+      const total = count ?? 0;
+      if (from >= total) return { items: [], total }
+      let dataQuery = this.supabaseService.admin.from('product').select('*').eq('is_active', true).eq('on_sale', true)
+      if (params.categoryId) {
+        dataQuery = dataQuery.eq('category_id', params.categoryId)
+      }
+      const { data: products, error: dataError } = await dataQuery.order('created_at', { ascending: false }).range(from, to);
+
+      if (dataError) throw new InternalServerErrorException('Failed to fetch sale products');
+      return { items: products as Product[], total };
+    }
 
     let countQuery = this.supabaseService.admin
       .from('product')

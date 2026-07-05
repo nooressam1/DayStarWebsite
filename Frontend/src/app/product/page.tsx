@@ -124,6 +124,18 @@ function ProductsCatalogContent() {
                             >
                                 🔥 Best Sellers
                             </button>
+                            <button
+                                onClick={() => {
+                                    const params = new URLSearchParams();
+                                    params.set("collection", "sale");
+                                    params.set("page", "1");
+                                    router.push(`/product?${params.toString()}`);
+                                    setShowCategoriesDropdown(false);
+                                }}
+                                className={`w-full text-left px-4 py-2 hover:bg-[#faf5f3] transition-colors text-xs font-sans font-semibold border-t border-gray-100 ${collection === "sale" ? "text-[#78534a] bg-[#faf5f3]" : "text-gray-700"}`}
+                            >
+                                🏷️ On Sale
+                            </button>
                         </Dropdown>
 
                         {/* Price Sorting Selector Dropdown */}

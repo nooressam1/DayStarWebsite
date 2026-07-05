@@ -53,6 +53,8 @@ export function useProductCatalog() {
   useEffect(() => {
     if (collection === "best-sellers") {
       setActiveCategoryName("Best Selling");
+    } else if (collection === "sale" || collection === "on-sale") {
+      setActiveCategoryName("On Sale");
     } else if (categoryId && categories.length > 0) {
       const activeCat = categories.find((c) => c.id === categoryId);
       setActiveCategoryName(activeCat ? activeCat.name : "Collection");

@@ -4,7 +4,6 @@ export type Category = {
   photo: string;
   slug: string;
 }
-
 export type Product = {
   id: string;
   category_id: string | null;
@@ -14,8 +13,11 @@ export type Product = {
   slug: string;
   price: number;
   created_at: string;
-  is_active: boolean
+  is_active: boolean;
+  on_sale?: boolean;          // <-- Add this
+  sale_price?: number | null;  // <-- Add this
 }
+
 
 export type Variant = {
   id: string;

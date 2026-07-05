@@ -11,12 +11,28 @@ export function ProductCard({ product }: { product: Product }) {
     return (
         <div className="flex flex-col gap-2 w-full h-full border border-brand-primary-brown/10 rounded-lg">
             <div className="relative w-full h-[250px] sm:h-[350px] md:h-[400px] ">
+                {product.on_sale && (
+                    <span className="absolute top-3 left-3 bg-[#c94a29] text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase z-10 shadow-sm">
+                        Sale
+                    </span>
+                )}
                 <Image fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover rounded-lg" src={product.images[0]} alt={product.name} />
             </div>
             <div className="p-4 flex flex-col gap-5">
                 <div className="flex flex-col ">
                     <h1 className="font-serif text-black text-lg truncate">{product.name}</h1>
-                    <p className="font-work text-brand-light-brown text-md truncate">{formatMoney(product.price)}</p>
+                    {product.on_sale && product.sale_price ? (
+                        <div className="flex items-center gap-2">
+                            <span className="font-work text-brand-primary-brown font-bold text-md">
+                                {formatMoney(product.sale_price)}
+                            </span>
+                            <span className="font-sans line-through text-xs text-gray-400">
+                                {formatMoney(product.price)}
+                            </span>
+                        </div>
+                    ) : (
+                        <p className="font-work text-brand-light-brown text-md truncate">{formatMoney(product.price)}</p>
+                    )}
                 </div>
                 <div className="flex flex-row gap-2">
                     <CustomButton

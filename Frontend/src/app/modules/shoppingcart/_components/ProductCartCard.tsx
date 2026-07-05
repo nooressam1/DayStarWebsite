@@ -9,6 +9,8 @@ const ProductCartCard = ({ name, price, photo, size, quantity, isEditable = true
     photo && photo.length > 0
       ? photo
       : "https://via.placeholder.com/150x150?text=No+Image";
+
+
   return (
     <div className="flex flex-row w-full items-center justify-between">
       <div className={isEditable ? "flex flex-row gap-5 w-1/2 items-center" : "flex flex-row gap-5 w-full items-center"}>
