@@ -15,13 +15,14 @@ export async function getProduct(slug: string): Promise<Product | null> {
         return null;
     }
 }
-export async function getProducts(params: { page?: number; limit?: number; categoryId?: string; collection?: string }): Promise<{ items: Product[]; total: number }> {
+export async function getProducts(params: { page?: number; limit?: number; categoryId?: string; collection?: string; search?: string }): Promise<{ items: Product[]; total: number }> {
     try {
         const query = new URLSearchParams();
         if (params.page) query.append('page', params.page.toString());
         if (params.limit) query.append('limit', params.limit.toString());
         if (params.categoryId) query.append('categoryId', params.categoryId);
         if (params.collection) query.append('collection', params.collection);
+        if (params.search) query.append('search', params.search);
 
         const res = await fetch(`${BASE_URL}/product?${query.toString()}`);
         if (!res.ok) return { items: [], total: 0 };

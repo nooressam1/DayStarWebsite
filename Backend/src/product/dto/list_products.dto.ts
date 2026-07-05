@@ -21,4 +21,8 @@ export class ListProductsDto {
   @IsOptional()
   @IsString()
   collection?: string;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

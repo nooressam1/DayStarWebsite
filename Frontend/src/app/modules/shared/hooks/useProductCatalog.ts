@@ -10,6 +10,7 @@ export function useProductCatalog() {
   // Read query params
   const categoryId = searchParams.get("category") || "";
   const collection = searchParams.get("collection") || "";
+  const search = searchParams.get("search") || "";
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = 9; // Show 9 items per page (3x3 grid)
 
@@ -37,7 +38,7 @@ export function useProductCatalog() {
   // Fetch products when query parameters change
   useEffect(() => {
     setLoading(true);
-    getProducts({ page, limit, categoryId, collection })
+    getProducts({ page, limit, categoryId, collection, search })
       .then((data) => {
         setProducts(data.items);
         setTotalProducts(data.total);
@@ -47,11 +48,13 @@ export function useProductCatalog() {
         console.error("Error loading products:", err);
         setLoading(false);
       });
-  }, [categoryId, collection, page]);
+  }, [categoryId, collection, page, search]);
 
   // Determine active title / header name
   useEffect(() => {
-    if (collection === "best-sellers") {
+    if (search) {
+      setActiveCategoryName(`Search Results for "${search}"`);
+    } else if (collection === "best-sellers") {
       setActiveCategoryName("Best Selling");
     } else if (collection === "sale" || collection === "on-sale") {
       setActiveCategoryName("On Sale");
@@ -61,7 +64,7 @@ export function useProductCatalog() {
     } else {
       setActiveCategoryName("All Skincare");
     }
-  }, [categoryId, collection, categories]);
+  }, [categoryId, collection, categories, search]);
   const totalPages = Math.ceil(totalProducts / limit) || 1;
 
   // Handle category selection

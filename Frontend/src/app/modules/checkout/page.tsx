@@ -12,11 +12,12 @@ import { processCheckout } from "@/utils/services";
 import { createClient } from "@/utils/supabase/client";
 import AuthModal from "../auth/AuthModal";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/supabase/auth-provider";
 
 const checkout = () => {
     const { cart, incrementItem, clearCart, decrementItem, removeFromCart, discount, setDiscount } = useCartStore();
     const router = useRouter();
-    const [user, setUser] = useState<any>(null);
+    const { user } = useAuth();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
     const [email, setEmail] = useState("");
@@ -35,29 +36,11 @@ const checkout = () => {
 
     // Listen to current authentication status
     useEffect(() => {
-        const supabase = createClient();
-
-        // 1. Get initial user session
-        supabase.auth.getUser().then(({ data: { user } }) => {
-            if (user) {
-                setUser(user);
-                if (user.email) setEmail(user.email);
-            }
-        });
-
-        // 2. Subscribe to auth changes (auto login, close modal)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (session?.user) {
-                setUser(session.user);
-                if (session.user.email) setEmail(session.user.email);
-                setIsAuthModalOpen(false);
-            } else {
-                setUser(null);
-            }
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
+        if (user) {
+            if (user.email) setEmail(user.email);
+            setIsAuthModalOpen(false);
+        }
+    }, [user]);
 
     // Calculate dynamic pricing
     const { subTotal: subtotal, deliveryFee, discount: discountAmount, total } = usePricing(cart, {

@@ -37,8 +37,14 @@ export class ProductService {
 
     if (params.collection === 'best-sellers') {
       const allBestSellers = await this.getBestSellers(100);
-      const total = allBestSellers.length;
-      const paginatedItems = allBestSellers.slice(from, from + limit);
+      let filtered = allBestSellers;
+      if (params.search) {
+        filtered = allBestSellers.filter(p =>
+          p.name.toLowerCase().includes(params.search!.toLowerCase())
+        );
+      }
+      const total = filtered.length;
+      const paginatedItems = filtered.slice(from, from + limit);
       return { items: paginatedItems, total };
     }
     if (params.collection === 'on-sale' || params.collection === 'sale') {
@@ -46,6 +52,9 @@ export class ProductService {
         .eq('is_active', true).eq('on_sale', true);
       if (params.categoryId) {
         countQuery = countQuery.eq('category_id', params.categoryId);
+      }
+      if (params.search) {
+        countQuery = countQuery.ilike('name', `%${params.search}%`);
       }
       const { count, error: countError } = await countQuery;
       if (countError) throw new InternalServerErrorException('Failed to fetch count');
@@ -55,6 +64,9 @@ export class ProductService {
       let dataQuery = this.supabaseService.admin.from('product').select('*').eq('is_active', true).eq('on_sale', true)
       if (params.categoryId) {
         dataQuery = dataQuery.eq('category_id', params.categoryId)
+      }
+      if (params.search) {
+        dataQuery = dataQuery.ilike('name', `%${params.search}%`);
       }
       const { data: products, error: dataError } = await dataQuery.order('created_at', { ascending: false }).range(from, to);
 
@@ -68,6 +80,9 @@ export class ProductService {
       .eq('is_active', true);
     if (params.categoryId) {
       countQuery = countQuery.eq('category_id', params.categoryId);
+    }
+    if (params.search) {
+      countQuery = countQuery.ilike('name', `%${params.search}%`);
     }
     const { count, error: countError } = await countQuery;
 
@@ -89,6 +104,9 @@ export class ProductService {
 
     if (params.categoryId) {
       dataQuery = dataQuery.eq('category_id', params.categoryId);
+    }
+    if (params.search) {
+      dataQuery = dataQuery.ilike('name', `%${params.search}%`);
     }
 
     const { data, error } = await dataQuery
