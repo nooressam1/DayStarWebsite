@@ -141,3 +141,12 @@ export async function getOrders(): Promise<any[]> {
         return [];
     }
 }
+export async function cancelOrder(orderId: string): Promise<any> {
+    try {
+        return await apiFetch(`/orders/${orderId}/cancel`, { method: 'PATCH' });
+
+    } catch (error) {
+        console.error("Error canceling order", error);
+        return null;
+    }
+}

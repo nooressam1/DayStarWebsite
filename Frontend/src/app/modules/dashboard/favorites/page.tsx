@@ -1,6 +1,6 @@
 'use client';
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { useFavoritesStore } from "../../shared/hooks/useFavoritesStore";
@@ -8,7 +8,27 @@ import { ProductCard } from "../../home/_components/ProductCard";
 
 export default function FavoritesPage() {
   const { favorites } = useFavoritesStore();
+  const [mounted, setMounted] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    // Render the layout wrapper without the dynamic store-dependent elements during hydration
+    return (
+      <div className="flex flex-col gap-6 font-sans">
+        <div>
+          <h1 className="text-2xl font-serif font-bold text-brand-primary-brown">
+            My Favorites
+          </h1>
+          <p className="text-sm text-brand-gray">
+            Browse and manage your saved skincare products
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-6 font-sans">
       <div>

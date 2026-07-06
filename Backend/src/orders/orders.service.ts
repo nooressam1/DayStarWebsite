@@ -252,5 +252,30 @@ export class OrdersService {
     }
     return orders;
   }
+  async cancelOrder(orderID: string, userID: string) {
+    const client = this.supabaseService.admin;
+    const { data: order, error: OrderError } = await client.from("orders").select('id, status, user_id').eq('id', orderID).single();
+    console.log("testingg", order);
+    if (OrderError || !order) {
+      throw new BadRequestException('Order Not found');
+    }
+    if (order.user_id !== userID) {
+      throw new BadRequestException('Access denied.');
+
+    }
+    if (order.status !== 'pending') {
+      throw new BadRequestException(`Cannot cancel order because it is already '${order.status}'.`);
+    }
+    const { data: updateOrder, error: UpdateError } = await client.from('orders').update({ status: 'cancelled' }).eq('id', orderID).select().single();
+
+    if (UpdateError || !updateOrder) {
+      throw new BadRequestException('Failed to cancel the order');
+    }
+    return {
+      success: true,
+      message: 'Order cancelled successfully',
+      order: updateOrder,
+    }
+  }
 }
 

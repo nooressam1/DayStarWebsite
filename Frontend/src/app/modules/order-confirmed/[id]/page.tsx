@@ -4,10 +4,11 @@ import React, { useState, useEffect, use } from "react";
 import { Check, MapPin, CreditCard, ShoppingBag, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import ProductCartCard from "../../shoppingcart/_components/ProductCartCard";
-import { getOrder } from "@/utils/services";
+import { cancelOrder, getOrder } from "@/utils/services";
 import { OrderConfirmedPageProps } from "@/utils/types/componentType";
 import { usePricing } from "@/app/modules/shared/hooks/usePricing";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
+import CustomButton from "../../shared/component/CustomButton";
 
 export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) {
   const { id } = use(params);
@@ -54,6 +55,20 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
 
   // Status mapping
   const orderStatus = order?.status === "pending" ? "Pending (Unpaid)" : order?.status;
+  const handleCancel = async () => {
+    try {
+      const response = await cancelOrder(id);
+      if (response && response.success) {
+        alert('Order cancelled successfully!');
+        window.location.reload();
+      } else {
+        alert('Failed to cancel the order.');
+      }
+    } catch (error) {
+      console.error('Failed to cancel order:', error);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -255,13 +270,16 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
         </div>
 
         {/* Continue Shopping Button */}
-        <Link
-          href="/modules/home"
-          className="w-full py-3.5 bg-brand-primary-brown hover:bg-brand-primary-brown/95 text-white font-sans text-sm font-semibold rounded-lg flex items-center justify-center gap-2 shadow-sm transition-colors text-center cursor-pointer"
-        >
-          <ShoppingBag className="h-4 w-4" />
-          <span>Continue Shopping</span>
-        </Link>
+        <div className="flex gap-4 flex-col">
+          <Link
+            href="/modules/home"
+            className="w-full py-3.5 bg-brand-primary-brown hover:bg-brand-primary-brown/95 text-white font-sans text-sm font-semibold rounded-lg flex items-center justify-center gap-2 shadow-sm transition-colors text-center cursor-pointer"
+          >
+            <ShoppingBag className="h-4 w-4" />
+            <span>Continue Shopping</span>
+          </Link>
+          <CustomButton onClick={handleCancel} className="w-full py-3" colorScheme="primary" type="button" variant="outline">Cancel Order</CustomButton>
+        </div>
       </div>
     </div>
   );

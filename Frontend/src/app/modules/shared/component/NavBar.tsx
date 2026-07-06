@@ -14,7 +14,11 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mounted, setMounted] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+  }, [])
   const {
     user,
     authOpen,
@@ -141,9 +145,11 @@ export default function Navbar() {
             aria-label="Cart"
           >
             <ShoppingBag className="h-5 w-5" />
-            <span className="absolute top-0 right-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-brand-secondary-blue text-[10px] font-bold text-white">
-              {cart.length}
-            </span>
+            {mounted && cart.length > 0 && (
+              <span className="absolute top-0 right-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-brand-secondary-blue text-[10px] font-bold text-white">
+                {cart.length}
+              </span>
+            )}
           </Link>
           {/* Account Icon with Hover Dropdown */}
           <div
