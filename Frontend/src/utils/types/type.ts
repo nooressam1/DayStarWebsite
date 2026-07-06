@@ -61,11 +61,16 @@ export type OrderItem = {
 
 export type Review = {
   id: string;
-  user_id: string;
-  product_id: string;
+  user_id?: string;
+  product_id?: string;
+  username: string;
   rating: number;
-  comment: string | null;
-  created_at: string;
+  comment?: string | null;
+  created_at?: string;
+  date: string;
+  title: string;
+  body: string;
+  timestamp: number; // for sorting
 }
 export type Discount = {
   id: string;

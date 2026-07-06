@@ -5,6 +5,7 @@ import axios from "axios";
 import ImageCarousel from "../_components/ImageCarousel";
 import ProductCartCard from "../../shoppingcart/_components/ProductCartCard";
 import { getProduct, getProductVariants } from "@/utils/services";
+import ProductReviews from "../_components/ProductReviews";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -34,6 +35,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="md:max-w-1/2">
           <ProductDetails product={product} variants={variants} ></ProductDetails>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto">
+        <ProductReviews />
       </div>
     </div>
   );
