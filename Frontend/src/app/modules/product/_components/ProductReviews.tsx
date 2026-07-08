@@ -1,13 +1,23 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Star, ChevronDown, PenLine } from "lucide-react";
 import CustomButton from "../../shared/component/CustomButton";
 import { useProductReviews } from "../hooks/useProductReviews";
+import { useAuth } from "@/lib/supabase/auth-provider";
+import AuthModal from "../../auth/AuthModal";
 
-export default function ProductReviews() {
+interface ProductReviewsProps {
+  productId: string;
+}
+
+export default function ProductReviews({ productId }: ProductReviewsProps) {
+  const { user } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   const {
     reviews,
+    loading,
     sortBy,
     setSortBy,
     showForm,
@@ -26,7 +36,22 @@ export default function ProductReviews() {
     averageRating,
     sortedReviews,
     handleSubmit,
-  } = useProductReviews();
+  } = useProductReviews(productId);
+
+  // Format date helper
+  const formatDate = (review: any) => {
+    if (review.created_at) {
+      try {
+        return new Date(review.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' });
+      } catch {
+        // Fallback
+      }
+    }
+    if (typeof review.date === 'number') {
+      return new Date(review.date * 1000).toLocaleDateString(undefined, { dateStyle: 'medium' });
+    }
+    return review.date || "Just now";
+  };
 
   // Helper to render stars
   const renderStars = (rating: number, interactive = false) => {
@@ -101,7 +126,13 @@ export default function ProductReviews() {
             variant={showForm ? "solid" : "outline"}
             colorScheme="primary"
             icon={PenLine}
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => {
+              if (!user) {
+                setIsAuthModalOpen(true);
+              } else {
+                setShowForm(!showForm);
+              }
+            }}
             className="text-xs uppercase font-semibold tracking-wider px-5 py-3 rounded-lg"
           >
             {showForm ? "Cancel Review" : "Write A Review"}
@@ -204,7 +235,11 @@ export default function ProductReviews() {
 
       {/* Reviews List */}
       <div className="flex flex-col gap-10">
-        {sortedReviews.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12 text-brand-gray bg-[#FAF5F3]/50 rounded-xl border border-[#78534a]/10 p-8 shadow-sm">
+            <p>Loading reviews...</p>
+          </div>
+        ) : sortedReviews.length === 0 ? (
           <div className="text-center py-12 text-brand-gray bg-[#FAF5F3]/50 rounded-xl border border-[#78534a]/10 p-8 shadow-sm">
             <p>No reviews yet. Be the first to share your thoughts!</p>
           </div>
@@ -231,7 +266,7 @@ export default function ProductReviews() {
                   </div>
                 </div>
                 <span className="text-xs text-gray-400 font-sans mt-1">
-                  {review.date}
+                  {formatDate(review)}
                 </span>
               </div>
 
@@ -248,6 +283,10 @@ export default function ProductReviews() {
           ))
         )}
       </div>
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 }

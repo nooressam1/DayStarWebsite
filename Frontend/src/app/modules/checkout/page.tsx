@@ -1,114 +1,61 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import CustomButton from "../shared/component/CustomButton";
 import TextInput from "../shared/component/TextInput";
 import SelectionCard from "../shared/component/SelectionCard";
-import { useCartStore } from "../shared/hooks/useCartStore";
-import { usePricing } from "@/app/modules/shared/hooks/usePricing";
 import ProductCartCard from "../shoppingcart/_components/ProductCartCard";
-import { processCheckout } from "@/utils/services";
-import { createClient } from "@/utils/supabase/client";
 import AuthModal from "../auth/AuthModal";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/supabase/auth-provider";
+import { EGYPT_GOVERNORATES } from "@/utils/constants";
+import { useCheckout } from "./hooks/useCheckout";
 
 const checkout = () => {
-    const { cart, incrementItem, clearCart, decrementItem, removeFromCart, discount, setDiscount } = useCartStore();
-    const router = useRouter();
-    const { user } = useAuth();
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-    const [email, setEmail] = useState("");
-    const [fullName, setFullName] = useState("");
-    const [phoneNumber, setPhoneNumber] = useState("");
-    const [city, setCity] = useState("");
-    const [area, setArea] = useState("");
-    const [address, setAddress] = useState("");
-    const [floorNumber, setFloorNumber] = useState("");
-    const [apartmentNumber, setApartmentNumber] = useState("");
-
-    const [deliveryType, setDeliveryType] = useState("home"); // "home" | "pickup"
-    const [paymentMethod, setPaymentMethod] = useState("card"); // "card" | "cash"
-
-    const [errors, setErrors] = useState<Record<string, string>>({});
-
-    // Listen to current authentication status
-    useEffect(() => {
-        if (user) {
-            if (user.email) setEmail(user.email);
-            setIsAuthModalOpen(false);
-        }
-    }, [user]);
-
-    // Calculate dynamic pricing
-    const { subTotal: subtotal, deliveryFee, discount: discountAmount, total } = usePricing(cart, {
+    const {
+        cart,
+        user,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
+        email,
+        setEmail,
+        fullName,
+        setFullName,
+        phoneNumber,
+        setPhoneNumber,
+        city,
+        setCity,
+        area,
+        setArea,
+        address,
+        setAddress,
+        floorNumber,
+        setFloorNumber,
+        apartmentNumber,
+        setApartmentNumber,
+        governorate,
+        setGovernorate,
+        postalCode,
+        setPostalCode,
+        savedAddresses,
+        selectedAddressId,
+        setSelectedAddressId,
         deliveryType,
-        deliveryFee: 1000,
-
+        setDeliveryType,
+        paymentMethod,
+        setPaymentMethod,
+        errors,
+        setErrors,
+        subtotal,
+        deliveryFee,
+        discountAmount,
+        total,
         discount,
-    });
-
-    const handleProceedCheckout = async () => {
-        // Enforce option 1: Must be logged in to checkout
-        if (!user) {
-            setIsAuthModalOpen(true);
-            return;
-        }
-        // Validate fields
-        const newErrors: Record<string, string> = {};
-        if (!fullName) newErrors.fullName = "Full name is required";
-        if (!email) newErrors.email = "Email is required";
-        else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Please enter a valid email address";
-        if (!phoneNumber) newErrors.phoneNumber = "Phone number is required";
-        if (!city) newErrors.city = "City is required";
-        if (!area) newErrors.area = "Area is required";
-        if (!address) newErrors.address = "Street address is required";
-
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            return;
-        }
-        setErrors({});
-
-        if (cart.length === 0) {
-            return;
-        }
-
-        const items = cart.map((item) => ({
-            variant_id: item.variant_id,
-            quantity: item.quantity,
-        }));
-
-        try {
-            const supabase = createClient();
-            const { data: { session } } = await supabase.auth.getSession();
-            const token = session?.access_token || "";
-
-            const response = await processCheckout(
-                city,
-                area,
-                address,
-                floorNumber,
-                apartmentNumber,
-                items,
-                token,
-                discount?.code || undefined
-
-            );
-
-            if (response && response.success) {
-                clearCart();
-                router.push(`/modules/order-confirmed/${response.orderId}`);
-            } else {
-                alert("Failed to place order. Please try again.");
-            }
-        } catch (error) {
-            console.error("Error during order submission:", error);
-            alert("An error occurred while placing your order.");
-        }
-    };
+        setDiscount,
+        incrementItem,
+        decrementItem,
+        removeFromCart,
+        handleProceedCheckout,
+        autoPopulateAddress,
+    } = useCheckout();
 
     return (
         <div className="p-10 flex flex-col md:flex-row gap-5 h-full">
@@ -163,63 +110,158 @@ const checkout = () => {
                     </div>
                 </div>
 
-                {/* Address Details */}
-                <div>
-                    <h2 className="text-black font-regular font-sans text-md mb-3 mt-2">
-                        Address Details
-                    </h2>
-                    <div className="flex flex-col gap-3">
-                        <div className="grid grid-cols-2 gap-4">
-                            <TextInput
-                                label="City"
-                                required
-                                placeholder="e.g. Cairo"
-                                value={city}
-                                onChange={(e) => {
-                                    setCity(e.target.value);
-                                    if (errors.city) setErrors(prev => ({ ...prev, city: "" }));
+                {/* Saved Address Selection */}
+                {user && savedAddresses.length > 0 && (
+                    <div className="mb-4">
+                        <label className="block text-brand-primary-brown text-sm font-semibold mb-2">
+                            Select Shipping Address
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {savedAddresses.map((addr) => (
+                                <button
+                                    key={addr.id}
+                                    type="button"
+                                    onClick={() => {
+                                        setSelectedAddressId(addr.id);
+                                        autoPopulateAddress(addr);
+                                    }}
+                                    className={`p-4 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${selectedAddressId === addr.id
+                                            ? "bg-[#FAF5F3] border-brand-primary-brown"
+                                            : "bg-white border-[#78534a]/15 hover:border-[#78534a]/30"
+                                        }`}
+                                >
+                                    <span className="font-bold text-sm text-brand-primary-brown">
+                                        {addr.label || "Address"} {addr.is_default && "(Default)"}
+                                    </span>
+                                    <span className="text-xs text-brand-gray line-clamp-1">
+                                        {addr.street}
+                                    </span>
+                                    <span className="text-xs text-brand-gray">
+                                        {addr.building_no}, {addr.city}
+                                    </span>
+                                </button>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSelectedAddressId("custom");
+                                    setCity("");
+                                    setArea("");
+                                    setGovernorate("");
+                                    setPostalCode("");
+                                    setAddress("");
+                                    setFloorNumber("");
+                                    setApartmentNumber("");
                                 }}
-                                error={errors.city}
-                            />
-                            <TextInput
-                                label="Area"
-                                required
-                                placeholder="e.g. Maadi"
-                                value={area}
-                                onChange={(e) => {
-                                    setArea(e.target.value);
-                                    if (errors.area) setErrors(prev => ({ ...prev, area: "" }));
-                                }}
-                                error={errors.area}
-                            />
-                        </div>
-                        <TextInput
-                            label="Street Address"
-                            required
-                            placeholder="Street Name, Building Number / Name"
-                            value={address}
-                            onChange={(e) => {
-                                setAddress(e.target.value);
-                                if (errors.address) setErrors(prev => ({ ...prev, address: "" }));
-                            }}
-                            error={errors.address}
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                            <TextInput
-                                label="Floor Number (Optional)"
-                                placeholder="e.g. 4th Floor"
-                                value={floorNumber}
-                                onChange={(e) => setFloorNumber(e.target.value)}
-                            />
-                            <TextInput
-                                label="Apartment Number (Optional)"
-                                placeholder="e.g. Apt 4B"
-                                value={apartmentNumber}
-                                onChange={(e) => setApartmentNumber(e.target.value)}
-                            />
+                                className={`p-4 rounded-xl border text-left flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${selectedAddressId === "custom"
+                                        ? "bg-[#FAF5F3] border-brand-primary-brown"
+                                        : "bg-white border-dashed border-[#78534a]/20 hover:border-[#78534a]/40"
+                                    }`}
+                            >
+                                <span className="font-bold text-sm text-brand-primary-brown">
+                                    + Add New Address
+                                </span>
+                                <span className="text-xs text-brand-gray">
+                                    Type a custom address below
+                                </span>
+                            </button>
                         </div>
                     </div>
-                </div>
+                )}
+
+                {/* Address Details */}
+                {(selectedAddressId === "custom" || savedAddresses.length === 0) && (
+                    <div>
+                        <h2 className="text-black font-regular font-sans text-md mb-3 mt-2">
+                            Address Details
+                        </h2>
+                        <div className="flex flex-col gap-3">
+                            <div className="grid grid-cols-2 gap-4">
+                                <TextInput
+                                    label="City"
+                                    required
+                                    placeholder="e.g. Cairo"
+                                    value={city}
+                                    onChange={(e) => {
+                                        setCity(e.target.value);
+                                        if (errors.city) setErrors(prev => ({ ...prev, city: "" }));
+                                    }}
+                                    error={errors.city}
+                                />
+                                <TextInput
+                                    label="Area"
+                                    required
+                                    placeholder="e.g. Maadi"
+                                    value={area}
+                                    onChange={(e) => {
+                                        setArea(e.target.value);
+                                        if (errors.area) setErrors(prev => ({ ...prev, area: "" }));
+                                    }}
+                                    error={errors.area}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1 w-full">
+                                    <label className="text-brand-primary-brown font-sans text-sm font-medium">
+                                        Governorate <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        value={governorate}
+                                        onChange={(e) => {
+                                            setGovernorate(e.target.value);
+                                            if (errors.governorate) setErrors(prev => ({ ...prev, governorate: "" }));
+                                        }}
+                                        className={`rounded-lg border px-4 py-2.5 text-sm outline-none transition-colors font-sans w-full bg-white cursor-pointer ${errors.governorate
+                                                ? "border-red-500 focus:border-red-500"
+                                                : "border-brand-primary-brown/20 focus:border-brand-primary-brown"
+                                            }`}
+                                    >
+                                        <option value="" disabled>Select Governorate</option>
+                                        {EGYPT_GOVERNORATES.map((gov) => (
+                                            <option key={gov} value={gov}>{gov}</option>
+                                        ))}
+                                    </select>
+                                    {errors.governorate && (
+                                        <span className="text-xs text-red-500 font-sans mt-0.5">{errors.governorate}</span>
+                                    )}
+                                </div>
+                                <TextInput
+                                    label="Postal Code"
+                                    placeholder="e.g. 11728 (Optional)"
+                                    value={postalCode}
+                                    onChange={(e) => {
+                                        setPostalCode(e.target.value);
+                                    }}
+                                />
+                            </div>
+                            <TextInput
+                                label="Street Address"
+                                required
+                                placeholder="Street Name, Building Number / Name"
+                                value={address}
+                                onChange={(e) => {
+                                    setAddress(e.target.value);
+                                    if (errors.address) setErrors(prev => ({ ...prev, address: "" }));
+                                }}
+                                error={errors.address}
+                            />
+                            <div className="grid grid-cols-2 gap-4">
+                                <TextInput
+                                    label="Floor Number (Optional)"
+                                    placeholder="e.g. 4th Floor"
+                                    value={floorNumber}
+                                    onChange={(e) => setFloorNumber(e.target.value)}
+                                />
+                                <TextInput
+                                    label="Apartment Number (Optional)"
+                                    placeholder="e.g. Apt 4B"
+                                    value={apartmentNumber}
+                                    onChange={(e) => setApartmentNumber(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Delivery Type */}
                 <div className="flex flex-col gap-4">

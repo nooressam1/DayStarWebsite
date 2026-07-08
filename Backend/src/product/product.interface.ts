@@ -20,3 +20,20 @@ export interface Variant {
   sku: string;
 }
 
+export interface Review {
+  id: string;
+  product_id: string;
+  user_id: string;
+  rating: number;
+  body: string;
+  comment?: string | null;
+  title: string;
+  created_at?: string;
+  date: string;
+  timestamp: number;
+  profile?: {
+    username: string;
+  };
+}
+
+

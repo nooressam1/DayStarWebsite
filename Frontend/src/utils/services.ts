@@ -1,6 +1,6 @@
 // utils/services/product.service.ts
 
-import { Category, Discount, Product, Variant } from "@/utils/types/type";
+import { Category, Discount, Product, Variant, Review, Address } from "@/utils/types/type";
 import { apiFetch } from "./api/api.apiFetch";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -82,8 +82,9 @@ export async function processCheckout(
     apartmentNumber: string,
     items: { variant_id: string; quantity: number }[],
     token: string,
-    couponCode?: string, // 🟢 Add this optional parameter
-
+    couponCode?: string,
+    governorate?: string,
+    postalCode?: string,
 ) {
     try {
         const res = await fetch(`${BASE_URL}/orders/checkout`, {
@@ -99,8 +100,9 @@ export async function processCheckout(
                 floorNumber,
                 apartmentNumber,
                 items,
-                couponCode, // 🟢 Add this optional parameter
-
+                couponCode,
+                governorate,
+                postalCode,
             }),
         });
         if (!res.ok) {
@@ -150,3 +152,123 @@ export async function cancelOrder(orderId: string): Promise<any> {
         return null;
     }
 }
+
+// Fetch reviews for a product
+export async function getProductReviews(productId: string): Promise<Review[]> {
+    try {
+        const res = await fetch(`${BASE_URL}/product/${productId}/reviews`);
+        if (!res.ok) return [];
+        const reviews: Review[] = await res.json();
+        // Map backend relation profile.username to username if username is empty
+        return reviews.map(r => ({
+            ...r,
+            username: r.username || r.profile?.username || "Anonymous"
+        }));
+    } catch {
+        return [];
+    }
+}
+
+// Create a new review for a product (requires auth)
+export async function createProductReview(
+    productId: string,
+    reviewData: { rating: number; title: string; body: string }
+): Promise<Review | null> {
+    try {
+        const data = await apiFetch<Review>(`/product/${productId}/reviews`, {
+            method: "POST",
+            body: JSON.stringify(reviewData),
+        });
+        return {
+            ...data,
+            username: data.username || data.profile?.username || "Anonymous"
+        };
+    } catch (error) {
+        console.error("Error creating review:", error);
+        return null;
+    }
+}
+
+// Fetch all addresses of the authenticated user
+export async function getUserAddresses(): Promise<Address[]> {
+    try {
+        return await apiFetch<Address[]>("/addresses");
+    } catch (error) {
+        console.error("Error fetching addresses:", error);
+        return [];
+    }
+}
+
+// Create a new user address
+export async function addUserAddress(dto: {
+    street: string;
+    area: string;
+    governorate: string;
+    postalCode?: string;
+    building_no: string;
+    city: string;
+    country?: string;
+    label?: string;
+    is_default?: boolean;
+}): Promise<Address | null> {
+    try {
+        return await apiFetch<Address>("/addresses", {
+            method: "POST",
+            body: JSON.stringify(dto),
+        });
+    } catch (error) {
+        console.error("Error adding address:", error);
+        return null;
+    }
+}
+
+// Update an existing user address
+export async function updateUserAddress(
+    id: string,
+    dto: {
+        street?: string;
+        area?: string;
+        governorate?: string;
+        postalCode?: string;
+        building_no?: string;
+        city?: string;
+        country?: string;
+        label?: string;
+        is_default?: boolean;
+    }
+): Promise<Address | null> {
+    try {
+        return await apiFetch<Address>(`/addresses/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(dto),
+        });
+    } catch (error) {
+        console.error("Error updating address:", error);
+        return null;
+    }
+}
+
+// Delete a user address
+export async function deleteUserAddress(id: string): Promise<string | null> {
+    try {
+        await apiFetch<{ success: boolean }>(`/addresses/${id}`, {
+            method: "DELETE",
+        });
+        return null;
+    } catch (error: any) {
+        console.error("Error deleting address:", error);
+        return error.message || "Failed to delete address.";
+    }
+}
+
+// Set a user address as default
+export async function setDefaultUserAddress(id: string): Promise<Address | null> {
+    try {
+        return await apiFetch<Address>(`/addresses/${id}/default`, {
+            method: "PATCH",
+        });
+    } catch (error) {
+        console.error("Error setting default address:", error);
+        return null;
+    }
+}

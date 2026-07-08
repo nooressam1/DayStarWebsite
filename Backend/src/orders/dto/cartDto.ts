@@ -37,6 +37,14 @@ export class CreateOrderDto {
 
   @IsString()
   @IsOptional()
+  governorate?: string;
+
+  @IsString()
+  @IsOptional()
+  postalCode?: string;
+
+  @IsString()
+  @IsOptional()
   couponCode?: string;
   @IsArray()
   @ValidateNested({ each: true })

@@ -24,7 +24,9 @@ export async function apiFetch<T = unknown>(
 
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (!res.ok) {
-    throw new Error(`Request to ${path} failed with ${res.status}`);
+    const errorBody = await res.json().catch(() => null);
+    const errorMessage = errorBody?.message || `Request to ${path} failed with ${res.status}`;
+    throw new Error(errorMessage);
   }
   return res.json() as Promise<T>;
 }

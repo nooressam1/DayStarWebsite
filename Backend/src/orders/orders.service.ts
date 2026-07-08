@@ -14,7 +14,7 @@ export class OrdersService {
 
   async processCheckout(userId: string, createOrderDto: CreateOrderDto) {
     const client = this.supabaseService.admin;
-    const { items, city, area, address, floorNumber, apartmentNumber, couponCode } = createOrderDto;
+    const { items, city, area, address, floorNumber, apartmentNumber, couponCode, governorate, postalCode } = createOrderDto;
 
     // 1. Validate items and fetch pricing info
     const { subTotal, orderItemsPayload } = await this.validateCartItems(client, items);
@@ -25,7 +25,7 @@ export class OrdersService {
 
     try {
       // 3. Persist shipping address
-      const addressId = await this.createAddress(client, userId, { city, area, address, floorNumber, apartmentNumber });
+      const addressId = await this.createAddress(client, userId, { city, area, address, floorNumber, apartmentNumber, governorate, postalCode });
 
       // 4. Create parent order header
       const orderId = await this.createOrder(client, userId, addressId, finalTotal, discountId, discountAmount);
@@ -121,12 +121,13 @@ export class OrdersService {
     return { discountId, discountAmount };
   }
 
-  private async createAddress(client: any, userId: string, details: { city: string; area: string; address: string; floorNumber?: string; apartmentNumber?: string }) {
+  private async createAddress(client: any, userId: string, details: { city: string; area: string; address: string; floorNumber?: string; apartmentNumber?: string; governorate?: string; postalCode?: string }) {
+    const formattedStreet = `${details.address} (Area: ${details.area}) (Gov: ${details.governorate || '-'}) (Postal: ${details.postalCode || '-'})`;
     const { data: insertedAddress, error: addressError } = await client
       .from('addresses')
       .insert({
         user_id: userId,
-        street: `${details.address} (Area: ${details.area})`,
+        street: formattedStreet,
         building_no: `Floor: ${details.floorNumber || '-'}, Apt: ${details.apartmentNumber || '-'}`,
         city: details.city,
         country: 'Egypt',
@@ -246,7 +247,7 @@ export class OrdersService {
         total,
         discount_amount,
         created_at
-      `).eq("user_id", userId).order('created_at', { ascending: true });
+      `).eq("user_id", userId).order('created_at', { ascending: false });
     if (orderError) {
       throw new BadRequestException('could not retrieve orders');
     }

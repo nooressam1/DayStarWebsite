@@ -38,7 +38,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
 
       <div className="max-w-7xl mx-auto">
-        <ProductReviews />
+        <ProductReviews productId={product.id} />
       </div>
     </div>
   );

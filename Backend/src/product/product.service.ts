@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
-import { Product, Variant } from './product.interface';
+import { Product, Variant, Review } from './product.interface';
 import { ListProductsDto } from './dto/list_products.dto';
 @Injectable()
 export class ProductService {
@@ -140,6 +140,53 @@ export class ProductService {
       return (newest ?? []) as Product[];
     }
     return data as Product[];
+  }
+
+  async getReviews(productId: string): Promise<Review[]> {
+    const { data, error } = await this.supabaseService.admin
+      .from('review')
+      .select('*, profile(username)')
+      .eq('product_id', productId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new InternalServerErrorException(`Failed to fetch reviews: ${error.message}`);
+    }
+
+    return (data || []) as Review[];
+  }
+
+  async createReview(
+    productId: string,
+    userId: string,
+    reviewData: { rating: number; title: string; body: string },
+  ): Promise<Review> {
+    const now = new Date();
+    const dateEpoch = Math.floor(now.getTime() / 1000);
+    const timeString = now.toTimeString().split(' ')[0];
+
+    const reviewToInsert = {
+      product_id: productId,
+      user_id: userId,
+      rating: reviewData.rating,
+      title: reviewData.title,
+      body: reviewData.body,
+      comment: reviewData.body,
+      date: dateEpoch,
+      timestamp: timeString,
+    };
+    console.log("testing data");
+    const { data, error } = await this.supabaseService.admin
+      .from('review')
+      .insert(reviewToInsert)
+      .select('*, profile(username)')
+      .single();
+
+    if (error) {
+      throw new InternalServerErrorException(`Failed to create review: ${error.message}`);
+    }
+
+    return data as Review;
   }
 
 }
