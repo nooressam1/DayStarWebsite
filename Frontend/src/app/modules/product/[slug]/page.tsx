@@ -1,15 +1,15 @@
 import React from "react";
 import ProductDetails from "../../product/_components/ProductDetails";
-import { Product } from "../../../../utils/types/type"; // 1. Import your existing type!
-import axios from "axios";
+import { Product } from "../../../../utils/types/type";
 import ImageCarousel from "../_components/ImageCarousel";
-import ProductCartCard from "../../shoppingcart/_components/ProductCartCard";
-import { getProduct, getProductVariants } from "@/utils/services";
+import { getProduct, getProductVariants, getProducts, getBestSellers } from "@/utils/services";
 import ProductReviews from "../_components/ProductReviews";
+import { ProductCard } from "@/app/modules/home/_components/ProductCard";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
+
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const product = await getProduct(slug);
@@ -25,21 +25,55 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
   const variants = await getProductVariants(product.id);
 
+  // Fetch similar products (same category)
+  const categoryId = product.category_id || undefined;
+  const { items: rawSimilar } = await getProducts({ categoryId, limit: 6 });
+  
+  let similarProducts = (rawSimilar || []).filter((p) => p.id !== product.id);
+  
+  // Fallback to best sellers if we don't have enough similar products
+  if (similarProducts.length < 4) {
+    const bestSellers = await getBestSellers();
+    const remainingCount = 4 - similarProducts.length;
+    const fallbacks = bestSellers.filter(
+      (p) => p.id !== product.id && !similarProducts.some((s) => s.id === p.id)
+    );
+    similarProducts = [...similarProducts, ...fallbacks.slice(0, remainingCount)];
+  }
+
+  // Ensure we show exactly 4
+  similarProducts = similarProducts.slice(0, 4);
+
   return (
-    <div className="py-10 px-10">
+    <div className="py-10 px-10 flex flex-col gap-16">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-14 items-center">
-        {" "}
         <div className="md:max-w-1/2">
           <ImageCarousel images={product.images} productName={product.name} />
         </div>
         <div className="md:max-w-1/2">
-          <ProductDetails product={product} variants={variants} ></ProductDetails>
+          <ProductDetails product={product} variants={variants} />
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto w-full">
         <ProductReviews productId={product.id} />
       </div>
+
+      {/* Similar Products Section */}
+      {similarProducts.length > 0 && (
+        <div className="max-w-7xl mx-auto w-full flex flex-col gap-8 mt-8">
+          <div className="flex flex-row justify-between items-center w-full">
+            <h1 className="text-brand-primary-brown font-bold font-serif text-2xl md:text-3xl">
+              Similar Products
+            </h1>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full">
+            {similarProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
