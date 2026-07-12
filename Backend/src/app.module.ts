@@ -13,6 +13,7 @@ import { categoryController } from './category/category.controller';
 import { CategoryService } from './category/category.service';
 import { OrdersModule } from './orders/orders.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { QuizModule } from './routineassembler/QuizModule';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AddressesModule } from './addresses/addresses.module';
     HealthModule,
     OrdersModule,
     AddressesModule,
+    QuizModule
   ],
   controllers: [ProductController, discountController, categoryController],
   providers: [ProductService, DiscountService, CategoryService],

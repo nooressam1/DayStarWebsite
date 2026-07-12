@@ -75,3 +75,36 @@ export interface DropdownProps {
   dropdownClassName?: string;
   children: React.ReactNode;
 }
+
+export interface SkincareOption {
+  id: string;
+  label: string;
+}
+
+export interface SkincareQuestion {
+  id: number;
+  title: string;
+  subtitle: string;
+  type: 'single' | 'multiple';
+  key: 'skinType' | 'concerns' | 'sensitivity' | 'goals' | 'sunExposure';
+  options: SkincareOption[];
+}
+
+export interface SkincareAnswersState {
+  skinType: string;
+  concerns: string[];
+  sensitivity: string;
+  goals: string[];
+  sunExposure: string;
+}
+
+export interface RecommendedProduct {
+  variant_id: string;
+  category: string;
+  name: string;
+  size: string;
+  quantity: number;
+  price: number;
+  photo: string;
+  whyChosen: string;
+}

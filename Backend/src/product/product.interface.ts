@@ -9,6 +9,9 @@ export interface Product {
   created_at: string;
   is_active: boolean;
   on_sale?: boolean;         // <-- Add this
+  skin_type: string[]
+  concern: string[]
+  step_type: string;
   sale_price?: number | null; // <-- Add this
 }
 

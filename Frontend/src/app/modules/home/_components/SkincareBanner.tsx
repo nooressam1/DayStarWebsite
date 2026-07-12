@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import CustomButton from "../../shared/component/CustomButton";
 
 export function SkincareBanner() {
@@ -22,13 +23,15 @@ export function SkincareBanner() {
                 <h1 className='text-xs sm:text-sm md:text-md font-light text-white font-sans max-w-xs sm:max-w-md'>
                     Get a skincare routine that fits your skin type
                 </h1>
-                <CustomButton 
-                    className='px-6 py-2.5 text-lg sm:px-15 sm:py-4 sm:text-2xl font-serif mt-2' 
-                    variant='opacity' 
-                    colorScheme='secondary'
-                >
-                    Try Now
-                </CustomButton>
+                <Link href="/modules/skincare-test">
+                    <CustomButton 
+                        className='px-6 py-2.5 text-lg sm:px-15 sm:py-4 sm:text-2xl font-serif mt-2' 
+                        variant='opacity' 
+                        colorScheme='secondary'
+                    >
+                        Try Now
+                    </CustomButton>
+                </Link>
             </div>
         </div >
     )
