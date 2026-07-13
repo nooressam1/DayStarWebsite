@@ -87,6 +87,7 @@ export async function processCheckout(
     postalCode?: string,
     fullName?: string,
     phoneNumber?: string,
+    addressId?: string,
 ) {
     try {
         const res = await fetch(`${BASE_URL}/orders/checkout`, {
@@ -107,6 +108,7 @@ export async function processCheckout(
                 postalCode,
                 fullName,
                 phoneNumber,
+                addressId,
             }),
         });
         if (!res.ok) {

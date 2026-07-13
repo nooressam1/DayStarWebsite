@@ -18,7 +18,7 @@ export class OrdersService {
 
   async processCheckout(userId: string, email: string, createOrderDto: CreateOrderDto) {
     const client = this.supabaseService.admin;
-    const { items, city, area, address, floorNumber, apartmentNumber, couponCode, governorate, postalCode, fullName, phoneNumber } = createOrderDto;
+    const { items, city, area, address, floorNumber, apartmentNumber, couponCode, governorate, postalCode, fullName, phoneNumber, addressId } = createOrderDto;
 
     // 1. Validate items and fetch pricing info
     const { subTotal, orderItemsPayload } = await this.validateCartItems(client, items);
@@ -28,24 +28,21 @@ export class OrdersService {
     const finalTotal = Math.max(0, subTotal - discountAmount);
 
     try {
-      // 3. Persist shipping address
-      const addressId = await this.createAddress(client, userId, { city, area, address, floorNumber, apartmentNumber, governorate, postalCode });
+      // 3. Determine address ID (reuse existing address or create a new one)
+      let finalAddressId: string;
+      if (addressId) {
+        finalAddressId = addressId;
+      } else {
+        finalAddressId = await this.createAddress(client, userId, { city, area, address, floorNumber, apartmentNumber, governorate, postalCode });
+      }
 
       // 4. Create parent order header
-      const orderId = await this.createOrder(client, userId, addressId, finalTotal, discountId, discountAmount);
+      const orderId = await this.createOrder(client, userId, finalAddressId, finalTotal, discountId, discountAmount, fullName, phoneNumber);
 
       // 5. Insert order line items
       await this.createOrderItems(client, orderId, orderItemsPayload);
 
-      // Save user name back to profiles table
-      if (fullName) {
-        const { error: profileError } = await client
-          .from('profiles')
-          .upsert({ id: userId, full_name: fullName });
-        if (profileError) {
-          console.error('Failed to save user name to profiles table:', profileError);
-        }
-      }
+
 
       // Save phone number back to Supabase Auth metadata
       if (phoneNumber) {
@@ -203,7 +200,16 @@ export class OrdersService {
     return insertedAddress.id;
   }
 
-  private async createOrder(client: any, userId: string, addressId: number, finalTotal: number, discountId: number | null, discountAmount: number) {
+  private async createOrder(
+    client: any,
+    userId: string,
+    addressId: string,
+    finalTotal: number,
+    discountId: number | null,
+    discountAmount: number,
+    fullName?: string,
+    phoneNumber?: string,
+  ) {
     const { data: insertedOrder, error: orderError } = await client
       .from('orders')
       .insert({
@@ -213,6 +219,8 @@ export class OrdersService {
         total: finalTotal,
         discount_amount: discountAmount,
         discount_id: discountId,
+        full_name: fullName,
+        phone_number: phoneNumber,
       })
       .select()
       .single();
@@ -255,6 +263,8 @@ export class OrdersService {
         status,
         total,
         discount_amount,
+        full_name,
+        phone_number,
         created_at,
         addresses (
           id,

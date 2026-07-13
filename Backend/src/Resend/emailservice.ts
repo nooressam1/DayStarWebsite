@@ -7,11 +7,12 @@ export class EmailService {
     private resend = new Resend(process.env.RESEND_APIKEY);
 
     async sendOrderConfirmation(to: string, order: any) {
+        const orderNum = order.order_number;
         try {
             await this.resend.emails.send({
                 from: 'Acme <onboarding@resend.dev>', // Resend verified test sending domain
                 to,
-                subject: `Order Confirmation - #${order.order_number}`,
+                subject: `Order Confirmation - #${orderNum}`,
                 html: this.buildOrderEmailHtml(order),
             });
             console.log("Order confirmation email successfully dispatched to:", to);
@@ -22,6 +23,7 @@ export class EmailService {
 
     private buildOrderEmailHtml(order: any): string {
         const formatMoney = (amount: number) => `EGP ${(amount / 100).toFixed(2)}`;
+        const orderNum = order.order_number;
 
         // Loop over the items and build HTML table rows
         const itemsRows = order.items.map((item: any) => `
@@ -38,6 +40,13 @@ export class EmailService {
                 </td>
             </tr>
         `).join('');
+
+        // Prepare shipping address display safe fallback
+        const addr = order.shippingAddress || {};
+        const addressText = addr.address || 'N/A';
+        const floorAptText = `Floor: ${addr.floorNumber || '-'}, Apt: ${addr.apartmentNumber || '-'}`;
+        const areaCityText = `${addr.area || ''}, ${addr.city || ''}`;
+        const govPostalText = `${addr.governorate ? `${addr.governorate} ` : ''}${addr.postalCode || ''}`;
 
         return `
         <!DOCTYPE html>
@@ -72,11 +81,37 @@ export class EmailService {
                         <table width="100%" style="background-color: #faf5f3; border-radius: 8px; padding: 16px;">
                             <tr>
                                 <td style="font-family: sans-serif; font-size: 13px; color: #8b7e7a; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Order ID</td>
-                                <td align="right" style="font-family: sans-serif; font-size: 14px; color: #004956; font-weight: 700;">#${order.order_number}</td>
+                                <td align="right" style="font-family: sans-serif; font-size: 14px; color: #004956; font-weight: 700;">#${orderNum}</td>
                             </tr>
                             <tr>
                                 <td style="padding-top: 8px; font-family: sans-serif; font-size: 13px; color: #8b7e7a; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Date</td>
                                 <td align="right" style="padding-top: 8px; font-family: sans-serif; font-size: 14px; color: #374151;">${new Date().toLocaleDateString('en-US', { dateStyle: 'long' })}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Customer Details & Shipping Address -->
+                <tr>
+                    <td style="padding: 0 30px 20px 30px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background-color: #faf5f3; border-radius: 8px; padding: 16px;">
+                            <tr>
+                                <td style="padding: 12px; font-family: sans-serif; font-size: 13px; vertical-align: top; width: 50%;">
+                                    <strong style="color: #78534a; font-family: serif; font-size: 14px; display: block; margin-bottom: 8px;">Customer Information</strong>
+                                    <div style="font-size: 13px; color: #686361; line-height: 1.5;">
+                                        <strong>Email:</strong> ${order.email || 'N/A'}<br>
+                                        <strong>Phone:</strong> ${order.phone || 'N/A'}
+                                    </div>
+                                </td>
+                                <td style="padding: 12px; font-family: sans-serif; font-size: 13px; vertical-align: top; width: 50%; border-left: 1px solid #e8dfdc;">
+                                    <strong style="color: #78534a; font-family: serif; font-size: 14px; display: block; margin-bottom: 8px;">Shipping Address</strong>
+                                    <div style="font-size: 13px; color: #686361; line-height: 1.5;">
+                                        ${addressText}<br>
+                                        ${floorAptText}<br>
+                                        ${areaCityText}<br>
+                                        ${govPostalText}
+                                    </div>
+                                </td>
                             </tr>
                         </table>
                     </td>

@@ -197,7 +197,8 @@ export function useCheckout() {
                 checkoutGov,
                 checkoutPostal,
                 fullName,
-                phoneNumber
+                phoneNumber,
+                isCustomMode ? undefined : selectedAddressId
             );
 
             if (response && response.success) {

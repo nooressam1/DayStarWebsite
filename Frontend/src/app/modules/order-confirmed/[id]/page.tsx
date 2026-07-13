@@ -40,6 +40,7 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
     size: item.variants?.size || "Standard",
     photo: item.variants?.product?.images?.[0] || "",
     quantity: item.quantity,
+    fullname: item.variants?.product?.full_name
   })) || [];
 
   // Reconstructing financial metrics and dates (safe for null/loading order, keeps hook calls unconditional)
@@ -255,8 +256,7 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
             {address ? (
               <div className="flex flex-col font-work text-xs text-brand-light-brown leading-relaxed">
                 <span className="font-semibold text-black text-sm">
-                  Valued Customer
-                </span>
+                  {order.full_name}                </span>
                 <span>{address.street}</span>
                 <span>{address.building_no}</span>
                 <span>{address.city}, {address.country}</span>

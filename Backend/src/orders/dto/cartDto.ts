@@ -55,6 +55,10 @@ export class CreateOrderDto {
   @IsOptional()
   phoneNumber?: string;
 
+  @IsString()
+  @IsOptional()
+  addressId?: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => cartItemDto)

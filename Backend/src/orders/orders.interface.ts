@@ -6,4 +6,6 @@ export interface orders {
     status: string;
     total: number;
     created_at: string;
+    full_name?: string;
+    phone_number?: string;
 }
