@@ -1,10 +1,9 @@
 export type Category = {
   id: string;
   name: string;
-  photo: string | null;
+  photo: string;
   slug: string;
 }
-
 export type Product = {
   id: string;
   category_id: string | null;
@@ -14,8 +13,11 @@ export type Product = {
   slug: string;
   price: number;
   created_at: string;
-  is_active: boolean
+  is_active: boolean;
+  on_sale?: boolean;          // <-- Add this
+  sale_price?: number | null;  // <-- Add this
 }
+
 
 export type Variant = {
   id: string;
@@ -28,9 +30,13 @@ export type Variant = {
 export type Address = {
   id: string;
   user_id: string;
-  line1: string;
+  street: string;
+  building_no: string;
   city: string;
   country: string;
+  label: string | null;
+  is_default: boolean;
+  created_at?: string;
 }
 
 export type Profile = {
@@ -39,8 +45,9 @@ export type Profile = {
   role: string;
 }
 
-export type Order = {
+export type orders = {
   id: string;
+  order_number: number;
   user_id: string;
   address_id: string;
   status: string;
@@ -58,11 +65,19 @@ export type OrderItem = {
 
 export type Review = {
   id: string;
-  user_id: string;
-  product_id: string;
+  user_id?: string;
+  product_id?: string;
+  username: string;
   rating: number;
-  comment: string | null;
-  created_at: string;
+  comment?: string | null;
+  created_at?: string;
+  date: number | string;
+  title: string;
+  body: string;
+  timestamp: string | number; // for sorting
+  profile?: {
+    username: string;
+  };
 }
 export type Discount = {
   id: string;
@@ -70,6 +85,7 @@ export type Discount = {
   value: number;
   type: string;
   created_at: string;
+  is_active: boolean
 }
 
 export type Paginated<T> = {

@@ -9,6 +9,11 @@ import { ProductController } from './product/product.controller';
 import { ProductService } from './product/product.service';
 import { discountController } from './discount/discount.controller';
 import { DiscountService } from './discount/discount.service';
+import { categoryController } from './category/category.controller';
+import { CategoryService } from './category/category.service';
+import { OrdersModule } from './orders/orders.module';
+import { AddressesModule } from './addresses/addresses.module';
+import { QuizModule } from './routineassembler/QuizModule';
 
 @Module({
   imports: [
@@ -20,8 +25,11 @@ import { DiscountService } from './discount/discount.service';
     AuthModule,
     MeModule,
     HealthModule,
+    OrdersModule,
+    AddressesModule,
+    QuizModule
   ],
-  controllers: [ProductController, discountController], // <-- MUST BE HERE
-  providers: [ProductService, DiscountService],
+  controllers: [ProductController, discountController, categoryController],
+  providers: [ProductService, DiscountService, CategoryService],
 })
 export class AppModule { }

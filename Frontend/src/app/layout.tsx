@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Inter, Work_Sans, Libre_Baskerville } from "next/font/google";
 import Navbar from "./modules/shared/component/NavBar";
+import { Footer } from "./modules/shared/component/Footer";
+import { getCachedUser } from "@/lib/supabase/server-auth";
+import { AuthProvider } from "@/lib/supabase/auth-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,19 +30,24 @@ export const metadata: Metadata = {
   description: "DayStar ecommerce",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialUser = await getCachedUser();
+
   return (
     <html
       lang="en"
       className={`${inter.variable} ${workSans.variable} ${libreBaskerville.variable} h-full antialiased`}
     >
       <body className="font-sans antialiased">
-        <Navbar />
-        <main>{children}</main>
+        <AuthProvider initialUser={initialUser}>
+          <Navbar />
+          <main >{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

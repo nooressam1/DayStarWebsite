@@ -8,6 +8,7 @@ import { PartyPopper } from 'lucide-react';
 export default function DiscountButton({ onApply }: { onApply: (discount: Discount) => void }) {
     const [code, setCode] = useState('');
     const [success, setSuccess] = useState(false);
+
     const [attempted, setAttempted] = useState(false);
 
     const handleApply = async () => {

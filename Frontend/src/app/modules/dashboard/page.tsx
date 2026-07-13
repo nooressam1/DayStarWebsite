@@ -1,28 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
 import { apiFetch } from '@/utils/api/api.apiFetch';
+import { useAuth } from '@/lib/supabase/auth-provider';
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [me, setMe] = useState<unknown>(null);
+  const { user } = useAuth();
+  const [me, setMe] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
+
     (async () => {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.replace('/login');
-        return;
-      }
-
       try {
         // Calls the NestJS backend's protected /me route.
         const data = await apiFetch('/me');
@@ -33,39 +24,55 @@ export default function DashboardPage() {
         setLoading(false);
       }
     })();
-  }, [router]);
-
-  async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/login');
-    router.refresh();
-  }
+  }, [user]);
 
   return (
-    <main className="mx-auto flex max-w-xl flex-1 flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <button
-          onClick={handleSignOut}
-          className="rounded border border-black/15 px-3 py-1.5 text-sm dark:border-white/20"
-        >
-          Sign out
-        </button>
+    <div className="flex flex-col gap-6 font-sans">
+      <div>
+        <h1 className="text-2xl font-serif font-bold text-brand-primary-brown">
+          Profile Overview
+        </h1>
+        <p className="text-sm text-brand-gray">
+          Manage your personal details and view your account status
+        </p>
       </div>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-black/60 dark:text-white/60">
-          Response from backend /me
-        </h2>
-        {loading && <p>Loading…</p>}
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {me != null && (
-          <pre className="overflow-auto rounded bg-black/5 p-4 text-xs dark:bg-white/10">
-            {JSON.stringify(me, null, 2)}
-          </pre>
-        )}
-      </section>
-    </main>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        {/* Profile Card */}
+        <div className="bg-[#FAF5F3]/50 p-6 rounded-xl border border-[#78534a]/10 flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-brand-primary-brown uppercase tracking-wider font-sans">
+            Personal Information
+          </h2>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-brand-gray">Email Address</span>
+            <span className="text-sm font-medium text-brand-primary-brown">
+              {user?.email || "Not Available"}
+            </span>
+          </div>
+        </div>
+
+        {/* System Diagnostics */}
+        <div className="bg-[#FAF5F3]/50 p-6 rounded-xl border border-[#78534a]/10 flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-brand-primary-brown uppercase tracking-wider font-sans">
+            Account Status (Server response)
+          </h2>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-brand-gray mb-1">Backend Connection Status</span>
+            {loading && <span className="text-sm text-brand-gray">Loading details...</span>}
+            {error && <span className="text-sm text-red-500">{error}</span>}
+            {me != null && (
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-brand-secondary-blue font-semibold">
+                  Authenticated and Connected
+                </span>
+                <span className="text-xs text-brand-gray">
+                  User ID: {me.id || me.sub || "N/A"}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
