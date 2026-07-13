@@ -18,7 +18,7 @@ const shoppingcart = () => {
   });
   return (
 
-    <div className="p-10 flex flex-row gap-5 h-screen">
+    <div className="p-10 flex flex-row gap-5 min-h-screen pb-32">
       <div className="w-full">
         <h1 className="text-brand-primary-brown font-bold font-serif text-xl">
           Shopping Cart
@@ -32,7 +32,7 @@ const shoppingcart = () => {
             (<div>
               <div className="flex flex-row py-5 justify-between text-black font-sans"><h1 className="w-1/2">Products</h1>
                 <h1 className="w-1/4 flex justify-center">Quantity</h1><h1 className="w-1/6 flex justify-end">Price</h1> </div>
-              <div>{cart.map((item) => (<ProductCartCard key={item.variant_id} {...item} onIncrement={() => incrementItem(item.variant_id)} onDecrement={() => decrementItem(item.variant_id)} onRemove={() => removeFromCart(item.variant_id)}></ProductCartCard>
+              <div className="flex flex-col gap-4">{cart.map((item) => (<ProductCartCard key={item.variant_id} {...item} onIncrement={() => incrementItem(item.variant_id)} onDecrement={() => decrementItem(item.variant_id)} onRemove={() => removeFromCart(item.variant_id)}></ProductCartCard>
 
               ))}</div>
             </div>
@@ -44,7 +44,7 @@ const shoppingcart = () => {
         </div>
 
       </div>
-      <div className=" w-0.5 h-screen/2 bg-[#78534A]/10"></div> {/*line*/}
+      <div className="w-0.5 bg-[#78534A]/10 self-stretch my-2"></div> {/*line*/}
 
       <div className="w-1/2">
         <h1 className="text-brand-primary-brown font-bold font-serif text-xl">

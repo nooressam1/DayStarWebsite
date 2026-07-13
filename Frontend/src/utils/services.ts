@@ -85,6 +85,8 @@ export async function processCheckout(
     couponCode?: string,
     governorate?: string,
     postalCode?: string,
+    fullName?: string,
+    phoneNumber?: string,
 ) {
     try {
         const res = await fetch(`${BASE_URL}/orders/checkout`, {
@@ -103,6 +105,8 @@ export async function processCheckout(
                 couponCode,
                 governorate,
                 postalCode,
+                fullName,
+                phoneNumber,
             }),
         });
         if (!res.ok) {

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { ArrowLeft, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { ProductCard } from "@/app/modules/home/_components/ProductCard";
 import Dropdown from "../modules/shared/component/Dropdown";
 import { useProductCatalog } from "../modules/shared/hooks/useProductCatalog";
@@ -32,6 +33,35 @@ function ProductsCatalogContent() {
         categoryId,
         collection,
     } = useProductCatalog();
+
+    const searchParams = useSearchParams();
+    const currentSearch = searchParams.get("search") || "";
+    const [searchVal, setSearchVal] = useState(currentSearch);
+
+    // Sync input field value when the search parameter changes (e.g., cleared by resetting filters)
+    useEffect(() => {
+        setSearchVal(currentSearch);
+    }, [currentSearch]);
+
+    const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const params = new URLSearchParams(searchParams.toString());
+        if (searchVal.trim()) {
+            params.set("search", searchVal.trim());
+        } else {
+            params.delete("search");
+        }
+        params.set("page", "1"); // Reset to page 1 on new search
+        router.push(`/product?${params.toString()}`);
+    };
+
+    const handleSearchClear = () => {
+        setSearchVal("");
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("search");
+        params.set("page", "1");
+        router.push(`/product?${params.toString()}`);
+    };
 
     return (
         <div className="min-h-screen bg-[#faf5f3] font-sans antialiased text-[#78534a]">
@@ -223,6 +253,35 @@ function ProductsCatalogContent() {
                         <button className="px-5 py-2.5 border border-[#78534a]/20 text-[#78534a]  rounded-md hover:border-[#78534a] text-xs font-sans font-semibold transition-all cursor-pointer">
                             Size
                         </button>
+
+                        {/* Premium Inline Search Bar */}
+                        <form
+                            onSubmit={handleSearchSubmit}
+                            className="flex items-center border border-[#78534a]/20 rounded-md bg-white overflow-hidden text-xs w-full sm:w-64 sm:ml-auto"
+                        >
+                            <input
+                                type="text"
+                                value={searchVal}
+                                onChange={(e) => setSearchVal(e.target.value)}
+                                placeholder="Search products..."
+                                className="px-3 py-2 bg-transparent outline-none w-full placeholder-[#78534a]/40 font-sans font-medium text-[#78534a]"
+                            />
+                            {searchVal && (
+                                <button
+                                    type="button"
+                                    onClick={handleSearchClear}
+                                    className="p-2 text-[#78534a]/60 hover:text-[#78534a] transition-colors"
+                                >
+                                    <X className="w-3.5 h-3.5" />
+                                </button>
+                            )}
+                            <button
+                                type="submit"
+                                className="p-2 border-l border-[#78534a]/15 text-[#78534a]/70 hover:text-[#78534a] hover:bg-[#faf5f3] transition-all cursor-pointer"
+                            >
+                                <Search className="w-3.5 h-3.5" />
+                            </button>
+                        </form>
                     </div>
                 </div>
 

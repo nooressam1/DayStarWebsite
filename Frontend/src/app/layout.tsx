@@ -45,7 +45,7 @@ export default async function RootLayout({
       <body className="font-sans antialiased">
         <AuthProvider initialUser={initialUser}>
           <Navbar />
-          <main>{children}</main>
+          <main >{children}</main>
           <Footer />
         </AuthProvider>
       </body>

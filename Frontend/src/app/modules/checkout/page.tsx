@@ -126,8 +126,8 @@ const checkout = () => {
                                         autoPopulateAddress(addr);
                                     }}
                                     className={`p-4 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${selectedAddressId === addr.id
-                                            ? "bg-[#FAF5F3] border-brand-primary-brown"
-                                            : "bg-white border-[#78534a]/15 hover:border-[#78534a]/30"
+                                        ? "bg-[#FAF5F3] border-brand-primary-brown"
+                                        : "bg-white border-[#78534a]/15 hover:border-[#78534a]/30"
                                         }`}
                                 >
                                     <span className="font-bold text-sm text-brand-primary-brown">
@@ -154,8 +154,8 @@ const checkout = () => {
                                     setApartmentNumber("");
                                 }}
                                 className={`p-4 rounded-xl border text-left flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${selectedAddressId === "custom"
-                                        ? "bg-[#FAF5F3] border-brand-primary-brown"
-                                        : "bg-white border-dashed border-[#78534a]/20 hover:border-[#78534a]/40"
+                                    ? "bg-[#FAF5F3] border-brand-primary-brown"
+                                    : "bg-white border-dashed border-[#78534a]/20 hover:border-[#78534a]/40"
                                     }`}
                             >
                                 <span className="font-bold text-sm text-brand-primary-brown">
@@ -212,8 +212,8 @@ const checkout = () => {
                                             if (errors.governorate) setErrors(prev => ({ ...prev, governorate: "" }));
                                         }}
                                         className={`rounded-lg border px-4 py-2.5 text-sm outline-none transition-colors font-sans w-full bg-white cursor-pointer ${errors.governorate
-                                                ? "border-red-500 focus:border-red-500"
-                                                : "border-brand-primary-brown/20 focus:border-brand-primary-brown"
+                                            ? "border-red-500 focus:border-red-500"
+                                            : "border-brand-primary-brown/20 focus:border-brand-primary-brown"
                                             }`}
                                     >
                                         <option value="" disabled>Select Governorate</option>
@@ -349,7 +349,7 @@ const checkout = () => {
                     ) :
                         (<div>
 
-                            <div>{cart.map((item) => (<ProductCartCard key={item.variant_id} {...item} isEditable={false} onIncrement={() => incrementItem(item.variant_id)} onDecrement={() => decrementItem(item.variant_id)} onRemove={() => removeFromCart(item.variant_id)}></ProductCartCard>
+                            <div className="flex flex-col gap-4">{cart.map((item) => (<ProductCartCard key={item.variant_id} {...item} isEditable={false} onIncrement={() => incrementItem(item.variant_id)} onDecrement={() => decrementItem(item.variant_id)} onRemove={() => removeFromCart(item.variant_id)}></ProductCartCard>
 
                             ))}</div>
                         </div>

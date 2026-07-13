@@ -7,14 +7,18 @@ import {
 import { CreateOrderDto } from './dto/cartDto';
 import { SupabaseService } from '../supabase/supabase.service';
 import { orders } from './orders.interface';
+import { EmailService } from 'src/Resend/emailservice';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly supabaseService: SupabaseService) { }
+  constructor(
+    private readonly supabaseService: SupabaseService,
+    private readonly emailService: EmailService,
+  ) { }
 
-  async processCheckout(userId: string, createOrderDto: CreateOrderDto) {
+  async processCheckout(userId: string, email: string, createOrderDto: CreateOrderDto) {
     const client = this.supabaseService.admin;
-    const { items, city, area, address, floorNumber, apartmentNumber, couponCode, governorate, postalCode } = createOrderDto;
+    const { items, city, area, address, floorNumber, apartmentNumber, couponCode, governorate, postalCode, fullName, phoneNumber } = createOrderDto;
 
     // 1. Validate items and fetch pricing info
     const { subTotal, orderItemsPayload } = await this.validateCartItems(client, items);
@@ -32,6 +36,58 @@ export class OrdersService {
 
       // 5. Insert order line items
       await this.createOrderItems(client, orderId, orderItemsPayload);
+
+      // Save user name back to profiles table
+      if (fullName) {
+        const { error: profileError } = await client
+          .from('profiles')
+          .upsert({ id: userId, full_name: fullName });
+        if (profileError) {
+          console.error('Failed to save user name to profiles table:', profileError);
+        }
+      }
+
+      // Save phone number back to Supabase Auth metadata
+      if (phoneNumber) {
+        const { error: authError } = await client.auth.admin.updateUserById(userId, {
+          phone: phoneNumber,
+          user_metadata: { phone: phoneNumber }
+        });
+        if (authError) {
+          console.error('Failed to save user phone to Supabase auth:', authError);
+        }
+      }
+
+      // 6. Fetch phone number from Supabase Auth Admin
+      let phone = phoneNumber || '';
+      if (!phone) {
+        try {
+          const { data } = await client.auth.admin.getUserById(userId);
+          phone = data?.user?.phone || data?.user?.user_metadata?.phone || '';
+        } catch (e) {
+          console.warn("Could not retrieve user phone details from Supabase admin auth:", e);
+        }
+      }
+
+      // 7. Send order confirmation email asynchronously
+      this.emailService.sendOrderConfirmation(email, {
+        id: orderId,
+        total: finalTotal,
+        items: orderItemsPayload,
+        email,
+        phone,
+        shippingAddress: {
+          city,
+          area,
+          address,
+          floorNumber,
+          apartmentNumber,
+          governorate,
+          postalCode
+        },
+      }).catch(err => {
+        console.error('Failed to send order confirmation email:', err);
+      });
 
       return {
         success: true,
@@ -53,8 +109,10 @@ export class OrdersService {
       .select(`
         id,
         stock,
+        size,
         product (
           id,
+          name,
           price
         )
       `)
@@ -65,7 +123,7 @@ export class OrdersService {
     }
 
     let subTotal = 0;
-    const orderItemsPayload: { variant_id: string; quantity: number; unit_price_snapshot: number }[] = [];
+    const orderItemsPayload: { variant_id: string; quantity: number; unit_price_snapshot: number; name: string; size: string }[] = [];
 
     for (const item of items) {
       const dbVariant = fetchedVariants.find((v) => v.id === item.variant_id);
@@ -78,7 +136,7 @@ export class OrdersService {
         throw new BadRequestException(`Insufficient inventory stock for this item allocation request.`);
       }
 
-      const parentProduct = dbVariant.product as unknown as { id: string; price: number };
+      const parentProduct = dbVariant.product as unknown as { id: string; name: string; price: number };
       const secureLivePrice = parentProduct.price;
 
       subTotal += secureLivePrice * item.quantity;
@@ -87,6 +145,8 @@ export class OrdersService {
         variant_id: item.variant_id,
         quantity: item.quantity,
         unit_price_snapshot: secureLivePrice,
+        name: parentProduct.name,
+        size: dbVariant.size || 'Standard',
       });
     }
 
@@ -167,8 +227,10 @@ export class OrdersService {
 
   private async createOrderItems(client: any, orderId: string, orderItemsPayload: any[]) {
     const finalizedOrderItems = orderItemsPayload.map((item) => ({
-      ...item,
       order_id: orderId,
+      variant_id: item.variant_id,
+      quantity: item.quantity,
+      unit_price_snapshot: item.unit_price_snapshot,
     }));
 
     const { error: itemsError } = await client

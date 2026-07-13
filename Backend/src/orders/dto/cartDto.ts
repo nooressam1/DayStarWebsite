@@ -46,6 +46,15 @@ export class CreateOrderDto {
   @IsString()
   @IsOptional()
   couponCode?: string;
+
+  @IsString()
+  @IsOptional()
+  fullName?: string;
+
+  @IsString()
+  @IsOptional()
+  phoneNumber?: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => cartItemDto)

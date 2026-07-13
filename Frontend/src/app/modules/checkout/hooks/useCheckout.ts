@@ -195,7 +195,9 @@ export function useCheckout() {
                 token,
                 discount?.code || undefined,
                 checkoutGov,
-                checkoutPostal
+                checkoutPostal,
+                fullName,
+                phoneNumber
             );
 
             if (response && response.success) {

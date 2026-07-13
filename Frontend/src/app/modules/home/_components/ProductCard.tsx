@@ -8,6 +8,11 @@ import { useRouter } from "next/navigation";
 
 export function ProductCard({ product }: { product: Product }) {
     const router = useRouter();
+    const displayImage =
+        product.images && product.images.length > 0
+            ? product.images[0]
+            : "https://via.placeholder.com/150x150?text=No+Image";
+
     return (
         <div className="flex flex-col gap-2 w-full h-full border border-brand-primary-brown/10 rounded-lg">
             <div className="relative w-full h-[250px] sm:h-[350px] md:h-[400px] ">
@@ -16,7 +21,7 @@ export function ProductCard({ product }: { product: Product }) {
                         Sale
                     </span>
                 )}
-                <Image fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover rounded-lg" src={product.images[0]} alt={product.name} />
+                <Image fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover rounded-lg" src={displayImage} alt={product.name} />
             </div>
             <div className="p-4 flex flex-col gap-5">
                 <div className="flex flex-col ">

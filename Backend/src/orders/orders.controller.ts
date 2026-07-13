@@ -15,7 +15,8 @@ export class OrdersController {
     @Body() createOrderDto: CreateOrderDto,
   ) {
     const userId = user.sub;
-    return this.ordersService.processCheckout(userId, createOrderDto);
+    const email = user.email;
+    return this.ordersService.processCheckout(userId, email, createOrderDto);
   }
 
   @Get(':id')
