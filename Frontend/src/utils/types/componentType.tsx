@@ -108,3 +108,24 @@ export interface RecommendedProduct {
   photo: string;
   whyChosen: string;
 }
+
+export interface ContactFormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export interface ContactFormErrors {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export interface ContactInfoCardProps {
+  icon: LucideIcon;
+  title?: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}
