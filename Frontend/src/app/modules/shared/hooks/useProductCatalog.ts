@@ -11,6 +11,7 @@ export function useProductCatalog() {
   const categoryId = searchParams.get("category") || "";
   const collection = searchParams.get("collection") || "";
   const search = searchParams.get("search") || "";
+  const discountParam = searchParams.get("discount") || "";
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = 9; // Show 9 items per page (3x3 grid)
 
@@ -38,7 +39,8 @@ export function useProductCatalog() {
   // Fetch products when query parameters change
   useEffect(() => {
     setLoading(true);
-    getProducts({ page, limit, categoryId, collection, search })
+    const discount = discountParam ? parseInt(discountParam, 10) : undefined;
+    getProducts({ page, limit, categoryId, collection, search, discount })
       .then((data) => {
         setProducts(data.items);
         setTotalProducts(data.total);
@@ -48,7 +50,7 @@ export function useProductCatalog() {
         console.error("Error loading products:", err);
         setLoading(false);
       });
-  }, [categoryId, collection, page, search]);
+  }, [categoryId, collection, page, search, discountParam]);
 
   // Determine active title / header name
   useEffect(() => {
@@ -91,8 +93,8 @@ export function useProductCatalog() {
   });
   const filteredProducts = sortedProducts.filter((product) => {
     const inStock = product.name.charCodeAt(0) % 6 !== 0; // 83% in stock
-    if (availability === "in-stock") return inStock;
-    if (availability === "out-of-stock") return !inStock;
+    const matchesAvailability = availability === "in-stock" ? inStock : availability === "out-of-stock" ? !inStock : true;
+    if (!matchesAvailability) return false;
     return true;
   });
 

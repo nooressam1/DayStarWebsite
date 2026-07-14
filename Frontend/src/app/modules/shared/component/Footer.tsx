@@ -38,7 +38,7 @@ export function Footer() {
                             {[
                                 { label: "FAQ", href: "/faq" },
                                 { label: "Terms and Conditions", href: "/terms" },
-                                { label: "Support", href: "/support" },
+                                { label: "Support", href: "/contact" },
                                 { label: "Use and Privacy Policy", href: "/privacy" },
                                 { label: "About Us", href: "/about" },
                                 { label: "Return and Exchange Policy", href: "/returns" },

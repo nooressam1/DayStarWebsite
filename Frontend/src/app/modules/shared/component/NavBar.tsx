@@ -96,6 +96,12 @@ export default function Navbar() {
           >
             About Us
           </Link>
+          <Link
+            href="/contact"
+            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-80 transition-opacity"
+          >
+            Contact Us
+          </Link>
         </div>
         <div className="flex gap-2">
           {/* Search Icon with Slide-out Input */}
@@ -272,9 +278,16 @@ export default function Navbar() {
           <Link
             href="/about"
             onClick={() => setMenuOpen(false)}
-            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-85 py-1"
+            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-85 py-1 border-b border-[#78534a]/5"
           >
             About Us
+          </Link>
+          <Link
+            href="/contact"
+            onClick={() => setMenuOpen(false)}
+            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-85 py-1"
+          >
+            Contact Us
           </Link>
         </div>
       )}

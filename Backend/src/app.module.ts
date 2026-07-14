@@ -14,6 +14,8 @@ import { CategoryService } from './category/category.service';
 import { OrdersModule } from './orders/orders.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { QuizModule } from './routineassembler/QuizModule';
+import { ContactSubmissionsController } from './contact_submissions/contact_submissions.controller';
+import { ContactSubmissionsService } from './contact_submissions/contact_submissions.service';
 
 @Module({
   imports: [
@@ -29,7 +31,7 @@ import { QuizModule } from './routineassembler/QuizModule';
     AddressesModule,
     QuizModule
   ],
-  controllers: [ProductController, discountController, categoryController],
-  providers: [ProductService, DiscountService, CategoryService],
+  controllers: [ProductController, discountController, categoryController, ContactSubmissionsController],
+  providers: [ProductService, DiscountService, CategoryService, ContactSubmissionsService],
 })
 export class AppModule { }
