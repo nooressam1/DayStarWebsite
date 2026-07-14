@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import CustomButton from "../../shared/component/CustomButton";
 
 export function SaleBanner() {
@@ -22,13 +23,15 @@ export function SaleBanner() {
                 <h1 className='text-xs sm:text-sm md:text-lg font-light text-white font-sans max-w-xs sm:max-w-md'>
                     Choose from our selection of beauty care products
                 </h1>
-                <CustomButton 
-                    className='px-6 py-2.5 text-lg sm:px-15 sm:py-4 sm:text-2xl font-serif mt-2' 
-                    variant='opacity' 
-                    colorScheme='secondary'
-                >
-                    Buy Now
-                </CustomButton>
+                <Link href="/product?collection=sale&discount=50">
+                    <CustomButton 
+                        className='px-6 py-2.5 text-lg sm:px-15 sm:py-4 sm:text-2xl font-serif mt-2' 
+                        variant='opacity' 
+                        colorScheme='secondary'
+                    >
+                        Buy Now
+                    </CustomButton>
+                </Link>
             </div>
         </div >
     )

@@ -1,4 +1,4 @@
-import { getBestSellers, getCategories } from "@/utils/services";
+import { getBestSellers, getCategories, getProducts } from "@/utils/services";
 import Link from "next/link";
 import BannerImage from "./_components/BannerImage";
 import { CategoriesBox } from "./_components/CategoriesBox";
@@ -10,6 +10,11 @@ import { ProductCarousel } from "./_components/ProductCarousel";
 export default async function HomePage() {
     const categories = await getCategories();
     const bestSellers = await getBestSellers();
+    
+    // Fetch products in the "sale" collection with 50% discount directly from the backend
+    const saleData = await getProducts({ collection: "sale", discount: 50 });
+    const fiftyPercentOffProducts = saleData?.items || [];
+
     return (
         <div className="flex flex-col gap-12 md:gap-25">
             <BannerImage></BannerImage>
@@ -78,7 +83,7 @@ export default async function HomePage() {
                             <SaleBanner />
                         </div>
                         <div className="flex flex-[2] w-full">
-                            <ProductCarousel products={bestSellers} />
+                            <ProductCarousel products={fiftyPercentOffProducts.slice(0, 4)} />
                         </div>
                     </div>
                 </div>

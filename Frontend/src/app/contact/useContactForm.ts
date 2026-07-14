@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ContactFormData, ContactFormErrors } from "@/utils/types/componentType";
+import { createContactSubmission } from "@/utils/services";
 
 export function useContactForm() {
   const [formData, setFormData] = useState<ContactFormData>({
@@ -71,7 +72,7 @@ export function useContactForm() {
 
     try {
       // Simulate API request to backend (1.8 seconds duration)
-      await new Promise((resolve) => setTimeout(resolve, 1800));
+      const response = await createContactSubmission(formData);
       setIsSuccess(true);
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (error) {

@@ -25,4 +25,9 @@ export class ListProductsDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  discount?: number;
 }

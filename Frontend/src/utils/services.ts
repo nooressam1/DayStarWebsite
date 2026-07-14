@@ -15,7 +15,7 @@ export async function getProduct(slug: string): Promise<Product | null> {
         return null;
     }
 }
-export async function getProducts(params: { page?: number; limit?: number; categoryId?: string; collection?: string; search?: string }): Promise<{ items: Product[]; total: number }> {
+export async function getProducts(params: { page?: number; limit?: number; categoryId?: string; collection?: string; search?: string; discount?: number }): Promise<{ items: Product[]; total: number }> {
     try {
         const query = new URLSearchParams();
         if (params.page) query.append('page', params.page.toString());
@@ -23,6 +23,7 @@ export async function getProducts(params: { page?: number; limit?: number; categ
         if (params.categoryId) query.append('categoryId', params.categoryId);
         if (params.collection) query.append('collection', params.collection);
         if (params.search) query.append('search', params.search);
+        if (params.discount) query.append('discount', params.discount.toString());
 
         const res = await fetch(`${BASE_URL}/product?${query.toString()}`);
         if (!res.ok) return { items: [], total: 0 };
@@ -272,9 +273,33 @@ export async function setDefaultUserAddress(id: string): Promise<Address | null>
     try {
         return await apiFetch<Address>(`/addresses/${id}/default`, {
             method: "PATCH",
-        });
+            });
     } catch (error) {
         console.error("Error setting default address:", error);
+        return null;
+    }
+}
+
+// Create a new contact submission
+export async function createContactSubmission(data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+    user_id?: string;
+}): Promise<any> {
+    try {
+        const res = await fetch(`${BASE_URL}/contact_submissions`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) return null;
+        return res.json();
+    } catch (error) {
+        console.error("Error creating contact submission:", error);
         return null;
     }
 }

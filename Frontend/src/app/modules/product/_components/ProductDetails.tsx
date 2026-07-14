@@ -7,15 +7,15 @@ import QuantityButton from "./QuantityButton";
 import FavoriteButton from "../../shared/component/FavoriteButton";
 import { useCartStore } from "../../shared/hooks/useCartStore";
 import { Variant } from "@/utils/types/type";
+import { getProductSalePrice } from "@/utils/product";
+
 export default function ProductDetails({ product, variants }: { product: Product, variants: Variant[] }) {
 
   const [selectedSize, setSelectedSize] = useState<Variant | null>(variants[0] || null); // Default to 50ml
   const [quantity, setQuantity] = useState<number>(1);
   const { addToCart } = useCartStore();
 
-  const displayPrice = product.on_sale && product.sale_price
-    ? product.sale_price
-    : product.price;
+  const displayPrice = getProductSalePrice(product);
 
 
   return (
@@ -91,7 +91,7 @@ export default function ProductDetails({ product, variants }: { product: Product
                 variant_id: selectedSize.id,
                 product_id: product.id,
                 name: product.name,
-                price: product.price,
+                price: displayPrice,
                 size: selectedSize.size,
                 photo: product.images[0],
               }, quantity)

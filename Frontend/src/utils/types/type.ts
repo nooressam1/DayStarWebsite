@@ -14,8 +14,8 @@ export type Product = {
   price: number;
   created_at: string;
   is_active: boolean;
-  on_sale?: boolean;          // <-- Add this
-  sale_price?: number | null;  // <-- Add this
+  on_sale?: boolean;
+  discount_percentage?: number | null;
 }
 
 

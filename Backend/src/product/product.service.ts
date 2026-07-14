@@ -30,6 +30,7 @@ export class ProductService {
   async allProducts(
     params: ListProductsDto,
   ): Promise<{ items: Product[]; total: number }> {
+    console.log("ALL PRODUCTS PARAMS:", params);
     const page = params.page ?? 1;
     const limit = params.limit ?? 10;
     const from = (page - 1) * limit;
@@ -50,6 +51,9 @@ export class ProductService {
     if (params.collection === 'on-sale' || params.collection === 'sale') {
       let countQuery = this.supabaseService.admin.from('product').select('*', { count: 'exact', head: true })
         .eq('is_active', true).eq('on_sale', true);
+      if (params.discount) {
+        countQuery = countQuery.eq('discount_percentage', params.discount);
+      }
       if (params.categoryId) {
         countQuery = countQuery.eq('category_id', params.categoryId);
       }
@@ -62,6 +66,9 @@ export class ProductService {
       const total = count ?? 0;
       if (from >= total) return { items: [], total }
       let dataQuery = this.supabaseService.admin.from('product').select('*').eq('is_active', true).eq('on_sale', true)
+      if (params.discount) {
+        dataQuery = dataQuery.eq('discount_percentage', params.discount);
+      }
       if (params.categoryId) {
         dataQuery = dataQuery.eq('category_id', params.categoryId)
       }
@@ -78,6 +85,9 @@ export class ProductService {
       .from('product')
       .select('*', { count: 'exact', head: true })
       .eq('is_active', true);
+    if (params.discount) {
+      countQuery = countQuery.eq('discount_percentage', params.discount);
+    }
     if (params.categoryId) {
       countQuery = countQuery.eq('category_id', params.categoryId);
     }
@@ -104,6 +114,9 @@ export class ProductService {
 
     if (params.categoryId) {
       dataQuery = dataQuery.eq('category_id', params.categoryId);
+    }
+    if (params.discount) {
+      dataQuery = dataQuery.eq('discount_percentage', params.discount);
     }
     if (params.search) {
       dataQuery = dataQuery.ilike('name', `%${params.search}%`);

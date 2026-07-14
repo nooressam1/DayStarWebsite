@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useCartStore } from "../../shared/hooks/useCartStore";
 import { RecommendedProduct } from "@/utils/types/componentType";
+import { getProductSalePrice } from "@/utils/product";
 
 export function useSkincareResults() {
   const { addToCart } = useCartStore();
@@ -60,7 +61,7 @@ export function useSkincareResults() {
                 name: (product as any).name,
                 size: (product as any).step_type === 'serum' || (product as any).step_type === 'treatment' ? "30 ML" : "150 ML",
                 quantity: 1,
-                price: (product as any).price,
+                price: getProductSalePrice(product as any),
                 photo: (product as any).images?.[0] || "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&auto=format&fit=crop&q=60",
                 whyChosen: getWhyChosenText(stepName)
               });
