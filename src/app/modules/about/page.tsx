@@ -25,7 +25,7 @@ export default function AboutPage() {
         {/* Right Column: Semicircular Curved Image */}
         <div className="w-full md:w-[55%] h-[280px] sm:h-[350px] md:h-full relative overflow-hidden rounded-bl-[180px] md:rounded-bl-none md:rounded-l-full self-stretch">
           <Image
-            src="https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?q=80&w=800&auto=format&fit=crop"
+            src="/assets/images/AboutHeader.jpg"
             alt="Natural beauty products in a basket"
             fill
             sizes="(max-width: 768px) 100vw, 55vw"
@@ -40,7 +40,7 @@ export default function AboutPage() {
         {/* Left Column: Image with rounded corners */}
         <div className="relative w-full h-[320px] sm:h-[400px] md:h-[500px] overflow-hidden rounded-[2rem] shadow-sm">
           <Image
-            src="https://images.unsplash.com/photo-1556229174-5e42a09e45af?q=80&w=800&auto=format&fit=crop"
+            src="/assets/images/AboutImage.jpg"
             alt="Skincare cream application"
             fill
             sizes="(max-width: 768px) 100vw, 45vw"
@@ -73,7 +73,7 @@ export default function AboutPage() {
       {/* 3. Our Promise Banner Section */}
       <section className="w-full h-[280px] sm:h-[350px] md:h-[420px] relative flex items-center justify-start overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?q=80&w=1200&auto=format&fit=crop"
+          src="/assets/images/aboutimage2.jpg"
           alt="Natural organic components background"
           fill
           sizes="100vw"

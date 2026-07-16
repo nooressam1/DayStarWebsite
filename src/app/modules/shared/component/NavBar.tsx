@@ -91,13 +91,13 @@ export default function Navbar() {
             On Sale
           </Link>
           <Link
-            href="/about"
+            href="/modules/about"
             className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-80 transition-opacity"
           >
             About Us
           </Link>
           <Link
-            href="/contact"
+            href="/modules/contact"
             className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-80 transition-opacity"
           >
             Contact Us
