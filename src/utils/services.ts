@@ -141,10 +141,14 @@ export async function getOrder(id: string): Promise<any> {
         return null;
     }
 }
-export async function getOrders(): Promise<any[]> {
+export async function getOrders(limit?: number, offset?: number): Promise<any[]> {
     try {
-        return await apiFetch('/orders');
-
+        const query = new URLSearchParams();
+        if (limit !== undefined) query.append('limit', limit.toString());
+        if (offset !== undefined) query.append('offset', offset.toString());
+        
+        const queryString = query.toString();
+        return await apiFetch(queryString ? `/orders?${queryString}` : '/orders');
     } catch (error) {
         console.error("Error fetching orders", error);
         return [];

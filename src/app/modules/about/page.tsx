@@ -31,6 +31,8 @@ export default function AboutPage() {
             sizes="(max-width: 768px) 100vw, 55vw"
             className="object-cover w-full h-full"
             priority
+            loading="eager"
+
           />
         </div>
       </section>
@@ -73,7 +75,7 @@ export default function AboutPage() {
       {/* 3. Our Promise Banner Section */}
       <section className="w-full h-[280px] sm:h-[350px] md:h-[420px] relative flex items-center justify-start overflow-hidden">
         <Image
-          src="/assets/images/aboutimage2.jpg"
+          src="/assets/images/aboutImage2.jpg"
           alt="Natural organic components background"
           fill
           sizes="100vw"

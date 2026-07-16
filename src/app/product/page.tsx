@@ -95,7 +95,7 @@ function ProductsCatalogContent() {
 
 
                 {/* 2. Collection Title */}
-                <h2 className="font-serif text-3xl md:text-4xl text-[#78534a] font-bold tracking-tight mb-2">
+                <h2 className="font-serif text-2xl md:text-4xl text-[#78534a] font-bold tracking-tight mb-2">
                     {activeCategoryName}
                 </h2>
 

@@ -24,15 +24,15 @@ export default function DiscountButton({ onApply }: { onApply: (discount: Discou
 
     return (
         <div>
-            <div className='flex flex-row border-1 border-brand-light-brown justify-between rounded-md '>
+            <div className='flex w-full  flex-row border-1 border-brand-light-brown justify-between rounded-md '>
                 <input
                     type="text"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     placeholder="Enter coupon code"
-                    className='p-3 '
+                    className='p-3 w-full md:w-auto'
                 />
-                <CustomButton className='py-3 w-full rounded-l-none ' onClick={handleApply} colorScheme='primary' variant='solid'>Apply</CustomButton>
+                <CustomButton className='py-3 px-5  w-auto rounded-l-none ' onClick={handleApply} colorScheme='primary' variant='solid'>Apply</CustomButton>
 
             </div>
             {success && <h1 className='font-work p-2 text-green-500 text-md flex gap-2'><PartyPopper></PartyPopper>Coupon applied successfully!</h1>}
