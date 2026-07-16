@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  /* 1. Custom Brand Colors */
+  --color-brand-primary-brown: #78534a;
+  --color-brand-secondary-blue: #004956;
+  --color-brand-secondary-blue-light: #017286;
+  --color-brand-light-brown: #686361;
+  --color-brand-light: #f9fafb;
+  --color-brand-gray: #757575;
+
+  /* Setting a custom theme color for your main background */
+  --color-brand-bg: #faf5f3;
+
+  /* 2. Fonts Configuration */
+  --font-sans: var(--font-inter), sans-serif;
+  --font-work: var(--font-work-sans), sans-serif;
+  --font-serif: var(--font-libre), serif;
+
+  --animate-slide: slide 25s linear infinite;
+
+  @keyframes slide {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+
+
+/* 3. Apply your clean variables directly to the body */
+body {
+  background-color: var(--color-brand-bg);
+  /* Soft background color */
+  color: var(--color-brand-secondary-blue);
+  /* High-contrast dark text color */
+}
