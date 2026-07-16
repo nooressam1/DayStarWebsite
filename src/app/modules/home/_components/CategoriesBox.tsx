@@ -5,7 +5,7 @@ import { categoryProps } from "@/utils/types/componentType";
 
 export function CategoriesBox({ photo, categoryName }: categoryProps) {
     return (
-        <div className="relative rounded-sm md:rounded-none w-full md:h-[312px] h-[150px]  overflow-hidden cursor-pointer group">
+        <div className="relative rounded-sm md:rounded-2xl w-full md:h-[412px] h-[150px]  overflow-hidden cursor-pointer group">
             <Image
                 src={photo}
                 alt={categoryName}

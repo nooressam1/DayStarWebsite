@@ -10,7 +10,7 @@ import { ProductCarousel } from "./_components/ProductCarousel";
 export default async function HomePage() {
     const categories = await getCategories();
     const bestSellers = await getBestSellers();
-    
+
     // Fetch products in the "sale" collection with 50% discount directly from the backend
     const saleData = await getProducts({ collection: "sale", discount: 50 });
     const fiftyPercentOffProducts = saleData?.items || [];
@@ -27,12 +27,28 @@ export default async function HomePage() {
                         <h1 className="text-brand-primary-brown/70 font-light font-sans text-base md:text-lg">
                             Everything you need to care for &amp; more  </h1>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8  justify-center gap-5 px-10 md:px-0 md:gap-0">
-                        {categories.map((cat) => (
-                            <Link key={cat.id} href={`/product?category=${cat.id}`} className="cursor-pointer">
-                                <CategoriesBox photo={cat.photo} categoryName={cat.name} />
-                            </Link>
-                        ))}
+                    <div className="overflow-hidden">
+                        {/* Mobile and Tablet: static grid */}
+                        <div className="grid grid-cols-2  lg:hidden gap-5 px-10 md:px-5">
+                            {categories.map((cat) => (
+                                <Link key={cat.id} href={`/product?category=${cat.id}`} className="cursor-pointer">
+                                    <CategoriesBox photo={cat.photo} categoryName={cat.name} />
+                                </Link>
+                            ))}
+                        </div>
+
+                        {/* Desktop: infinite marquee slider */}
+                        <div className="hidden gap-5 lg:flex w-max animate-slide">
+                            {[...categories, ...categories].map((cat, index) => (
+                                <Link
+                                    key={`${cat.id}-${index}`}
+                                    href={`/product?category=${cat.id}`}
+                                    className="cursor-pointer w-[20vw] shrink-0"
+                                >
+                                    <CategoriesBox photo={cat.photo} categoryName={cat.name} />
+                                </Link>
+                            ))}
+                        </div>
                     </div>
                 </div>
 

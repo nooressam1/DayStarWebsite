@@ -9,18 +9,22 @@ import { getProductSalePrice, isProductOnSale, getProductDiscountPercentage } fr
 
 export function ProductCard({ product }: { product: Product }) {
     const router = useRouter();
-    const displayImage =
-        product.images && product.images.length > 0
-            ? product.images[0]
-            : "https://via.placeholder.com/150x150?text=No+Image";
+    const hasImage =
+        Array.isArray(product.images) &&
+        product.images.length > 0 &&
+        product.images[0] &&
+        typeof product.images[0] === "string" &&
+        product.images[0].trim() !== "";
+
+    const displayImage = hasImage ? product.images![0] : "/no-image.png";
 
     const onSale = isProductOnSale(product);
     const salePrice = getProductSalePrice(product);
     const discountPercent = getProductDiscountPercentage(product);
 
     return (
-        <div className="flex flex-col gap-2 w-full h-full border border-brand-primary-brown/10 rounded-lg">
-            <div className="relative w-full h-[250px] sm:h-[350px] md:h-[400px] ">
+        <div className="flex flex-col gap-2 w-full h-full border border-brand-primary-brown/10 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow">
+            <div className="relative w-full h-[250px] sm:h-[350px] md:h-[400px]">
                 {onSale && (
                     <span className="absolute top-3 left-3 bg-[#c94a29] text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase z-10 shadow-sm">
                         {discountPercent > 0 ? `${discountPercent}% OFF` : "Sale"}

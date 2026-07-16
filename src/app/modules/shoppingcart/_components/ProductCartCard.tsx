@@ -6,10 +6,9 @@ import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { Trash } from "lucide-react";
 
 const ProductCartCard = ({ name, price, photo, size, quantity, isEditable = true, variant_id, onIncrement, onDecrement, onRemove }: CartItemCardProps) => {
-  const displayImage =
-    photo && photo.length > 0
-      ? photo
-      : "https://via.placeholder.com/150x150?text=No+Image";
+  const hasImage = photo && typeof photo === "string" && photo.trim() !== "";
+
+  const displayImage = hasImage ? photo : "/no-image.png";
 
   // Derive kebab-case slug from product name
   const itemSlug = name

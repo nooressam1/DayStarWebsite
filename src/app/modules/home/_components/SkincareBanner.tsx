@@ -24,9 +24,9 @@ export function SkincareBanner() {
                     Get a skincare routine that fits your skin type
                 </h1>
                 <Link href="/modules/skincare-test">
-                    <CustomButton 
-                        className='px-6 py-2.5 text-lg sm:px-15 sm:py-4 sm:text-2xl font-serif mt-2' 
-                        variant='opacity' 
+                    <CustomButton
+                        className='px-6 py-2.5 text-xl sm:px-15 sm:py-4  font-serif mt-2'
+                        variant='opacity'
                         colorScheme='secondary'
                     >
                         Try Now
