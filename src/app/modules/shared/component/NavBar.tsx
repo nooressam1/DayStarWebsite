@@ -63,7 +63,7 @@ export default function Navbar() {
             <Menu className="h-5 w-5" />
           </button>
         </div>
-        <div>
+        <div className={searchOpen ? "hidden md:block" : "block"}>
           <Link
             href="/modules/home"
             className="cursor-pointer font-serif text-brand-primary-brown font-bold text-base md:text-2xl transition-colors"
@@ -123,7 +123,7 @@ export default function Navbar() {
                     if (!searchQuery.trim()) setSearchOpen(false);
                   }, 150);
                 }}
-                className="bg-[#FAF5F3] border border-brand-primary-brown/20 rounded-full px-4 py-1 text-sm text-brand-primary-brown outline-none focus:border-brand-primary-brown w-40 md:w-56 transition-all duration-300 animate-in slide-in-from-right-2"
+                className="bg-[#FAF5F3] border border-brand-primary-brown/20 rounded-full px-4 py-1 text-sm text-brand-primary-brown outline-none focus:border-brand-primary-brown w-[48vw] sm:w-56 md:w-56 transition-all duration-300 animate-in slide-in-from-right-2"
                 autoFocus
               />
             )}

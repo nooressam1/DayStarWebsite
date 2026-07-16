@@ -32,7 +32,7 @@ export default function DiscountButton({ onApply }: { onApply: (discount: Discou
                     placeholder="Enter coupon code"
                     className='p-3 w-full md:w-auto'
                 />
-                <CustomButton className='py-3 w-full md:w-auto rounded-l-none ' onClick={handleApply} colorScheme='primary' variant='solid'>Apply</CustomButton>
+                <CustomButton className='py-3 px-5  w-auto rounded-l-none ' onClick={handleApply} colorScheme='primary' variant='solid'>Apply</CustomButton>
 
             </div>
             {success && <h1 className='font-work p-2 text-green-500 text-md flex gap-2'><PartyPopper></PartyPopper>Coupon applied successfully!</h1>}

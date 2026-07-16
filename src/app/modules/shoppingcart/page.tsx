@@ -46,7 +46,7 @@ const shoppingcart = () => {
       </div>
       <div className="w-0.5 bg-[#78534A]/10 self-stretch my-2"></div> {/*line*/}
 
-      <div className="w-1/2">
+      <div className="w-full md:w-1/2">
         <h1 className="text-brand-primary-brown font-bold font-serif text-xl">
           Order Summary
         </h1>
