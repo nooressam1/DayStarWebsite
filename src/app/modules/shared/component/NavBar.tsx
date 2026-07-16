@@ -276,14 +276,14 @@ export default function Navbar() {
             On Sale
           </Link>
           <Link
-            href="/about"
+            href="/modules/about"
             onClick={() => setMenuOpen(false)}
             className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-85 py-1 border-b border-[#78534a]/5"
           >
             About Us
           </Link>
           <Link
-            href="/contact"
+            href="/modules/contact"
             onClick={() => setMenuOpen(false)}
             className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-85 py-1"
           >

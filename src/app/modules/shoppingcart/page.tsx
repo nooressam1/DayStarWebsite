@@ -18,7 +18,7 @@ const shoppingcart = () => {
   });
   return (
 
-    <div className="p-10 flex flex-row gap-5 min-h-screen pb-32">
+    <div className="p-10 flex flex-col md:flex-row gap-5 min-h-screen pb-32">
       <div className="w-full">
         <h1 className="text-brand-primary-brown font-bold font-serif text-xl">
           Shopping Cart
