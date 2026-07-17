@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Inter, Work_Sans, Libre_Baskerville } from "next/font/google";
-import Navbar from "./modules/shared/component/NavBar";
-import { Footer } from "./modules/shared/component/Footer";
 import { getCachedUser } from "@/lib/supabase/server-auth";
 import { AuthProvider } from "@/lib/supabase/auth-provider";
 
@@ -44,9 +42,7 @@ export default async function RootLayout({
     >
       <body className="font-sans antialiased">
         <AuthProvider initialUser={initialUser}>
-          <Navbar />
-          <main >{children}</main>
-          <Footer />
+          {children}
         </AuthProvider>
       </body>
     </html>
