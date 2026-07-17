@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import AboutPage from "@/modules/about/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { AboutPage } from "@/modules/about";
+import { Spinner } from "@/modules/shared";
 
 export default function About() {
   return (

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import SkincareTestResultsPage from "@/modules/skincare-test/results/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { SkincareTestResultsPage } from "@/modules/skincare-test";
+import { Spinner } from "@/modules/shared";
 
 export default function SkincareTestResults() {
   return (

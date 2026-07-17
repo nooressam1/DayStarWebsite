@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import CheckoutPage from "@/modules/checkout/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { CheckoutPage } from "@/modules/checkout";
+import { Spinner } from "@/modules/shared";
 
 export default function Checkout() {
   return (

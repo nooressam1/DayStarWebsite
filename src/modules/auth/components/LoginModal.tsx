@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import CustomButton from '@/modules/shared/component/CustomButton';
+import { CustomButton } from "@/modules/shared";
 import { useAuthModalStore } from '../hooks/useAuthModalStore';
 
 export default function LoginModal() {

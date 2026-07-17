@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import OrderConfirmedPage from "@/modules/order-confirmed/[id]/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { OrderConfirmedPage } from "@/modules/order-confirmed";
+import { Spinner } from "@/modules/shared";
 
 interface OrderConfirmedPageProps {
   params: Promise<{ id: string }>;

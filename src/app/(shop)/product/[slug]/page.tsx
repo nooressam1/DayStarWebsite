@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import ProductDetailPage from "@/modules/product/[slug]/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { ProductDetailPage } from "@/modules/product";
+import { Spinner } from "@/modules/shared";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;

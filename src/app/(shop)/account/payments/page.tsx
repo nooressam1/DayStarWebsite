@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import PaymentsPage from "@/modules/dashboard/payments/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { PaymentsPage } from "@/modules/dashboard";
+import { Spinner } from "@/modules/shared";
 
 export default function AccountPayments() {
   return (

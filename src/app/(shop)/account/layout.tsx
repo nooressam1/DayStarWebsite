@@ -1,2 +1,2 @@
-import AccountLayout from "@/modules/dashboard/layout";
+import { AccountLayout } from "@/modules/dashboard";
 export default AccountLayout;
