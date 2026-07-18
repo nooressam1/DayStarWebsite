@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import ProductCatalogPage from "@/modules/product/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { ProductCatalogPage } from "@/modules/product";
+import { Spinner } from "@/modules/shared";
 
 export default function ProductCatalog() {
   return (

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import OrdersPage from "@/modules/dashboard/orders/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { OrdersPage } from "@/modules/dashboard";
+import { Spinner } from "@/modules/shared";
 
 export default function AccountOrders() {
   return (

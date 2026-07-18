@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import ContactPage from "@/modules/contact/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { ContactPage } from "@/modules/contact";
+import { Spinner } from "@/modules/shared";
 
 export default function Contact() {
   return (

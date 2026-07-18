@@ -1,6 +1,5 @@
-import Navbar from "@/modules/shared/component/NavBar";
-import { Footer } from "@/modules/shared/component/Footer";
-import AuthModal from "@/modules/auth/components/AuthModal";
+import { Navbar, Footer } from "@/modules/shared";
+import { AuthModal } from "@/modules/auth";
 
 export default function ShopLayout({
   children,

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import CartPage from "@/modules/shoppingcart/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { CartPage } from "@/modules/shoppingcart";
+import { Spinner } from "@/modules/shared";
 
 export default function Cart() {
   return (

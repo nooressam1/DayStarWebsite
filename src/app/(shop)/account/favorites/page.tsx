@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import FavoritesPage from "@/modules/dashboard/favorites/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { FavoritesPage } from "@/modules/dashboard";
+import { Spinner } from "@/modules/shared";
 
 export default function AccountFavorites() {
   return (

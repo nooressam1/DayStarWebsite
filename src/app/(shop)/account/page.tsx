@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import AccountPage from "@/modules/dashboard/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { AccountPage } from "@/modules/dashboard";
+import { Spinner } from "@/modules/shared";
 
 export default function Account() {
   return (

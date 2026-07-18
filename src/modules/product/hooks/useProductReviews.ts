@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
-import { Review } from "@/utils/types/type";
-import { getProductReviews, createProductReview } from "@/utils/services";
+import { Review } from "@/app/api/types";
+import { getProductReviews, createProductReview } from "@/app/api/endpoints/product.endpoint";
 import { useAuth } from "@/lib/supabase/auth-provider";
 
 export function useProductReviews(productId: string) {

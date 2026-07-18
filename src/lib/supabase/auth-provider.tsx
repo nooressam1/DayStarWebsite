@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 
+import { clearAuthData } from "@/app/api/utils/client";
+
 interface AuthContextType {
   user: any;
   loading: boolean;
@@ -48,8 +50,7 @@ export function AuthProvider({
   }, [initialUser]);
 
   const signOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await clearAuthData();
     setUser(null);
   };
 

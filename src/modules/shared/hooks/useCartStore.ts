@@ -1,6 +1,25 @@
-import { CartState } from "@/utils/types/componentType";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { Discount, OrderItem } from "@/app/api/types";
+
+export interface CartItem extends Pick<OrderItem, "variant_id" | "quantity"> {
+  product_id: string;
+  name: string;
+  price: number;
+  size: string; // e.g., "50ml" (from variants.size)
+  photo: string;
+}
+
+export interface CartState {
+  cart: CartItem[];
+  discount: Discount | null;
+  addToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  incrementItem: (variant_id: string) => void;
+  decrementItem: (variant_id: string) => void;
+  removeFromCart: (variant_id: string) => void;
+  clearCart: () => void;
+  setDiscount: (discount: Discount | null) => void;
+}
 
 export const useCartStore = create<CartState>()(
   persist(

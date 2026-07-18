@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import AddressesPage from "@/modules/dashboard/addresses/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { AddressesPage } from "@/modules/dashboard";
+import { Spinner } from "@/modules/shared";
 
 export default function AccountAddresses() {
   return (

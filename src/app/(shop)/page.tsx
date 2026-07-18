@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import HomePage from "@/modules/home/page";
-import { Spinner } from "@/modules/shared/component/Spinner";
+import { HomePage } from "@/modules/home";
+import { Spinner } from "@/modules/shared";
 
 export default function Home() {
   return (
