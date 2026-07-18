@@ -11,7 +11,8 @@ export interface SkincareAnswersState {
   goals: string[];
   sunExposure: string;
 }
-import { apiFetch } from "@/utils/api/api.apiFetch";
+import { apiClient } from "@/app/api/utils/client";
+import { ENDPOINTS } from "@/app/api/constants/endpoints";
 
 export function useSkincareTest(questions: SkincareQuestion[]) {
   const router = useRouter();
@@ -60,7 +61,7 @@ export function useSkincareTest(questions: SkincareQuestion[]) {
       setError(null);
       try {
         // Send POST request directly upon submission event to prevent double runs
-        const routineData = await apiFetch<Record<string, any>>("/quiz/submit", {
+        const routineData = await apiClient.request<Record<string, any>>(ENDPOINTS.QUIZ.SUBMIT, undefined, {
           method: "POST",
           body: JSON.stringify({
             skinType: answers.skinType,
