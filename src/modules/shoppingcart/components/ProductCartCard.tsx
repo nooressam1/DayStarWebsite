@@ -1,7 +1,14 @@
 import React from "react";
 import Link from "next/link";
 import QuantityButton from "../../product/components/QuantityButton";
-import { CartItemCardProps } from "@/utils/types/componentType";
+import { CartItem } from "@/modules/shared";
+
+export interface CartItemCardProps extends CartItem {
+  isEditable?: boolean;
+  onIncrement: () => void;
+  onDecrement: () => void;
+  onRemove: () => void;
+}
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { Trash } from "lucide-react";
 

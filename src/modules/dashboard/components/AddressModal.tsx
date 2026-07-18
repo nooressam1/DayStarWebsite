@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Home, Briefcase, Map } from "lucide-react";
-import { Address } from "@/utils/types/type";
+import { Address } from "@/app/api/types";
 import { TextInput, CustomButton } from "@/modules/shared";
 import { useAddressForm } from "../hooks/useAddressForm";
 
-import { EGYPT_GOVERNORATES } from "@/utils/constants";
+import { EGYPT_GOVERNORATES } from "@/modules/checkout";
 
 interface AddressModalProps {
   isOpen: boolean;

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ShoppingBag, ChevronRight, Calendar, DollarSign } from "lucide-react";
-import { getOrders } from "@/utils/services";
+import { getOrders } from "@/app/api/endpoints/order.endpoint";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 
 export default function OrdersPage() {

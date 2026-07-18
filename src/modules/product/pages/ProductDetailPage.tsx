@@ -1,8 +1,8 @@
 import React from "react";
 import ProductDetails from "../components/ProductDetails";
-import { Product } from "@/utils/types/type";
+import { Product } from "@/app/api/types";
 import ImageCarousel from "../components/ImageCarousel";
-import { getProduct, getProductVariants, getProducts, getBestSellers } from "@/utils/services";
+import { getProduct, getProductVariants, getProducts, getBestSellers } from "@/app/api/endpoints/product.endpoint";
 import ProductReviews from "../components/ProductReviews";
 import { ProductCard } from "@/modules/home/components/ProductCard";
 

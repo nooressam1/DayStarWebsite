@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Product } from "@/utils/types/type";
-import { getProduct } from "@/utils/services";
-import { isProductOnSale, getProductSalePrice } from "@/utils/product";
+import { Product } from "@/app/api/types";
+import { getProduct } from "@/app/api/endpoints/product.endpoint";
+import { isProductOnSale, getProductSalePrice } from "@/modules/product";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 
 interface FavoritesState {

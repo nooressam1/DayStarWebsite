@@ -6,7 +6,8 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { ProductCard } from "@/modules/home/components/ProductCard";
-import { Dropdown, useProductCatalog } from "@/modules/shared";
+import { Dropdown } from "@/modules/shared";
+import { useProductCatalog } from "../hooks/useProductCatalog";
 
 function ProductsCatalogContent() {
     const {

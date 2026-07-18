@@ -1,6 +1,10 @@
 "use client";
-import { ProductCarouselProps } from "@/utils/types/componentType";
 import React, { useState } from "react";
+
+export interface ProductCarouselProps {
+  images: string[];
+  productName: string;
+}
 
 export default function ImageCarousel({
   images,

@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { SkincareAnswersState, SkincareQuestion } from "@/utils/types/componentType";
+import { SkincareQuestion } from "../utils/questions";
+
+export interface SkincareAnswersState {
+  skinType: string;
+  concerns: string[];
+  sensitivity: string;
+  goals: string[];
+  sunExposure: string;
+}
 import { apiFetch } from "@/utils/api/api.apiFetch";
 
 export function useSkincareTest(questions: SkincareQuestion[]) {

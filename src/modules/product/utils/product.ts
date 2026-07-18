@@ -1,4 +1,4 @@
-import { Product } from "./types/type";
+import { Product } from "@/app/api/types";
 
 /**
  * Computes the active sale price of a product.

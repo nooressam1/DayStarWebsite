@@ -1,5 +1,9 @@
-import { TextInputProps } from "@/utils/types/componentType";
 import React, { InputHTMLAttributes } from "react";
+
+export interface TextInputProps extends InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  error?: string;
+}
 
 
 /**

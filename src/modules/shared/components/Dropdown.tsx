@@ -1,6 +1,14 @@
 import React, { useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
-import { DropdownProps } from "@/utils/types/componentType";
+
+export interface DropdownProps {
+  label: string;
+  isOpen: boolean;
+  onToggle: (isOpen: boolean) => void;
+  className?: string;
+  dropdownClassName?: string;
+  children: React.ReactNode;
+}
 
 export const Dropdown: React.FC<DropdownProps> = ({
   label,

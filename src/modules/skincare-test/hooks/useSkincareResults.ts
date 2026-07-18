@@ -1,9 +1,19 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { useCartStore } from "../../shared/hooks/useCartStore";
-import { RecommendedProduct } from "@/utils/types/componentType";
-import { getProductSalePrice } from "@/utils/product";
+import { useCartStore } from "@/modules/shared";
+
+export interface RecommendedProduct {
+  variant_id: string;
+  category: string;
+  name: string;
+  size: string;
+  quantity: number;
+  price: number;
+  photo: string;
+  whyChosen: string;
+}
+import { getProductSalePrice } from "@/modules/product";
 
 export function useSkincareResults() {
   const { addToCart } = useCartStore();

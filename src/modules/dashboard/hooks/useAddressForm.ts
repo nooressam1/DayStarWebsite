@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Address } from "@/utils/types/type";
-import { addUserAddress, updateUserAddress } from "@/utils/services";
+import { Address } from "@/app/api/types";
+import { addUserAddress, updateUserAddress } from "@/app/api/endpoints/address.endpoint";
 
 interface UseAddressFormProps {
   isOpen: boolean;

@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import CustomButton from "./CustomButton";
 import { Heart } from "lucide-react";
-import { Product } from "@/utils/types/type";
-import { useFavoritesStore } from "../hooks/useFavoritesStore";
+import { Product } from "@/app/api/types";
+import { useFavoritesStore } from "@/modules/shared";
 
 export default function FavoriteButton({ product }: { product: Product }) {
   const [mounted, setMounted] = useState(false);

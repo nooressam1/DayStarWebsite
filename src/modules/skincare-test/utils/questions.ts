@@ -1,4 +1,16 @@
-import { SkincareQuestion } from "@/utils/types/componentType";
+export interface SkincareOption {
+  id: string;
+  label: string;
+}
+
+export interface SkincareQuestion {
+  id: number;
+  title: string;
+  subtitle: string;
+  type: 'single' | 'multiple';
+  key: 'skinType' | 'concerns' | 'sensitivity' | 'goals' | 'sunExposure';
+  options: SkincareOption[];
+}
 
 export const QUESTIONS: SkincareQuestion[] = [
   {

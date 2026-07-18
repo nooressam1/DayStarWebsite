@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCartStore, usePricing, CustomButton } from "@/modules/shared";
 import ProductCartCard from "../components/ProductCartCard";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
-import { Discount } from "@/utils/types/type";
+import { Discount } from "@/app/api/types";
 import DiscountButton from "../components/DiscountButton";
 
 const shoppingcart = () => {

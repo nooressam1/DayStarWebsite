@@ -1,5 +1,12 @@
 import React from "react";
-import { ContactInfoCardProps } from "@/utils/types/componentType";
+import { LucideIcon } from "lucide-react";
+
+export interface ContactInfoCardProps {
+  icon: LucideIcon;
+  title?: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}
 
 export default function ContactInfoCard({
   icon: Icon,

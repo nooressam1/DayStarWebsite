@@ -1,6 +1,14 @@
 import { BUTTON_VARIANTS } from "@/utils/theme/theme";
-import { ButtonProps } from "@/utils/types/componentType";
-import React from "react";
+import React, { ButtonHTMLAttributes, ReactNode } from "react";
+import { LucideIcon } from "lucide-react";
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children?: ReactNode;
+  icon?: LucideIcon;
+  iconPosition?: "left" | "right";
+  variant?: "solid" | "outline" | "opacity";
+  colorScheme?: "primary" | "secondary" | "dark";
+}
 
 export default function CustomButton({
   children,

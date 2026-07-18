@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/supabase/auth-provider";
-import { Address } from "@/utils/types/type";
+import { Address } from "@/app/api/types";
 import {
   getUserAddresses,
   deleteUserAddress,
   setDefaultUserAddress,
-} from "@/utils/services";
+} from "@/app/api/endpoints/address.endpoint";
 
 export function useAddresses() {
   const { user, loading: authLoading } = useAuth();

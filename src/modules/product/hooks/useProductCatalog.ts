@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Product, Category } from "@/utils/types/type";
-import { getProducts, getCategories } from "@/utils/services";
+import { Product, Category } from "@/app/api/types";
+import { getProducts } from "@/app/api/endpoints/product.endpoint";
+import { getCategories } from "@/app/api/endpoints/category.endpoint";
 
 export function useProductCatalog() {
   const router = useRouter();

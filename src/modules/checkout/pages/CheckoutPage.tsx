@@ -3,11 +3,12 @@
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { CustomButton, TextInput, SelectionCard } from "@/modules/shared";
 import ProductCartCard from "@/modules/shoppingcart/components/ProductCartCard";
-import { EGYPT_GOVERNORATES } from "@/utils/constants";
+import { EGYPT_GOVERNORATES } from "@/modules/checkout";
 import { useCheckout } from "../hooks/useCheckout";
 
 const checkout = () => {
     const {
+        addressData,
         cart,
         user,
         isAuthModalOpen,
@@ -18,6 +19,25 @@ const checkout = () => {
         setFullName,
         phoneNumber,
         setPhoneNumber,
+        deliveryType,
+        setDeliveryType,
+        paymentMethod,
+        setPaymentMethod,
+        errors,
+        setErrors,
+        subtotal,
+        deliveryFee,
+        discountAmount,
+        total,
+        discount,
+        setDiscount,
+        incrementItem,
+        decrementItem,
+        removeFromCart,
+        handleProceedCheckout,
+    } = useCheckout();
+
+    const {
         city,
         setCity,
         area,
@@ -35,24 +55,8 @@ const checkout = () => {
         savedAddresses,
         selectedAddressId,
         setSelectedAddressId,
-        deliveryType,
-        setDeliveryType,
-        paymentMethod,
-        setPaymentMethod,
-        errors,
-        setErrors,
-        subtotal,
-        deliveryFee,
-        discountAmount,
-        total,
-        discount,
-        setDiscount,
-        incrementItem,
-        decrementItem,
-        removeFromCart,
-        handleProceedCheckout,
         autoPopulateAddress,
-    } = useCheckout();
+    } = addressData;
 
     return (
         <div className="p-10 flex flex-col md:flex-row gap-5 h-full">

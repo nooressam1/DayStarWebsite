@@ -1,11 +1,10 @@
 "use client";
 import React, { useState } from "react";
-import { Product } from "@/utils/types/type";
+import { Product, Variant } from "@/app/api/types";
 import { CustomButton, FavoriteButton, useCartStore } from "@/modules/shared";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import QuantityButton from "./QuantityButton";
-import { Variant } from "@/utils/types/type";
-import { getProductSalePrice } from "@/utils/product";
+import { getProductSalePrice } from "@/modules/product";
 
 export default function ProductDetails({ product, variants }: { product: Product, variants: Variant[] }) {
 

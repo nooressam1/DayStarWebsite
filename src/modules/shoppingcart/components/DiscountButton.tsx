@@ -1,8 +1,8 @@
 'use client'
 import React, { useState } from 'react'
 import { CustomButton } from "@/modules/shared";
-import { getDiscount } from '@/utils/services';
-import { Discount } from '@/utils/types/type';
+import { getDiscount } from '@/app/api/endpoints/discount.endpoint';
+import { Discount } from "@/app/api/types";
 import { PartyPopper } from 'lucide-react';
 
 export default function DiscountButton({ onApply }: { onApply: (discount: Discount) => void }) {

@@ -1,10 +1,10 @@
 "use client";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { CustomButton, FavoriteButton } from "@/modules/shared";
-import { Product } from "@/utils/types/type";
+import { Product } from "@/app/api/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { getProductSalePrice, isProductOnSale, getProductDiscountPercentage } from "@/utils/product";
+import { getProductSalePrice, isProductOnSale, getProductDiscountPercentage } from "@/modules/product";
 
 export function ProductCard({ product }: { product: Product }) {
     const router = useRouter();

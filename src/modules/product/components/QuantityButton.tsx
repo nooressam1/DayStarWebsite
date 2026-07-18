@@ -1,5 +1,10 @@
 import React from "react";
-import { QuantityButtonProps } from "@/utils/types/componentType";
+
+export interface QuantityButtonProps {
+  value: number;
+  onDecrement?: () => void;
+  onIncrement?: () => void;
+}
 
 export default function QuantityButton({ value, onDecrement, onIncrement }: QuantityButtonProps) {
   return (

@@ -1,6 +1,18 @@
 import React, { useState } from "react";
-import { ContactFormData, ContactFormErrors } from "@/utils/types/componentType";
-import { createContactSubmission } from "@/utils/services";
+export interface ContactFormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export interface ContactFormErrors {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+import { createContactSubmission } from "@/app/api/endpoints/contact.endpoint";
 
 export function useContactForm() {
   const [formData, setFormData] = useState<ContactFormData>({

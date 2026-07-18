@@ -4,8 +4,10 @@ import React, { useState, useEffect, use } from "react";
 import { Check, MapPin, CreditCard, ShoppingBag, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import ProductCartCard from "../../shoppingcart/components/ProductCartCard";
-import { cancelOrder, getOrder } from "@/utils/services";
-import { OrderConfirmedPageProps } from "@/utils/types/componentType";
+import { cancelOrder, getOrder } from "@/app/api/endpoints/order.endpoint";
+export interface OrderConfirmedPageProps {
+  params: Promise<{ id: string }>;
+}
 import { usePricing, CustomButton } from "@/modules/shared";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 

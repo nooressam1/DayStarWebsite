@@ -1,5 +1,9 @@
-import React from "react";
-import { SelectionCardProps } from "@/utils/types/componentType";
+import React, { InputHTMLAttributes } from "react";
+
+export interface SelectionCardProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
+  title: string;
+  description: string;
+}
 
 /**
  * Reusable selection card component that displays a title, description,

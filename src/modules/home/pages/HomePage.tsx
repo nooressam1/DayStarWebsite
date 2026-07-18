@@ -1,4 +1,5 @@
-import { getBestSellers, getCategories, getProducts } from "@/utils/services";
+import { getBestSellers, getProducts } from "@/app/api/endpoints/product.endpoint";
+import { getCategories } from "@/app/api/endpoints/category.endpoint";
 import Link from "next/link";
 import BannerImage from "../components/BannerImage";
 import { CategoriesBox } from "../components/CategoriesBox";

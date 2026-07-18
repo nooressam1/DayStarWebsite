@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Product } from "@/utils/types/type";
+import { Product } from "@/app/api/types";
 import { ProductCard } from "./ProductCard";
 
 export function ProductCarousel({ products }: { products: Product[] }) {

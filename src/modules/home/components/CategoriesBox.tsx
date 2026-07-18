@@ -1,7 +1,10 @@
 import React from "react";
 import Image from 'next/image'
 
-import { categoryProps } from "@/utils/types/componentType";
+export interface categoryProps {
+  photo: string;
+  categoryName: string;
+}
 
 export function CategoriesBox({ photo, categoryName }: categoryProps) {
     return (

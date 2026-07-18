@@ -10,7 +10,7 @@ export { default as TextInput } from "./components/TextInput";
 export { Spinner } from "./components/Spinner";
 
 export { useCartStore } from "./hooks/useCartStore";
+export type { CartItem, CartState } from "./hooks/useCartStore";
 export { useFavoritesStore } from "./hooks/useFavoritesStore";
 export { useNavbarAuth } from "./hooks/useNavbarAuth";
 export { usePricing } from "./hooks/usePricing";
-export { useProductCatalog } from "./hooks/useProductCatalog";
