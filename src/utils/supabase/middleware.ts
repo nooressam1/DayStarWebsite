@@ -31,7 +31,31 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: keep this call directly after creating the client. It refreshes
   // the token; removing it can randomly log users out.
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const url = new URL(request.url);
+  const isProtectedPath = 
+    url.pathname.startsWith('/account') || 
+    url.pathname.startsWith('/checkout') || 
+    url.pathname.startsWith('/order-confirmed');
+
+  if (!user && isProtectedPath) {
+    const redirectResponse = NextResponse.redirect(new URL('/', request.url));
+    
+    // Copy the cookies from the supabaseResponse to the redirectResponse
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, {
+        path: cookie.path,
+        domain: cookie.domain,
+        maxAge: cookie.maxAge,
+        secure: cookie.secure,
+        sameSite: cookie.sameSite,
+        expires: cookie.expires,
+      });
+    });
+    
+    return redirectResponse;
+  }
 
   return supabaseResponse;
 }

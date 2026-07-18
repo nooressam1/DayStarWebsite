@@ -29,4 +29,7 @@ export const ENDPOINTS = {
   CONTACT: {
     SUBMIT: "/contact_submissions",
   },
+  QUIZ: {
+    SUBMIT: "/quiz/submit",
+  },
 } as const;

@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { apiFetch } from '@/utils/api/api.apiFetch';
+import { apiClient } from '@/app/api/utils/client';
 import { useAuth } from '@/lib/supabase/auth-provider';
+import { ENDPOINTS } from '@/app/api/constants/endpoints';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -16,7 +17,7 @@ export default function DashboardPage() {
     (async () => {
       try {
         // Calls the NestJS backend's protected /me route.
-        const data = await apiFetch('/me');
+        const data = await apiClient.request(ENDPOINTS.USER.ME);
         setMe(data);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to reach backend');
