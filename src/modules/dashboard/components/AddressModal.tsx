@@ -44,6 +44,8 @@ export default function AddressModal({
     governorate,
     postalCode,
     buildingNo,
+    floorNumber,
+    apartmentNumber,
     city,
     country,
     isDefault,
@@ -195,14 +197,30 @@ export default function AddressModal({
           />
 
           {/* Building No, Floor, Apt */}
-          <TextInput
-            label="Building info (Floor / Apartment / Building Number)"
-            required
-            placeholder="e.g. Building 12, Floor 4, Apt 10"
-            value={buildingNo}
-            onChange={(e) => updateField("buildingNo", e.target.value)}
-            maxLength={100}
-          />
+          <div className="grid grid-cols-3 gap-3">
+            <TextInput
+              label="Building No."
+              required
+              placeholder="e.g. Bldg 12"
+              value={buildingNo}
+              onChange={(e) => updateField("buildingNo", e.target.value)}
+              maxLength={50}
+            />
+            <TextInput
+              label="Floor No."
+              placeholder="e.g. 4th Floor"
+              value={floorNumber}
+              onChange={(e) => updateField("floorNumber", e.target.value)}
+              maxLength={30}
+            />
+            <TextInput
+              label="Apartment No."
+              placeholder="e.g. Apt 4B"
+              value={apartmentNumber}
+              onChange={(e) => updateField("apartmentNumber", e.target.value)}
+              maxLength={30}
+            />
+          </div>
 
           {/* Set as Default Checkbox */}
           <div className="flex items-center gap-2 mt-2">
