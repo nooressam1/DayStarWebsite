@@ -3,8 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ShoppingBag, Search, User, Menu } from "lucide-react"; // Example icon library
-import { useCartStore } from "../hooks/useCartStore";
-import { useNavbarAuth } from "../hooks/useNavbarAuth";
+import { useCartStore, useNavbarAuth } from "@/app/api/hooks";
 
 export default function Navbar() {
   const { cart } = useCartStore();

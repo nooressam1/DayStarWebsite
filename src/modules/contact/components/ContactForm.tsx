@@ -3,7 +3,7 @@
 import React from "react";
 import { CheckCircle, Loader2, Send } from "lucide-react";
 import { TextInput } from "@/modules/shared";
-import { useContactForm } from "../hooks/useContactForm";
+import { useContactForm } from "@/app/api/hooks";
 
 export default function ContactForm() {
   const {

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
-import { useAuthModalStore } from '../hooks/useAuthModalStore';
+import { useAuthModalStore } from '@/app/api/hooks';
 
 export default function AuthModal() {
   const { isOpen, view, closeModal, setView } = useAuthModalStore();

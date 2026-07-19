@@ -4,105 +4,93 @@ import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { CustomButton, TextInput, SelectionCard } from "@/modules/shared";
 import ProductCartCard from "@/modules/shoppingcart/components/ProductCartCard";
 import { EGYPT_GOVERNORATES } from "@/modules/checkout";
-import { useCheckout } from "../hooks/useCheckout";
+import { useCheckout } from "@/app/api/hooks";
 
 const checkout = () => {
     const {
         addressData,
+        checkoutForm,
+        updateCheckoutField,
         cart,
         user,
-        isAuthModalOpen,
-        setIsAuthModalOpen,
-        email,
-        setEmail,
-        fullName,
-        setFullName,
-        phoneNumber,
-        setPhoneNumber,
-        deliveryType,
-        setDeliveryType,
-        paymentMethod,
-        setPaymentMethod,
         errors,
         setErrors,
         subtotal,
         deliveryFee,
         discountAmount,
         total,
-        discount,
-        setDiscount,
         incrementItem,
         decrementItem,
         removeFromCart,
+        submitting,
         handleProceedCheckout,
     } = useCheckout();
 
+    const { fullName, phoneNumber, email, deliveryType, paymentMethod } = checkoutForm;
+
+    const {
+        addressForm,
+        updateField,
+        savedAddresses,
+        selectAddress,
+    } = addressData;
+
     const {
         city,
-        setCity,
         area,
-        setArea,
-        address,
-        setAddress,
+        street: address,
         floorNumber,
-        setFloorNumber,
         apartmentNumber,
-        setApartmentNumber,
         governorate,
-        setGovernorate,
         postalCode,
-        setPostalCode,
-        savedAddresses,
         selectedAddressId,
-        setSelectedAddressId,
-        autoPopulateAddress,
-    } = addressData;
+    } = addressForm;
 
     return (
         <div className="p-10 flex flex-col md:flex-row gap-5 h-full">
             <div className="w-full flex flex-col gap-4  pr-4">
-                <h1 className="text-brand-primary-brown font-bold font-serif text-xl">
-                    Checkout
-                </h1>
+                <h1 className="text-black font-semibold font-serif text-3xl">Checkout</h1>
 
-                {/* Contact Information */}
+                {/* Personal Information */}
                 <div>
                     <h2 className="text-black font-regular font-sans text-md mb-3">
-                        Contact information
+                        Personal Information
                     </h2>
+
                     <div className="flex flex-col gap-3">
                         <TextInput
-                            label="Full Name"
+                            label="Email Address"
                             required
-                            placeholder="John Doe"
-                            value={fullName}
+                            type="email"
+                            placeholder="Enter your email"
+                            value={user ? user.email : email}
                             onChange={(e) => {
-                                setFullName(e.target.value);
-                                if (errors.fullName) setErrors(prev => ({ ...prev, fullName: "" }));
+                                updateCheckoutField("email", e.target.value);
+                                if (errors.email) setErrors(prev => ({ ...prev, email: "" }));
                             }}
-                            error={errors.fullName}
+                            error={errors.email}
+                            disabled={!!user}
                         />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        <div className="grid grid-cols-2 gap-4">
                             <TextInput
-                                type="email"
-                                label="Email"
+                                label="Full Name"
                                 required
-                                placeholder="you@example.com"
-                                value={email}
+                                placeholder="Enter your full name"
+                                value={fullName}
                                 onChange={(e) => {
-                                    setEmail(e.target.value);
-                                    if (errors.email) setErrors(prev => ({ ...prev, email: "" }));
+                                    updateCheckoutField("fullName", e.target.value);
+                                    if (errors.fullName) setErrors(prev => ({ ...prev, fullName: "" }));
                                 }}
-                                error={errors.email}
+                                error={errors.fullName}
                             />
                             <TextInput
-                                type="tel"
                                 label="Phone Number"
                                 required
-                                placeholder="+1 (555) 000-0000"
+                                placeholder="Enter your phone number"
                                 value={phoneNumber}
                                 onChange={(e) => {
-                                    setPhoneNumber(e.target.value);
+                                    updateCheckoutField("phoneNumber", e.target.value);
                                     if (errors.phoneNumber) setErrors(prev => ({ ...prev, phoneNumber: "" }));
                                 }}
                                 error={errors.phoneNumber}
@@ -111,23 +99,20 @@ const checkout = () => {
                     </div>
                 </div>
 
-                {/* Saved Address Selection */}
-                {user && savedAddresses.length > 0 && (
-                    <div className="mb-4">
-                        <label className="block text-brand-primary-brown text-sm font-semibold mb-2">
-                            Select Shipping Address
-                        </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Saved Addresses List (if available) */}
+                {savedAddresses.length > 0 && (
+                    <div>
+                        <h2 className="text-black font-regular font-sans text-md mb-3 mt-2">
+                            Select Delivery Address
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
                             {savedAddresses.map((addr) => (
                                 <button
                                     key={addr.id}
                                     type="button"
-                                    onClick={() => {
-                                        setSelectedAddressId(addr.id);
-                                        autoPopulateAddress(addr);
-                                    }}
+                                    onClick={() => selectAddress(addr)}
                                     className={`p-4 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${selectedAddressId === addr.id
-                                        ? "bg-[#FAF5F3] border-brand-primary-brown"
+                                        ? "bg-[#FAF5F3] border-brand-primary-brown shadow-xs"
                                         : "bg-white border-[#78534a]/15 hover:border-[#78534a]/30"
                                         }`}
                                 >
@@ -144,16 +129,7 @@ const checkout = () => {
                             ))}
                             <button
                                 type="button"
-                                onClick={() => {
-                                    setSelectedAddressId("custom");
-                                    setCity("");
-                                    setArea("");
-                                    setGovernorate("");
-                                    setPostalCode("");
-                                    setAddress("");
-                                    setFloorNumber("");
-                                    setApartmentNumber("");
-                                }}
+                                onClick={() => selectAddress("custom")}
                                 className={`p-4 rounded-xl border text-left flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${selectedAddressId === "custom"
                                     ? "bg-[#FAF5F3] border-brand-primary-brown"
                                     : "bg-white border-dashed border-[#78534a]/20 hover:border-[#78534a]/40"
@@ -184,7 +160,7 @@ const checkout = () => {
                                     placeholder="e.g. Cairo"
                                     value={city}
                                     onChange={(e) => {
-                                        setCity(e.target.value);
+                                        updateField("city", e.target.value);
                                         if (errors.city) setErrors(prev => ({ ...prev, city: "" }));
                                     }}
                                     error={errors.city}
@@ -195,7 +171,7 @@ const checkout = () => {
                                     placeholder="e.g. Maadi"
                                     value={area}
                                     onChange={(e) => {
-                                        setArea(e.target.value);
+                                        updateField("area", e.target.value);
                                         if (errors.area) setErrors(prev => ({ ...prev, area: "" }));
                                     }}
                                     error={errors.area}
@@ -209,7 +185,7 @@ const checkout = () => {
                                     <select
                                         value={governorate}
                                         onChange={(e) => {
-                                            setGovernorate(e.target.value);
+                                            updateField("governorate", e.target.value);
                                             if (errors.governorate) setErrors(prev => ({ ...prev, governorate: "" }));
                                         }}
                                         className={`rounded-lg border px-4 py-2.5 text-sm outline-none transition-colors font-sans w-full bg-white cursor-pointer ${errors.governorate
@@ -231,7 +207,7 @@ const checkout = () => {
                                     placeholder="e.g. 11728 (Optional)"
                                     value={postalCode}
                                     onChange={(e) => {
-                                        setPostalCode(e.target.value);
+                                        updateField("postalCode", e.target.value);
                                     }}
                                 />
                             </div>
@@ -241,7 +217,7 @@ const checkout = () => {
                                 placeholder="Street Name, Building Number / Name"
                                 value={address}
                                 onChange={(e) => {
-                                    setAddress(e.target.value);
+                                    updateField("street", e.target.value);
                                     if (errors.address) setErrors(prev => ({ ...prev, address: "" }));
                                 }}
                                 error={errors.address}
@@ -251,13 +227,13 @@ const checkout = () => {
                                     label="Floor Number (Optional)"
                                     placeholder="e.g. 4th Floor"
                                     value={floorNumber}
-                                    onChange={(e) => setFloorNumber(e.target.value)}
+                                    onChange={(e) => updateField("floorNumber", e.target.value)}
                                 />
                                 <TextInput
                                     label="Apartment Number (Optional)"
                                     placeholder="e.g. Apt 4B"
                                     value={apartmentNumber}
-                                    onChange={(e) => setApartmentNumber(e.target.value)}
+                                    onChange={(e) => updateField("apartmentNumber", e.target.value)}
                                 />
                             </div>
                         </div>
@@ -273,14 +249,14 @@ const checkout = () => {
                             description="Your package will be delivered directly to your address within 3-5 business days."
                             name="deliveryType"
                             checked={deliveryType === "home"}
-                            onChange={() => setDeliveryType("home")}
+                            onChange={() => updateCheckoutField("deliveryType", "home")}
                         />
                         <SelectionCard
                             title="Fast Delivery"
                             description="Pay 7 L.E. and get your package delivered as fast as possible."
                             name="deliveryType"
                             checked={deliveryType === "pickup"}
-                            onChange={() => setDeliveryType("pickup")}
+                            onChange={() => updateCheckoutField("deliveryType", "pickup")}
                         />
                     </div>
                 </div>
@@ -294,24 +270,26 @@ const checkout = () => {
                             description="Pay securely using your credit or debit card via our secure payment gateway."
                             name="paymentMethod"
                             checked={paymentMethod === "card"}
-                            onChange={() => setPaymentMethod("card")}
+                            onChange={() => updateCheckoutField("paymentMethod", "card")}
                         />
                         <SelectionCard
                             title="Cash on Delivery"
                             description="Pay with cash upon physical delivery of your package to your doorstep."
                             name="paymentMethod"
                             checked={paymentMethod === "cash"}
-                            onChange={() => setPaymentMethod("cash")}
+                            onChange={() => updateCheckoutField("paymentMethod", "cash")}
                         />
                     </div>
                 </div>
+
                 <CustomButton
                     className="w-full py-4 mt-4"
                     variant="solid"
                     colorScheme="secondary"
+                    disabled={submitting}
                     onClick={handleProceedCheckout}
                 >
-                    Confirm Order
+                    {submitting ? "Processing..." : "Confirm Order"}
                 </CustomButton>
             </div>
 

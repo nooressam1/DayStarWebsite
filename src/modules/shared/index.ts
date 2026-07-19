@@ -9,8 +9,8 @@ export { default as SelectionCard } from "./components/SelectionCard";
 export { default as TextInput } from "./components/TextInput";
 export { Spinner } from "./components/Spinner";
 
-export { useCartStore } from "./hooks/useCartStore";
-export type { CartItem, CartState } from "./hooks/useCartStore";
-export { useFavoritesStore } from "./hooks/useFavoritesStore";
-export { useNavbarAuth } from "./hooks/useNavbarAuth";
-export { usePricing } from "./hooks/usePricing";
+export { useCartStore } from "@/app/api/hooks/useCartStore";
+export type { CartItem, CartState } from "@/app/api/hooks/useCartStore";
+export { useFavoritesStore } from "@/app/api/hooks/useFavoritesStore";
+export { useNavbarAuth } from "@/app/api/hooks/useNavbarAuth";
+export { usePricing } from "@/app/api/hooks/usePricing";

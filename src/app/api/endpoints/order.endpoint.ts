@@ -1,21 +1,28 @@
 import { ENDPOINTS } from "@/app/api/constants/endpoints";
 import { apiClient } from "@/app/api/utils/client";
 
-export async function processCheckout(
-    city: string,
-    area: string,
-    address: string,
-    floorNumber: string,
-    apartmentNumber: string,
-    items: { variant_id: string; quantity: number }[],
-    token: string,
-    couponCode?: string,
-    governorate?: string,
-    postalCode?: string,
-    fullName?: string,
-    phoneNumber?: string,
-    addressId?: string,
-): Promise<any> {
+export interface CheckoutAddressPayload {
+    city: string;
+    area: string;
+    address: string; // street name / building details
+    floorNumber?: string;
+    apartmentNumber?: string;
+    governorate?: string;
+    postalCode?: string;
+    addressId?: string;
+}
+
+export interface ProcessCheckoutParams {
+    address: CheckoutAddressPayload;
+    items: { variant_id: string; quantity: number }[];
+    token: string;
+    couponCode?: string;
+    fullName?: string;
+    phoneNumber?: string;
+}
+
+export async function processCheckout(params: ProcessCheckoutParams): Promise<any> {
+    const { address, items, token, couponCode, fullName, phoneNumber } = params;
     try {
         return await apiClient.request(ENDPOINTS.ORDER.CHECKOUT, undefined, {
             method: 'POST',
@@ -23,18 +30,18 @@ export async function processCheckout(
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                city,
-                area,
-                address,
-                floorNumber,
-                apartmentNumber,
+                city: address.city,
+                area: address.area,
+                address: address.address,
+                floorNumber: address.floorNumber,
+                apartmentNumber: address.apartmentNumber,
+                governorate: address.governorate,
+                postalCode: address.postalCode,
+                addressId: address.addressId,
                 items,
                 couponCode,
-                governorate,
-                postalCode,
                 fullName,
                 phoneNumber,
-                addressId,
             }),
         });
     } catch (error) {

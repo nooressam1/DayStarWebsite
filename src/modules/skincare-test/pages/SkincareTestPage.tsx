@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ArrowRight, AlertCircle } from "lucide-react";
-import { useSkincareTest } from "../hooks/useSkincareTest";
+import { useSkincareTest } from "@/app/api/hooks";
 import { QUESTIONS } from "../utils/questions";
 
 export default function SkincareTestPage() {
