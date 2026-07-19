@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useCartStore } from "@/modules/shared";
+import { getProductSalePrice } from "@/modules/product";
+import { getProductVariants } from "@/app/api/endpoints/product.endpoint";
 
 export interface RecommendedProduct {
+  productId: string;
   variant_id: string;
   category: string;
   name: string;
@@ -13,11 +16,11 @@ export interface RecommendedProduct {
   photo: string;
   whyChosen: string;
 }
-import { getProductSalePrice } from "@/modules/product";
 
 export function useSkincareResults() {
   const { addToCart } = useCartStore();
   const [isAddedToCart, setIsAddedToCart] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
   const [loading, setLoading] = useState(true);
   const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
   const [skinType, setSkinType] = useState("normal");
@@ -40,9 +43,6 @@ export function useSkincareResults() {
         setSensitivity(answers.sensitivity || "resilient");
         setSunExposure(answers.sunExposure || "moderate");
 
-        const productsList: RecommendedProduct[] = [];
-
-        // Define whyChosen messages based on skin profile
         const getWhyChosenText = (step: string) => {
           if (step === 'cleanser') {
             return `pH-balanced cleanser selected to align with your ${answers.skinType || "normal"} skin. It cleanses deeply without depleting natural skin hydration.`;
@@ -63,23 +63,27 @@ export function useSkincareResults() {
         };
 
         if (routineData) {
+          const productsList: RecommendedProduct[] = [];
           Object.entries(routineData).forEach(([stepName, product]) => {
             if (product) {
+              const prod = product as any;
+              const inlineVariant = prod.variants && prod.variants.length > 0 ? prod.variants[0] : null;
+
               productsList.push({
-                variant_id: (product as any).id,
+                productId: prod.id,
+                variant_id: inlineVariant ? inlineVariant.id : "",
                 category: `${stepName.charAt(0).toUpperCase() + stepName.slice(1)} Product`,
-                name: (product as any).name,
-                size: (product as any).step_type === 'serum' || (product as any).step_type === 'treatment' ? "30 ML" : "150 ML",
+                name: prod.name,
+                size: inlineVariant?.size || (prod.step_type === 'serum' || prod.step_type === 'treatment' ? "30 ML" : "150 ML"),
                 quantity: 1,
-                price: getProductSalePrice(product as any),
-                photo: (product as any).images?.[0] || "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&auto=format&fit=crop&q=60",
+                price: getProductSalePrice(prod),
+                photo: prod.images?.[0] || "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&auto=format&fit=crop&q=60",
                 whyChosen: getWhyChosenText(stepName)
               });
             }
           });
+          setRecommendedProducts(productsList);
         }
-
-        setRecommendedProducts(productsList);
       } catch (e) {
         console.error("Error parsing skincare results from storage:", e);
       }
@@ -87,18 +91,43 @@ export function useSkincareResults() {
     setLoading(false);
   }, []);
 
-  const handleAddAllToCart = () => {
-    recommendedProducts.forEach(product => {
-      addToCart({
-        product_id: `prod-${product.variant_id}`,
-        name: product.name,
-        price: product.price,
-        size: product.size,
-        photo: product.photo,
-        variant_id: product.variant_id
-      }, 1);
-    });
+  const handleAddAllToCart = async () => {
+    if (addingToCart) return;
+    setAddingToCart(true);
 
+    for (const product of recommendedProducts) {
+      try {
+        let realVariantId = product.variant_id;
+        let realSize = product.size;
+
+        // Fetch variants from backend using product ID to guarantee accurate variant_id & stock
+        const variants = await getProductVariants(product.productId);
+        if (variants && variants.length > 0) {
+          const validVariant = variants.find(v => v.stock > 0) || variants[0];
+          realVariantId = validVariant.id;
+          if (validVariant.size) {
+            realSize = validVariant.size;
+          }
+        }
+
+        if (realVariantId) {
+          addToCart({
+            product_id: product.productId,
+            name: product.name,
+            price: product.price,
+            size: realSize,
+            photo: product.photo,
+            variant_id: realVariantId,
+          }, 1);
+        } else {
+          console.warn(`No valid variant found for product ${product.name} (${product.productId})`);
+        }
+      } catch (error) {
+        console.error(`Error resolving variant for product ${product.productId}:`, error);
+      }
+    }
+
+    setAddingToCart(false);
     setIsAddedToCart(true);
     setTimeout(() => {
       setIsAddedToCart(false);
@@ -112,6 +141,7 @@ export function useSkincareResults() {
     sunExposure,
     recommendedProducts,
     isAddedToCart,
+    addingToCart,
     loading,
     handleAddAllToCart
   };

@@ -39,6 +39,7 @@ const checkout = () => {
         city,
         area,
         street: address,
+        buildingNo,
         floorNumber,
         apartmentNumber,
         governorate,
@@ -222,15 +223,21 @@ const checkout = () => {
                                 }}
                                 error={errors.address}
                             />
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-3 gap-3">
                                 <TextInput
-                                    label="Floor Number (Optional)"
+                                    label="Building No."
+                                    placeholder="e.g. Bldg 12"
+                                    value={buildingNo}
+                                    onChange={(e) => updateField("buildingNo", e.target.value)}
+                                />
+                                <TextInput
+                                    label="Floor No."
                                     placeholder="e.g. 4th Floor"
                                     value={floorNumber}
                                     onChange={(e) => updateField("floorNumber", e.target.value)}
                                 />
                                 <TextInput
-                                    label="Apartment Number (Optional)"
+                                    label="Apartment No."
                                     placeholder="e.g. Apt 4B"
                                     value={apartmentNumber}
                                     onChange={(e) => updateField("apartmentNumber", e.target.value)}

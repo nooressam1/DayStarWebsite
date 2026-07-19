@@ -14,6 +14,7 @@ function SkincareResultsContent() {
     sunExposure,
     recommendedProducts,
     isAddedToCart,
+    addingToCart,
     loading,
     handleAddAllToCart
   } = useSkincareResults();
@@ -105,9 +106,10 @@ function SkincareResultsContent() {
             <div className="pt-6 border-t border-gray-100 flex justify-center">
               <button
                 onClick={handleAddAllToCart}
-                className="w-full md:w-auto px-10 py-4 bg-[#004956] hover:bg-[#004956]/90 text-white font-medium rounded-xl transition-all duration-300 shadow-md shadow-[#004956]/10 flex items-center justify-center gap-2 cursor-pointer text-base"
+                disabled={addingToCart}
+                className="w-full md:w-auto px-10 py-4 bg-[#004956] hover:bg-[#004956]/90 disabled:opacity-60 text-white font-medium rounded-xl transition-all duration-300 shadow-md shadow-[#004956]/10 flex items-center justify-center gap-2 cursor-pointer text-base"
               >
-                Add All to Cart
+                {addingToCart ? "Adding Routine to Cart..." : "Add All to Cart"}
               </button>
             </div>
           )}

@@ -20,7 +20,7 @@ export const initialCheckoutForm: CheckoutFormState = {
     phoneNumber: "",
     email: "",
     deliveryType: "home",
-    paymentMethod: "cod",
+    paymentMethod: "cash",
 };
 
 export interface ValidateCheckoutParams {
