@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { SkincareQuestion } from "../utils/questions";
+import { SkincareQuestion } from "@/modules/skincare-test/utils/questions";
 
 export interface SkincareAnswersState {
   skinType: string;

@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { X, Home, Briefcase, Map } from "lucide-react";
 import { Address } from "@/app/api/types";
 import { TextInput, CustomButton } from "@/modules/shared";
-import { useAddressForm } from "../hooks/useAddressForm";
+import { useAddressForm } from "@/app/api/hooks";
 
 import { EGYPT_GOVERNORATES } from "@/modules/checkout";
 
@@ -23,26 +23,8 @@ export default function AddressModal({
   isFirstAddress = false,
 }: AddressModalProps) {
   const {
-    label,
-    setLabel,
-    customLabel,
-    setCustomLabel,
-    street,
-    setStreet,
-    area,
-    setArea,
-    governorate,
-    setGovernorate,
-    postalCode,
-    setPostalCode,
-    buildingNo,
-    setBuildingNo,
-    city,
-    setCity,
-    country,
-    setCountry,
-    isDefault,
-    setIsDefault,
+    addressForm,
+    updateField,
     formError,
     submitting,
     handleSubmit,
@@ -53,6 +35,19 @@ export default function AddressModal({
     onClose,
     onSaveSuccess,
   });
+
+  const {
+    label,
+    customLabel,
+    street,
+    area,
+    governorate,
+    postalCode,
+    buildingNo,
+    city,
+    country,
+    isDefault,
+  } = addressForm;
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -107,7 +102,7 @@ export default function AddressModal({
                   <button
                     key={opt.val}
                     type="button"
-                    onClick={() => setLabel(opt.val)}
+                    onClick={() => updateField("label", opt.val)}
                     className={`flex items-center justify-center gap-2 py-2 px-3 border rounded-xl text-sm font-semibold transition-all cursor-pointer ${label === opt.val
                       ? "border-brand-primary-brown bg-[#FAF5F3] text-brand-primary-brown"
                       : "border-[#78534a]/20 text-brand-gray hover:border-[#78534a]/40"
@@ -128,7 +123,7 @@ export default function AddressModal({
               required
               placeholder="e.g. Office, Parents, Gym"
               value={customLabel}
-              onChange={(e) => setCustomLabel(e.target.value)}
+              onChange={(e) => updateField("customLabel", e.target.value)}
               maxLength={30}
             />
           )}
@@ -140,7 +135,7 @@ export default function AddressModal({
               required
               placeholder="e.g. Cairo"
               value={city}
-              onChange={(e) => setCity(e.target.value)}
+              onChange={(e) => updateField("city", e.target.value)}
               maxLength={50}
             />
             <TextInput
@@ -148,7 +143,7 @@ export default function AddressModal({
               required
               placeholder="Egypt"
               value={country}
-              onChange={(e) => setCountry(e.target.value)}
+              onChange={(e) => updateField("country", e.target.value)}
               maxLength={50}
             />
           </div>
@@ -161,7 +156,7 @@ export default function AddressModal({
               </label>
               <select
                 value={governorate}
-                onChange={(e) => setGovernorate(e.target.value)}
+                onChange={(e) => updateField("governorate", e.target.value)}
                 className="rounded-lg border px-4 py-2.5 text-sm outline-none transition-colors font-sans w-full bg-white border-brand-primary-brown/20 focus:border-brand-primary-brown cursor-pointer"
               >
                 <option value="" disabled>Select Governorate</option>
@@ -174,7 +169,7 @@ export default function AddressModal({
               label="Postal Code"
               placeholder="e.g. 11728 (Optional)"
               value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value)}
+              onChange={(e) => updateField("postalCode", e.target.value)}
               maxLength={20}
             />
           </div>
@@ -185,7 +180,7 @@ export default function AddressModal({
             required
             placeholder="e.g. Maadi"
             value={area}
-            onChange={(e) => setArea(e.target.value)}
+            onChange={(e) => updateField("area", e.target.value)}
             maxLength={100}
           />
 
@@ -195,7 +190,7 @@ export default function AddressModal({
             required
             placeholder="e.g. 15 Tahrir Street"
             value={street}
-            onChange={(e) => setStreet(e.target.value)}
+            onChange={(e) => updateField("street", e.target.value)}
             maxLength={200}
           />
 
@@ -205,7 +200,7 @@ export default function AddressModal({
             required
             placeholder="e.g. Building 12, Floor 4, Apt 10"
             value={buildingNo}
-            onChange={(e) => setBuildingNo(e.target.value)}
+            onChange={(e) => updateField("buildingNo", e.target.value)}
             maxLength={100}
           />
 
@@ -216,7 +211,7 @@ export default function AddressModal({
               type="checkbox"
               checked={isDefault}
               disabled={editingAddress?.is_default}
-              onChange={(e) => setIsDefault(e.target.checked)}
+              onChange={(e) => updateField("isDefault", e.target.checked)}
               className="rounded border-brand-primary-brown/30 text-brand-primary-brown focus:ring-brand-primary-brown h-4 w-4 cursor-pointer"
             />
             <label

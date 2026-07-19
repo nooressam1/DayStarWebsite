@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/client';
-import { useAuthModalStore } from '@/modules/auth/hooks/useAuthModalStore';
+import { useAuthModalStore } from '@/app/api/hooks/useAuthModalStore';
 import { toast } from 'sonner';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";

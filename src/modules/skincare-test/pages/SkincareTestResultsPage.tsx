@@ -4,7 +4,7 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import { Check, AlertCircle } from "lucide-react";
 import ProductCartCard from "../../shoppingcart/components/ProductCartCard";
-import { useSkincareResults } from "../hooks/useSkincareResults";
+import { useSkincareResults } from "@/app/api/hooks";
 
 function SkincareResultsContent() {
   const {

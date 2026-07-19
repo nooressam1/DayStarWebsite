@@ -2,6 +2,21 @@ import { Address } from "@/app/api/types";
 import { ENDPOINTS } from "@/app/api/constants/endpoints";
 import { apiClient } from "@/app/api/utils/client";
 
+export interface AddressPayloadDto {
+    street: string;
+    city: string;
+    building_no?: string | null;
+    floor_number?: string | null;
+    apartment_number?: string | null;
+    area?: string | null;
+    governorate?: string | null;
+    postal_code?: string | null;
+    postalCode?: string | null;
+    country?: string;
+    label?: string;
+    is_default?: boolean;
+}
+
 // Fetch all addresses of the authenticated user
 export async function getUserAddresses(): Promise<Address[]> {
     try {
@@ -13,17 +28,7 @@ export async function getUserAddresses(): Promise<Address[]> {
 }
 
 // Create a new user address
-export async function addUserAddress(dto: {
-    street: string;
-    area: string;
-    governorate: string;
-    postalCode?: string;
-    building_no: string;
-    city: string;
-    country?: string;
-    label?: string;
-    is_default?: boolean;
-}): Promise<Address | null> {
+export async function addUserAddress(dto: AddressPayloadDto): Promise<Address | null> {
     try {
         return await apiClient.request<Address>(ENDPOINTS.ADDRESS.LIST_OR_CREATE, undefined, {
             method: "POST",
@@ -38,17 +43,7 @@ export async function addUserAddress(dto: {
 // Update an existing user address
 export async function updateUserAddress(
     id: string,
-    dto: {
-        street?: string;
-        area?: string;
-        governorate?: string;
-        postalCode?: string;
-        building_no?: string;
-        city?: string;
-        country?: string;
-        label?: string;
-        is_default?: boolean;
-    }
+    dto: Partial<AddressPayloadDto>
 ): Promise<Address | null> {
     try {
         return await apiClient.request<Address>(ENDPOINTS.ADDRESS.BY_ID(id), undefined, {

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { MapPin, Plus, Trash2, Edit2, CheckCircle2, Home, Briefcase, Map } from "lucide-react";
-import { useAddresses } from "../hooks/useAddresses";
+import { useAddresses } from "@/app/api/hooks";
 import AddressModal from "../components/AddressModal";
 import { CustomButton } from "@/modules/shared";
 
@@ -22,28 +22,6 @@ export default function AddressesPage() {
     loadAddresses,
   } = useAddresses();
 
-  // Helper to parse composite street format
-  const parseStreet = (streetStr: string) => {
-    let street = streetStr;
-    let area = "";
-    let governorate = "";
-    let postalCode = "";
-
-    const newFormatMatch = streetStr.match(/^(.*?)\s*\(Area:\s*([^\)]*)\)\s*\(Gov:\s*([^\)]*)\)\s*\(Postal:\s*([^\)]*)\)$/);
-    const oldFormatMatch = streetStr.match(/^(.*?)\s*\(Area:\s*([^\)]*)\)$/);
-
-    if (newFormatMatch) {
-      street = newFormatMatch[1].trim();
-      area = newFormatMatch[2].trim();
-      governorate = newFormatMatch[3].trim();
-      postalCode = newFormatMatch[4].trim();
-    } else if (oldFormatMatch) {
-      street = oldFormatMatch[1].trim();
-      area = oldFormatMatch[2].trim();
-    }
-
-    return { street, area, governorate, postalCode };
-  };
 
   // Helper to render address icons based on label
   const renderAddressIcon = (addressLabel: string | null) => {
@@ -172,24 +150,23 @@ export default function AddressesPage() {
 
               {/* Address Body */}
               <div className="text-sm text-brand-primary-brown/85 font-sans leading-relaxed pl-1">
-                {(() => {
-                  const parsed = parseStreet(address.street);
-                  return (
-                    <>
-                      <p className="font-medium text-brand-primary-brown">
-                        {parsed.street} {parsed.area && `, ${parsed.area}`}
-                      </p>
-                      {parsed.governorate && (
-                        <p className="text-brand-gray mt-0.5">Gov: {parsed.governorate}</p>
-                      )}
-                      <p className="text-brand-gray">{address.building_no}</p>
-                      <p className="text-brand-gray">
-                        {address.city}, {address.country}
-                        {parsed.postalCode && parsed.postalCode !== "-" && ` (Postal: ${parsed.postalCode})`}
-                      </p>
-                    </>
-                  );
-                })()}
+                <p className="font-medium text-brand-primary-brown">
+                  {address.street} {address.area && `, ${address.area}`}
+                </p>
+                {address.governorate && (
+                  <p className="text-[#78534a]/70 text-xs font-semibold mt-0.5">Gov: {address.governorate}</p>
+                )}
+                {(address.building_no || address.floor_number || address.apartment_number) && (
+                  <p className="text-brand-gray text-xs mt-0.5">
+                    {address.building_no ? `Bldg: ${address.building_no}` : ""}
+                    {address.floor_number ? ` Floor: ${address.floor_number}` : ""}
+                    {address.apartment_number ? ` Apt: ${address.apartment_number}` : ""}
+                  </p>
+                )}
+                <p className="text-brand-gray text-xs mt-0.5">
+                  {address.city}, {address.country}
+                  {address.postal_code ? ` (Postal: ${address.postal_code})` : ""}
+                </p>
               </div>
 
               {/* Action Footer */}

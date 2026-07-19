@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/supabase/auth-provider";
 
-import { useAuthModalStore } from "@/modules/auth/hooks/useAuthModalStore";
+import { useAuthModalStore } from "./useAuthModalStore";
 
 export function useNavbarAuth() {
   const router = useRouter();

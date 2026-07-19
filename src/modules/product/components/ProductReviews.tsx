@@ -3,8 +3,7 @@
 import React, { useState } from "react";
 import { Star, ChevronDown, PenLine } from "lucide-react";
 import { CustomButton } from "@/modules/shared";
-import { useProductReviews } from "../hooks/useProductReviews";
-import { useAuthModalStore } from "@/modules/auth/hooks/useAuthModalStore";
+import { useProductReviews, useAuthModalStore } from "@/app/api/hooks";
 import { useAuth } from "@/lib/supabase/auth-provider";
 
 interface ProductReviewsProps {
