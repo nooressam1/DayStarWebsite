@@ -1,7 +1,6 @@
 "use client";
-
 import React, { useState, useEffect, use } from "react";
-import { Check, MapPin, CreditCard, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Check, MapPin, CreditCard, ShoppingBag, ArrowLeft, User } from "lucide-react";
 import Link from "next/link";
 import ProductCartCard from "../../shoppingcart/components/ProductCartCard";
 import { cancelOrder, getOrder } from "@/app/api/endpoints/order.endpoint";
@@ -247,26 +246,49 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
           </div>
         </div>
 
-        {/* Card 4: Shipping Address */}
+        {/* Card 4: User Details & Shipping Address */}
         <div className="bg-brand-bg/30 border border-brand-primary-brown/10 rounded-xl p-6 text-sm">
-          <div className="flex flex-col gap-2">
-            <h3 className="font-sans text-xs font-bold text-brand-primary-brown uppercase tracking-wider mb-1 flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 text-brand-primary-brown" />
-              <span>Shipping address</span>
-            </h3>
-            {address ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* User Details */}
+            <div className="flex flex-col gap-2">
+              <h3 className="font-sans text-xs font-bold text-brand-primary-brown uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                <User className="h-3.5 w-3.5 text-brand-primary-brown" />
+                <span>User Details</span>
+              </h3>
               <div className="flex flex-col font-work text-xs text-brand-light-brown leading-relaxed">
                 <span className="font-semibold text-black text-sm">
-                  {order.full_name}                </span>
-                <span>{address.street}</span>
-                <span>{address.building_no}</span>
-                <span>{address.city}, {address.country}</span>
+                  {order.full_name || "N/A"}
+                </span>
+                {order.phone_number && (
+                  <span>Phone: {order.phone_number}</span>
+                )}
+                {order.email && (
+                  <span>Email: {order.email}</span>
+                )}
               </div>
-            ) : (
-              <span className="font-work text-xs text-brand-light-brown italic">
-                No shipping address recorded.
-              </span>
-            )}
+            </div>
+
+            {/* Shipping Address */}
+            <div className="flex flex-col gap-2 border-t md:border-t-0 md:border-l border-brand-primary-brown/10 pt-4 md:pt-0 md:pl-6">
+              <h3 className="font-sans text-xs font-bold text-brand-primary-brown uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5 text-brand-primary-brown" />
+                <span>Shipping address</span>
+              </h3>
+              {address ? (
+                <div className="flex flex-col font-work text-xs text-brand-light-brown leading-relaxed">
+                  <span className="font-semibold text-black text-sm">
+                    {order.full_name}
+                  </span>
+                  <span>{address.street}</span>
+                  {address.building_no && <span>{address.building_no}</span>}
+                  <span>{address.city}, {address.country}</span>
+                </div>
+              ) : (
+                <span className="font-work text-xs text-brand-light-brown italic">
+                  No shipping address recorded.
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
