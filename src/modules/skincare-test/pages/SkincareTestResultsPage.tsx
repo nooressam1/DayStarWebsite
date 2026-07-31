@@ -6,6 +6,8 @@ import { Check, AlertCircle } from "lucide-react";
 import ProductCartCard from "../../shoppingcart/components/ProductCartCard";
 import { useSkincareResults } from "@/app/api/hooks";
 
+import { SkinSensitivity } from "@/enums";
+
 function SkincareResultsContent() {
   const {
     skinType,
@@ -38,7 +40,7 @@ function SkincareResultsContent() {
           Your Skin Analysis
         </h2>
         <p className="text-[#374151] leading-relaxed font-light text-sm md:text-base">
-          Based on your results, it appears you have <strong className="font-semibold text-brand-primary-brown capitalize">{skinType}</strong> skin that is <strong className="font-semibold text-brand-primary-brown">{sensitivity === 'highly_sensitive' ? 'highly sensitive' : sensitivity === 'moderately_sensitive' ? 'moderately sensitive' : 'resilient'}</strong>.
+          Based on your results, it appears you have <strong className="font-semibold text-brand-primary-brown capitalize">{skinType}</strong> skin that is <strong className="font-semibold text-brand-primary-brown">{sensitivity === SkinSensitivity.HIGHLY_SENSITIVE ? 'highly sensitive' : sensitivity === SkinSensitivity.MODERATELY_SENSITIVE ? 'moderately sensitive' : 'resilient'}</strong>.
         </p>
         <p className="text-[#686361] mt-4 leading-relaxed font-light text-sm md:text-base">
           Your primary skin concerns are <strong className="font-semibold text-brand-primary-brown">{concerns.length > 0 ? concerns.map(c => c.replace('_', ' ')).join(', ') : "general balance"}</strong>. With <strong className="font-semibold text-brand-primary-brown capitalize">{sunExposure}</strong> daily sun exposure, it is vital to keep your barrier protected and hydrated.

@@ -5,6 +5,8 @@ import { useCartStore } from "@/modules/shared";
 import { getProductSalePrice } from "@/modules/product";
 import { getProductVariants } from "@/app/api/endpoints/product.endpoint";
 
+import { SkinType, SkinSensitivity, SunExposure } from "@/enums";
+
 export interface RecommendedProduct {
   productId: string;
   variant_id: string;
@@ -23,10 +25,10 @@ export function useSkincareResults() {
   const [addingToCart, setAddingToCart] = useState(false);
   const [loading, setLoading] = useState(true);
   const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
-  const [skinType, setSkinType] = useState("normal");
+  const [skinType, setSkinType] = useState<string>(SkinType.NORMAL);
   const [concerns, setConcerns] = useState<string[]>([]);
-  const [sensitivity, setSensitivity] = useState("resilient");
-  const [sunExposure, setSunExposure] = useState("moderate");
+  const [sensitivity, setSensitivity] = useState<string>(SkinSensitivity.RESILIENT);
+  const [sunExposure, setSunExposure] = useState<string>(SunExposure.MODERATE);
 
   useEffect(() => {
     // Read cached answers and backend routine response from sessionStorage on component mount

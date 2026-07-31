@@ -1,3 +1,5 @@
+import { SkinType, SkinConcern, SkinSensitivity, SkinGoal, SunExposure } from '@/enums';
+
 export interface SkincareOption {
   id: string;
   label: string;
@@ -20,11 +22,11 @@ export const QUESTIONS: SkincareQuestion[] = [
     type: 'single',
     key: 'skinType',
     options: [
-      { id: 'dry', label: 'Dry (Feels tight, flaky, or rough)' },
-      { id: 'oily', label: 'Oily (Looks shiny, feels greasy all over)' },
-      { id: 'combination', label: 'Combination (Shiny in T-zone, dry on cheeks)' },
-      { id: 'normal', label: 'Normal (Balanced, neither too oily nor too dry)' },
-      { id: 'sensitive', label: 'Sensitive (Red, irritated, itchy, or easily reacts to products)' }
+      { id: SkinType.DRY, label: 'Dry (Feels tight, flaky, or rough)' },
+      { id: SkinType.OILY, label: 'Oily (Looks shiny, feels greasy all over)' },
+      { id: SkinType.COMBINATION, label: 'Combination (Shiny in T-zone, dry on cheeks)' },
+      { id: SkinType.NORMAL, label: 'Normal (Balanced, neither too oily nor too dry)' },
+      { id: SkinType.SENSITIVE, label: 'Sensitive (Red, irritated, itchy, or easily reacts to products)' }
     ]
   },
   {
@@ -34,11 +36,11 @@ export const QUESTIONS: SkincareQuestion[] = [
     type: 'multiple',
     key: 'concerns',
     options: [
-      { id: 'acne', label: 'Acne, breakouts, or clogged pores' },
-      { id: 'pigmentation', label: 'Dark spots, hyperpigmentation, or uneven skin tone' },
-      { id: 'aging', label: 'Fine lines, wrinkles, or loss of firmness' },
-      { id: 'redness', label: 'Redness, irritation, or visible blood vessels' },
-      { id: 'dryness', label: 'Dullness, dry patches, or lack of radiance' }
+      { id: SkinConcern.ACNE, label: 'Acne, breakouts, or clogged pores' },
+      { id: SkinConcern.PIGMENTATION, label: 'Dark spots, hyperpigmentation, or uneven skin tone' },
+      { id: SkinConcern.AGING, label: 'Fine lines, wrinkles, or loss of firmness' },
+      { id: SkinConcern.REDNESS, label: 'Redness, irritation, or visible blood vessels' },
+      { id: SkinConcern.DRYNESS, label: 'Dullness, dry patches, or lack of radiance' }
     ]
   },
   {
@@ -48,10 +50,10 @@ export const QUESTIONS: SkincareQuestion[] = [
     key: 'sensitivity',
     type: 'single',
     options: [
-      { id: 'highly_sensitive', label: 'Very sensitive (often turns red, burns, or breaks out immediately)' },
-      { id: 'moderately_sensitive', label: 'Moderately sensitive (occasionally reacts, depending on ingredients)' },
-      { id: 'resilient', label: 'Resilient (rarely reacts, handles active ingredients well)' },
-      { id: 'unpredictable', label: 'Unpredictable (reactions seem random or hard to pin down)' }
+      { id: SkinSensitivity.HIGHLY_SENSITIVE, label: 'Very sensitive (often turns red, burns, or breaks out immediately)' },
+      { id: SkinSensitivity.MODERATELY_SENSITIVE, label: 'Moderately sensitive (occasionally reacts, depending on ingredients)' },
+      { id: SkinSensitivity.RESILIENT, label: 'Resilient (rarely reacts, handles active ingredients well)' },
+      { id: SkinSensitivity.UNPREDICTABLE, label: 'Unpredictable (reactions seem random or hard to pin down)' }
     ]
   },
   {
@@ -61,11 +63,11 @@ export const QUESTIONS: SkincareQuestion[] = [
     key: 'goals',
     type: 'multiple',
     options: [
-      { id: 'clear_acne', label: 'Clear acne and reduce future breakouts' },
-      { id: 'smooth_lines', label: 'Smooth fine lines and firm sagging skin' },
-      { id: 'fade_spots', label: 'Fade dark spots and achieve a glowing complexion' },
-      { id: 'calm_irritation', label: 'Calm irritation and strengthen the skin barrier' },
-      { id: 'intense_hydration', label: 'Intense hydration and plumpness' }
+      { id: SkinGoal.CLEAR_ACNE, label: 'Clear acne and reduce future breakouts' },
+      { id: SkinGoal.SMOOTH_LINES, label: 'Smooth fine lines and firm sagging skin' },
+      { id: SkinGoal.FADE_SPOTS, label: 'Fade dark spots and achieve a glowing complexion' },
+      { id: SkinGoal.CALM_IRRITATION, label: 'Calm irritation and strengthen the skin barrier' },
+      { id: SkinGoal.INTENSE_HYDRATION, label: 'Intense hydration and plumpness' }
     ]
   },
   {
@@ -75,9 +77,9 @@ export const QUESTIONS: SkincareQuestion[] = [
     key: 'sunExposure',
     type: 'single',
     options: [
-      { id: 'high', label: 'High (spend several hours outdoors in direct sunlight)' },
-      { id: 'moderate', label: 'Moderate (spend some time outdoors, mostly commute or brief walks)' },
-      { id: 'minimal', label: 'Minimal (spend most of the day indoors)' }
+      { id: SunExposure.HIGH, label: 'High (spend several hours outdoors in direct sunlight)' },
+      { id: SunExposure.MODERATE, label: 'Moderate (spend some time outdoors, mostly commute or brief walks)' },
+      { id: SunExposure.MINIMAL, label: 'Minimal (spend most of the day indoors)' }
     ]
   }
 ];
