@@ -4,4 +4,5 @@ export interface Variant {
   size: string;
   stock: number;
   sku: string;
+  created_at?: string;
 }

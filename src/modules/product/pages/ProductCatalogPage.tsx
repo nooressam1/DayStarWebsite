@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { ProductCard } from "@/modules/home/components/ProductCard";
-import { Dropdown } from "@/modules/shared";
+import { Dropdown, ProductCardSkeletonGrid } from "@/modules/shared";
 import { useProductCatalog } from "@/app/api/hooks";
 
 function ProductsCatalogContent() {
@@ -288,10 +288,7 @@ function ProductsCatalogContent() {
                 {/* 4. Products Grid Area */}
                 <div>
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-24">
-                            <div className="w-10 h-10 border-4 border-[#78534a] border-t-transparent rounded-full animate-spin"></div>
-                            <span className="mt-4 text-xs text-[#78534a]/75 font-work font-medium">Loading products...</span>
-                        </div>
+                        <ProductCardSkeletonGrid count={6} className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12" />
                     ) : sortedProducts.length === 0 ? (
                         <div className="text-center py-20  border border-[#78534a]/10 rounded-xl p-8 shadow-sm">
                             <h3 className="font-serif text-lg font-bold text-[#78534a]">No products found</h3>

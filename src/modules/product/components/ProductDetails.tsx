@@ -1,19 +1,42 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Product, Variant } from "@/app/api/types";
 import { CustomButton, FavoriteButton, useCartStore } from "@/modules/shared";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import QuantityButton from "./QuantityButton";
 import { getProductSalePrice } from "@/modules/product";
+import { useAuth } from "@/lib/supabase/auth-provider";
+import { useAuthModalStore } from "@/app/api/hooks/useAuthModalStore";
 
 export default function ProductDetails({ product, variants }: { product: Product, variants: Variant[] }) {
-
+  const router = useRouter();
+  const { user } = useAuth();
+  const { openModal } = useAuthModalStore();
   const [selectedSize, setSelectedSize] = useState<Variant | null>(variants[0] || null); // Default to 50ml
   const [quantity, setQuantity] = useState<number>(1);
   const { addToCart } = useCartStore();
 
   const displayPrice = getProductSalePrice(product);
 
+  const handleBuyNow = () => {
+    if (!selectedSize) return;
+
+    addToCart({
+      variant_id: selectedSize.id,
+      product_id: product.id,
+      name: product.name,
+      price: displayPrice,
+      size: selectedSize.size,
+      photo: product.images[0],
+    }, quantity);
+
+    if (!user) {
+      openModal("login");
+    } else {
+      router.push("/checkout");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -69,7 +92,7 @@ export default function ProductDetails({ product, variants }: { product: Product
           key={"buy_now"}
           variant={"solid"}
           colorScheme={"primary"}
-          onClick={() => { }}
+          onClick={handleBuyNow}
           className="py-4 px-2 text-sm font-normal rounded-lg min-w-[80px]" // Make size buttons slightly smaller
         >
           Buy Now
