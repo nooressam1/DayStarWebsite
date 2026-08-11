@@ -37,11 +37,11 @@ export enum SunExposure {
 }
 
 export enum StepType {
-  CLEANSER = 'cleanser',
-  TONER = 'toner',
-  SERUM = 'serum',
-  TREATMENT = 'treatment',
-  MOISTURIZER = 'moisturizer',
-  SPF = 'spf',
-  UNASSIGNED = 'unassigned',
+  CLEANSER = 'CLEANSER',
+  TONER = 'TONER',
+  SERUM = 'SERUM',
+  TREATMENT = 'TREATMENT',
+  MOISTURIZER = 'MOISTURIZER',
+  SPF = 'SPF',
+  UNASSIGNED = 'UNASSIGNED',
 }

@@ -21,8 +21,8 @@ export interface AddressPayloadDto {
 export async function getUserAddresses(): Promise<Address[]> {
     try {
         return await apiClient.request<Address[]>(ENDPOINTS.ADDRESS.LIST_OR_CREATE);
-    } catch (error) {
-        console.error("Error fetching addresses:", error);
+    } catch (error: any) {
+        console.error("Error fetching addresses:", error?.message || error?.details || error);
         return [];
     }
 }
