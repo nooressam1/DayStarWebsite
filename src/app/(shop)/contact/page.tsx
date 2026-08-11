@@ -1,16 +1,9 @@
 import { Suspense } from "react";
-import { ContactPage } from "@/modules/contact";
-import { Spinner } from "@/modules/shared";
+import { ContactPage, ContactPageSkeleton } from "@/modules/contact";
 
 export default function Contact() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
-      }
-    >
+    <Suspense fallback={<ContactPageSkeleton />}>
       <ContactPage />
     </Suspense>
   );

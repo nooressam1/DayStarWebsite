@@ -1,6 +1,5 @@
 import { Suspense } from "react";
-import { OrderConfirmedPage } from "@/modules/order-confirmed";
-import { Spinner } from "@/modules/shared";
+import { OrderConfirmedPage, OrderConfirmedPageSkeleton } from "@/modules/order-confirmed";
 
 interface OrderConfirmedPageProps {
   params: Promise<{ id: string }>;
@@ -8,13 +7,7 @@ interface OrderConfirmedPageProps {
 
 export default function OrderConfirmed({ params }: OrderConfirmedPageProps) {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
-      }
-    >
+    <Suspense fallback={<OrderConfirmedPageSkeleton />}>
       <OrderConfirmedPage params={params} />
     </Suspense>
   );

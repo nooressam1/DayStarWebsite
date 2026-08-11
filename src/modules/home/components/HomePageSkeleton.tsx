@@ -26,10 +26,15 @@ export function HomePageSkeleton() {
                         <div className="h-4 w-72 bg-stone-300/70 rounded-md animate-pulse" />
                     </div>
 
+                    {/* Categories Skeleton Grid - Accurately matching CategoriesBox (h-[150px] md:h-[412px], rounded-sm md:rounded-2xl, centered text) */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-5 w-full px-10 md:px-15">
                         {Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="h-44 sm:h-52 bg-stone-300/85 rounded-xl w-full animate-pulse flex flex-col justify-end p-4 gap-2">
-                                <div className="h-5 w-2/3 bg-stone-400/70 rounded-md animate-pulse" />
+                            <div
+                                key={i}
+                                className="relative rounded-sm md:rounded-2xl w-full h-[150px] md:h-[412px] bg-stone-300/85 animate-pulse flex items-center justify-center p-4 overflow-hidden border border-black/5"
+                            >
+                                {/* Centered Category Name Text Placeholder */}
+                                <div className="h-6 sm:h-7 md:h-8 w-2/3 sm:w-1/2 bg-stone-400/80 rounded-md animate-pulse shadow-xs" />
                             </div>
                         ))}
                     </div>

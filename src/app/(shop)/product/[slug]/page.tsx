@@ -1,6 +1,5 @@
 import { Suspense } from "react";
-import { ProductDetailPage } from "@/modules/product";
-import { Spinner } from "@/modules/shared";
+import { ProductDetailPage, ProductDetailPageSkeleton } from "@/modules/product";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -8,13 +7,7 @@ interface ProductDetailPageProps {
 
 export default function ProductDetail({ params }: ProductDetailPageProps) {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
-      }
-    >
+    <Suspense fallback={<ProductDetailPageSkeleton />}>
       <ProductDetailPage params={params} />
     </Suspense>
   );

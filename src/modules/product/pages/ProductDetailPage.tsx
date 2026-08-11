@@ -28,9 +28,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   // Fetch similar products (same category)
   const categoryId = product.category_id || undefined;
   const { items: rawSimilar } = await getProducts({ categoryId, limit: 6 });
-  
+
   let similarProducts = (rawSimilar || []).filter((p) => p.id !== product.id);
-  
+
   // Fallback to best sellers if we don't have enough similar products
   if (similarProducts.length < 4) {
     const bestSellers = await getBestSellers();
@@ -46,11 +46,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="py-10 px-10 flex flex-col gap-16">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-14 items-center">
-        <div className="md:max-w-1/2">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-14 items-start w-full">
+        <div className="w-full md:w-1/2 shrink-0">
           <ImageCarousel images={product.images} productName={product.name} />
         </div>
-        <div className="md:max-w-1/2">
+        <div className="w-full md:w-1/2">
           <ProductDetails product={product} variants={variants} />
         </div>
       </div>

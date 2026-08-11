@@ -9,6 +9,7 @@ export interface OrderConfirmedPageProps {
 }
 import { usePricing, CustomButton } from "@/modules/shared";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
+import { OrderConfirmedPageSkeleton } from "../components/OrderConfirmedPageSkeleton";
 
 export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) {
   const { id } = use(params);
@@ -72,14 +73,7 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
 
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-brand-bg py-20 px-4 flex flex-col justify-center items-center font-sans antialiased text-brand-light-brown">
-        <div className="flex flex-col items-center">
-          <div className="w-10 h-10 border-4 border-brand-primary-brown border-t-transparent rounded-full animate-spin"></div>
-          <span className="mt-4 text-sm font-work">Loading order details...</span>
-        </div>
-      </div>
-    );
+    return <OrderConfirmedPageSkeleton />;
   }
 
   // If the order was not found (or access is unauthorized)

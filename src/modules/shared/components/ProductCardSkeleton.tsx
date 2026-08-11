@@ -10,7 +10,7 @@ export function ProductCardSkeleton({ className = "" }: ProductCardSkeletonProps
     return (
         <div className={`flex flex-col gap-2 w-full h-full border border-brand-primary-brown/15 rounded-lg overflow-hidden bg-white shadow-xs ${className}`}>
             {/* Product Image Skeleton */}
-            <div className="relative w-full h-[250px] sm:h-[350px] md:h-[400px] bg-stone-300/85 animate-pulse overflow-hidden">
+            <div className="relative w-full aspect-square sm:aspect-[4/5] bg-stone-300/85 animate-pulse overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
             </div>
 

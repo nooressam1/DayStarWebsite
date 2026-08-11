@@ -4,3 +4,5 @@ export { default as OrdersPage } from "./pages/OrdersPage";
 export { default as FavoritesPage } from "./pages/FavoritesPage";
 export { default as AddressesPage } from "./pages/AddressesPage";
 export { default as PaymentsPage } from "./pages/PaymentsPage";
+export { AccountPageSkeleton } from "./components/AccountPageSkeleton";
+
