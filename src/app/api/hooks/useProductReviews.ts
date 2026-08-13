@@ -1,11 +1,14 @@
 import { useState, useMemo, useEffect } from "react";
 import { Review } from "@/app/api/types";
-import { getProductReviews, createProductReview } from "@/app/api/endpoints/product.endpoint";
+import { createProductReview } from "@/app/api/endpoints/product.endpoint";
 import { useAuth } from "@/lib/supabase/auth-provider";
+import { useProductReviewsQuery } from "./useProductQueries";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function useProductReviews(productId: string) {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: reviews = [], isLoading: loading } = useProductReviewsQuery(productId);
+
   const [sortBy, setSortBy] = useState<"newest" | "highest" | "lowest">("newest");
   const [showForm, setShowForm] = useState(false);
 
@@ -28,27 +31,6 @@ export function useProductReviews(productId: string) {
       setFormName("");
     }
   }, [user]);
-
-  // Fetch reviews from Backend
-  useEffect(() => {
-    if (!productId) return;
-    let active = true;
-
-    async function fetchReviews() {
-      setLoading(true);
-      const data = await getProductReviews(productId);
-      if (active) {
-        setReviews(data);
-        setLoading(false);
-      }
-    }
-
-    fetchReviews();
-
-    return () => {
-      active = false;
-    };
-  }, [productId]);
 
   // Calculate Average Rating
   const averageRating = useMemo(() => {
@@ -97,8 +79,8 @@ export function useProductReviews(productId: string) {
       return;
     }
 
-    // Insert new review at the top of the reviews list
-    setReviews((prev) => [created, ...prev]);
+    // Invalidate React Query cache so the new review is re-fetched and updated everywhere
+    queryClient.invalidateQueries({ queryKey: ["product-reviews", productId] });
 
     // Reset Form
     setFormRating(5);
@@ -131,4 +113,3 @@ export function useProductReviews(productId: string) {
     handleSubmit,
   };
 }
-

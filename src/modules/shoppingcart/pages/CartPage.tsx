@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { useCartStore, usePricing, CustomButton } from "@/modules/shared";
+import { useCartStore, calculatePricing, CustomButton } from "@/modules/shared";
 import ProductCartCard from "../components/ProductCartCard";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { Discount } from "@/app/api/types";
@@ -10,7 +10,7 @@ import DiscountButton from "../components/DiscountButton";
 const shoppingcart = () => {
   const { cart, incrementItem, decrementItem, removeFromCart, discount, setDiscount } = useCartStore();
 
-  const { subTotal: subtotal, deliveryFee: DELIVERY_FEE, discount: discountAmount, total } = usePricing(cart, {
+  const { subTotal: subtotal, deliveryFee: DELIVERY_FEE, discount: discountAmount, total } = calculatePricing(cart, {
     deliveryFee: 1000,
     discount,
   });

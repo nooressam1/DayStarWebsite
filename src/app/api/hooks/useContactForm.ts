@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useReducer } from "react";
+import { useContactMutation } from "@/app/api/hooks/useContactQueries";
+
 export interface ContactFormData {
   name: string;
   email: string;
@@ -12,57 +14,116 @@ export interface ContactFormErrors {
   subject: string;
   message: string;
 }
-import { createContactSubmission } from "@/app/api/endpoints/contact.endpoint";
+
+export interface ContactFormFullState {
+  formData: ContactFormData;
+  errors: ContactFormErrors;
+  isSubmitting: boolean;
+  isSuccess: boolean;
+}
+
+const initialContactFormData: ContactFormData = {
+  name: "",
+  email: "",
+  subject: "",
+  message: "",
+};
+
+const initialContactFormErrors: ContactFormErrors = {
+  name: "",
+  email: "",
+  subject: "",
+  message: "",
+};
+
+type ContactFormAction =
+  | { type: "CHANGE_INPUT"; name: keyof ContactFormData; value: string }
+  | { type: "SET_ERRORS"; errors: ContactFormErrors }
+  | { type: "CLEAR_ERROR"; field: keyof ContactFormErrors }
+  | { type: "SUBMIT_START" }
+  | { type: "SUBMIT_SUCCESS" }
+  | { type: "SUBMIT_FAILURE" }
+  | { type: "RESET_SUCCESS" };
+
+function contactFormReducer(
+  state: ContactFormFullState,
+  action: ContactFormAction
+): ContactFormFullState {
+  switch (action.type) {
+    case "CHANGE_INPUT":
+      return {
+        ...state,
+        formData: { ...state.formData, [action.name]: action.value },
+        errors: state.errors[action.name]
+          ? { ...state.errors, [action.name]: "" }
+          : state.errors,
+      };
+    case "SET_ERRORS":
+      return { ...state, errors: action.errors };
+    case "CLEAR_ERROR":
+      return { ...state, errors: { ...state.errors, [action.field]: "" } };
+    case "SUBMIT_START":
+      return { ...state, isSubmitting: true };
+    case "SUBMIT_SUCCESS":
+      return {
+        ...state,
+        isSubmitting: false,
+        isSuccess: true,
+        formData: initialContactFormData,
+        errors: initialContactFormErrors,
+      };
+    case "SUBMIT_FAILURE":
+      return { ...state, isSubmitting: false };
+    case "RESET_SUCCESS":
+      return { ...state, isSuccess: false };
+    default:
+      return state;
+  }
+}
 
 export function useContactForm() {
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
+  const [state, dispatch] = useReducer(contactFormReducer, {
+    formData: initialContactFormData,
+    errors: initialContactFormErrors,
+    isSubmitting: false,
+    isSuccess: false,
   });
 
-  const [errors, setErrors] = useState<ContactFormErrors>({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const contactMutation = useContactMutation();
 
   const validate = () => {
     let isValid = true;
     const newErrors = { name: "", email: "", subject: "", message: "" };
 
-    if (!formData.name.trim()) {
+    if (!state.formData.name.trim()) {
       newErrors.name = "Full name is required";
       isValid = false;
     }
 
-    if (!formData.email.trim()) {
+    if (!state.formData.email.trim()) {
       newErrors.email = "Email address is required";
       isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(state.formData.email)) {
       newErrors.email = "Please enter a valid email address";
       isValid = false;
     }
 
-    if (!formData.subject.trim()) {
+    if (!state.formData.subject.trim()) {
       newErrors.subject = "Subject is required";
       isValid = false;
     }
 
-    if (!formData.message.trim()) {
+    if (!state.formData.message.trim()) {
       newErrors.message = "Message is required";
       isValid = false;
-    } else if (formData.message.trim().length < 10) {
+    } else if (state.formData.message.trim().length < 10) {
       newErrors.message = "Message must be at least 10 characters long";
       isValid = false;
     }
 
-    setErrors(newErrors);
+    if (!isValid) {
+      dispatch({ type: "SET_ERRORS", errors: newErrors });
+    }
     return isValid;
   };
 
@@ -70,41 +131,41 @@ export function useContactForm() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name as keyof typeof errors]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
+    dispatch({
+      type: "CHANGE_INPUT",
+      name: name as keyof ContactFormData,
+      value,
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    setIsSubmitting(true);
+    dispatch({ type: "SUBMIT_START" });
 
     try {
-      // Simulate API request to backend (1.8 seconds duration)
-      const response = await createContactSubmission(formData);
-      setIsSuccess(true);
-      setFormData({ name: "", email: "", subject: "", message: "" });
+      await contactMutation.mutateAsync(state.formData);
+      dispatch({ type: "SUBMIT_SUCCESS" });
     } catch (error) {
       console.error("Submission failed", error);
-    } finally {
-      setIsSubmitting(false);
+      dispatch({ type: "SUBMIT_FAILURE" });
     }
   };
 
   const resetForm = () => {
-    setIsSuccess(false);
+    dispatch({ type: "RESET_SUCCESS" });
   };
 
   return {
-    formData,
-    errors,
-    isSubmitting,
-    isSuccess,
+    formData: state.formData,
+    errors: state.errors,
+    isSubmitting: state.isSubmitting || contactMutation.isPending,
+    isSuccess: state.isSuccess,
     handleInputChange,
     handleSubmit,
     resetForm,
+    dispatch,
   };
 }
+

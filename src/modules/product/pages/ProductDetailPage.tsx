@@ -1,18 +1,40 @@
-import React from "react";
+"use client";
+
+import React, { use } from "react";
 import ProductDetails from "../components/ProductDetails";
-import { Product } from "@/app/api/types";
 import ImageCarousel from "../components/ImageCarousel";
-import { getProduct, getProductVariants, getProducts, getBestSellers } from "@/app/api/endpoints/product.endpoint";
 import ProductReviews from "../components/ProductReviews";
 import { ProductCard } from "@/modules/home/components/ProductCard";
+import {
+  useProductBySlugQuery,
+  useProductVariantsQuery,
+  useProductsQuery,
+  useBestSellersQuery,
+} from "@/app/api/hooks/useProductQueries";
+import ProductDetailPageSkeleton from "../components/ProductDetailPageSkeleton";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
-  const { slug } = await params;
-  const product = await getProduct(slug);
+export default function ProductDetailPage({ params }: ProductPageProps) {
+  const { slug } = use(params);
+
+  // React Query Hooks (Automatic In-Memory Caching & Instant Nav)
+  const { data: product, isLoading: productLoading } = useProductBySlugQuery(slug);
+  const { data: variants = [], isLoading: variantsLoading } = useProductVariantsQuery(product?.id || "");
+  const { data: similarData } = useProductsQuery({
+    categoryId: product?.category_id || undefined,
+    limit: 6,
+  });
+  const { data: bestSellers = [] } = useBestSellersQuery();
+
+  const isLoading = productLoading || variantsLoading;
+
+  if (isLoading) {
+    return <ProductDetailPageSkeleton />;
+  }
+
   if (!product) {
     return (
       <div className="text-center py-20 font-serif text-brand-primary-brown">
@@ -23,17 +45,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
     );
   }
-  const variants = await getProductVariants(product.id);
 
-  // Fetch similar products (same category)
-  const categoryId = product.category_id || undefined;
-  const { items: rawSimilar } = await getProducts({ categoryId, limit: 6 });
+  const rawSimilar = similarData?.items || [];
+  let similarProducts = rawSimilar.filter((p) => p.id !== product.id);
 
-  let similarProducts = (rawSimilar || []).filter((p) => p.id !== product.id);
-
-  // Fallback to best sellers if we don't have enough similar products
   if (similarProducts.length < 4) {
-    const bestSellers = await getBestSellers();
     const remainingCount = 4 - similarProducts.length;
     const fallbacks = bestSellers.filter(
       (p) => p.id !== product.id && !similarProducts.some((s) => s.id === p.id)
@@ -41,7 +57,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
     similarProducts = [...similarProducts, ...fallbacks.slice(0, remainingCount)];
   }
 
-  // Ensure we show exactly 4
   similarProducts = similarProducts.slice(0, 4);
 
   return (

@@ -5,14 +5,25 @@ import { CartItem } from "@/modules/shared";
 
 export interface CartItemCardProps extends CartItem {
   isEditable?: boolean;
-  onIncrement: () => void;
-  onDecrement: () => void;
-  onRemove: () => void;
+  onIncrement?: () => void;
+  onDecrement?: () => void;
+  onRemove?: () => void;
 }
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { Trash } from "lucide-react";
 
-const ProductCartCard = ({ name, price, photo, size, quantity, isEditable = true, variant_id, onIncrement, onDecrement, onRemove }: CartItemCardProps) => {
+const ProductCartCard = ({
+  name,
+  price,
+  photo,
+  size,
+  quantity,
+  isEditable = true,
+  variant_id,
+  onIncrement = () => {},
+  onDecrement = () => {},
+  onRemove = () => {},
+}: CartItemCardProps) => {
   const hasImage = photo && typeof photo === "string" && photo.trim() !== "";
 
   const displayImage = hasImage ? photo : "/no-image.png";

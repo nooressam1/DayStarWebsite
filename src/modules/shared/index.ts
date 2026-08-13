@@ -20,4 +20,7 @@ export { useCartStore } from "@/app/api/hooks/useCartStore";
 export type { CartItem, CartState } from "@/app/api/hooks/useCartStore";
 export { useFavoritesStore } from "@/app/api/hooks/useFavoritesStore";
 export { useNavbarAuth } from "@/app/api/hooks/useNavbarAuth";
-export { usePricing } from "@/app/api/hooks/usePricing";
+export { calculatePricing } from "@/utils/pricing/pricing.utils";
+export type { PricingItem, PricingOptions, PricingResult } from "@/utils/pricing/pricing.utils";
+
+

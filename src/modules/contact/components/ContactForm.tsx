@@ -3,7 +3,7 @@
 import React from "react";
 import { CheckCircle, Loader2, Send } from "lucide-react";
 import { TextInput } from "@/modules/shared";
-import { useContactForm } from "@/app/api/hooks";
+import { useContactForm } from "@/app/api/hooks/useContactForm";
 
 export default function ContactForm() {
   const {
@@ -15,6 +15,7 @@ export default function ContactForm() {
     handleSubmit,
     resetForm,
   } = useContactForm();
+
 
   return (
     <div className="bg-[#fcf8f6] border border-[#78534a]/10 rounded-3xl p-8 sm:p-10 shadow-sm relative overflow-hidden">
@@ -53,7 +54,6 @@ export default function ContactForm() {
       ) : (
         /* Interactive Form State */
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 relative z-10">
-          
           {/* Name Input */}
           <TextInput
             id="name"

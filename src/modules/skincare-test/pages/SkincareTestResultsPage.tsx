@@ -1,25 +1,128 @@
 'use client';
 
-import React, { Suspense } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { Check, AlertCircle } from "lucide-react";
 import ProductCartCard from "../../shoppingcart/components/ProductCartCard";
-import { useSkincareResults } from "@/app/api/hooks";
+import { useCartStore } from "@/modules/shared";
+import { getProductSalePrice } from "@/modules/product";
+import { getProductVariants } from "@/app/api/endpoints/product.endpoint";
+import { SkinType, SkinSensitivity, SunExposure } from "@/enums";
 
-import { SkinSensitivity } from "@/enums";
+export interface RecommendedProduct {
+  product_id: string;
+  variant_id: string;
+  category: string;
+  name: string;
+  size: string;
+  quantity: number;
+  price: number;
+  photo: string;
+  whyChosen: string;
+}
 
 function SkincareResultsContent() {
-  const {
-    skinType,
-    concerns,
-    sensitivity,
-    sunExposure,
-    recommendedProducts,
-    isAddedToCart,
-    addingToCart,
-    loading,
-    handleAddAllToCart
-  } = useSkincareResults();
+  const { addToCart } = useCartStore();
+  const [isAddedToCart, setIsAddedToCart] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
+  const [skinType, setSkinType] = useState<string>(SkinType.NORMAL);
+  const [concerns, setConcerns] = useState<string[]>([]);
+  const [sensitivity, setSensitivity] = useState<string>(SkinSensitivity.RESILIENT);
+  const [sunExposure, setSunExposure] = useState<string>(SunExposure.MODERATE);
+
+  useEffect(() => {
+    const answersRaw = sessionStorage.getItem("skincare_results_answers");
+    const routineRaw = sessionStorage.getItem("skincare_results_routine");
+
+    if (answersRaw && routineRaw) {
+      try {
+        const answers = JSON.parse(answersRaw);
+        const routineData = JSON.parse(routineRaw);
+
+        setSkinType(answers.skinType || "normal");
+        setConcerns(answers.concerns || []);
+        setSensitivity(answers.sensitivity || "resilient");
+        setSunExposure(answers.sunExposure || "moderate");
+
+        const getWhyChosenText = (step: string) => {
+          if (step === "cleanser") {
+            return `pH-balanced cleanser selected to align with your ${answers.skinType || "normal"} skin. It cleanses deeply without depleting natural skin hydration.`;
+          }
+          if (step === "spf") {
+            return `Broad-spectrum UV protection to prevent sun damage. Formulated with soothing ingredients suitable for your ${(answers.sensitivity || "resilient").replace("_", " ")} skin.`;
+          }
+          if (step === "toner") {
+            return `Balancing toner that preps your skin, restores optimal pH, and boosts absorption of subsequent active serums.`;
+          }
+          if (step === "serum" || step === "treatment") {
+            return `High-potency treatment chosen to directly address your concerns: ${(answers.concerns || []).join(", ") || "overall skin health"}.`;
+          }
+          return `Moisturizing formula selected to reinforce your skin barrier and lock in hydration all day long.`;
+        };
+
+        const rawProducts: any[] = routineData.recommendedProducts || [];
+
+        Promise.all(
+          rawProducts.map(async (item: any) => {
+            const product = item.product || item;
+            const finalPrice = getProductSalePrice(product);
+
+            let chosenVariantId = item.variant_id || item.variantId;
+            let variantSize = item.size || "Standard";
+
+            if (!chosenVariantId && product?.id) {
+              const fetchedVariants = await getProductVariants(product.id);
+              if (fetchedVariants && fetchedVariants.length > 0) {
+                chosenVariantId = fetchedVariants[0].id;
+                variantSize = fetchedVariants[0].size || "Standard";
+              }
+            }
+
+            return {
+              product_id: product?.id || item.id,
+              variant_id: chosenVariantId || product?.id || item.id,
+              category: item.step || product?.category || "Routine Care",
+              name: product?.name || item.name || "Skincare Essential",
+              size: variantSize,
+              quantity: 1,
+              price: finalPrice,
+              photo: product?.images?.[0] || item.photo || "",
+              whyChosen: getWhyChosenText(item.step || "routine"),
+            };
+          })
+        ).then((resolved) => {
+          setRecommendedProducts(resolved);
+          setLoading(false);
+        });
+      } catch (err) {
+        console.error("Failed to parse stored routine or fetch variants:", err);
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const handleAddAllToCart = () => {
+    if (recommendedProducts.length === 0) return;
+    setAddingToCart(true);
+
+    recommendedProducts.forEach((item) => {
+      addToCart({
+        variant_id: item.variant_id,
+        product_id: item.product_id,
+        name: item.name,
+        price: item.price,
+        size: item.size,
+        photo: item.photo,
+      }, 1);
+    });
+
+    setAddingToCart(false);
+    setIsAddedToCart(true);
+  };
 
   if (loading) {
     return (
@@ -43,7 +146,7 @@ function SkincareResultsContent() {
           Based on your results, it appears you have <strong className="font-semibold text-brand-primary-brown capitalize">{skinType}</strong> skin that is <strong className="font-semibold text-brand-primary-brown">{sensitivity === SkinSensitivity.HIGHLY_SENSITIVE ? 'highly sensitive' : sensitivity === SkinSensitivity.MODERATELY_SENSITIVE ? 'moderately sensitive' : 'resilient'}</strong>.
         </p>
         <p className="text-[#686361] mt-4 leading-relaxed font-light text-sm md:text-base">
-          Your primary skin concerns are <strong className="font-semibold text-brand-primary-brown">{concerns.length > 0 ? concerns.map(c => c.replace('_', ' ')).join(', ') : "general balance"}</strong>. With <strong className="font-semibold text-brand-primary-brown capitalize">{sunExposure}</strong> daily sun exposure, it is vital to keep your barrier protected and hydrated.
+          Your primary skin concerns are <strong className="font-semibold text-brand-primary-brown">{concerns.length > 0 ? concerns.map((c: string) => c.replace('_', ' ')).join(', ') : "general balance"}</strong>. With <strong className="font-semibold text-brand-primary-brown capitalize">{sunExposure}</strong> daily sun exposure, it is vital to keep your barrier protected and hydrated.
         </p>
         <p className="text-[#686361] mt-4 leading-relaxed font-light text-sm md:text-base">
           We suggest a simple daily routine using pH-balanced cleansers, soothing humectants, and a reliable broad-spectrum SPF to lock in hydration and combat environmental stressors.
@@ -52,116 +155,75 @@ function SkincareResultsContent() {
 
       {/* Box 2: Product Recommendations List */}
       <div className="bg-[#FDF9F8] rounded-xl shadow-md shadow-[#78534a]/5 border border-[#78534a]/10 overflow-hidden">
-        {/* Box 2 Header Bar */}
         <div className="bg-[#FAF5F3] border-b border-[#78534a]/10 py-8 px-6 text-center">
-          <span className="text-[#78534a]  font-serif text-base md:text-md font-medium tracking-wide">
+          <span className="text-[#78534a] font-serif text-base md:text-md font-medium tracking-wide">
             Your new product list for your skincare routine
           </span>
         </div>
 
-        {/* Box 2 Body */}
-        <div className="p-8 md:p-10 space-y-8">
-          {recommendedProducts.length > 0 ? (
+        {/* List of recommended items */}
+        <div className="p-6 md:p-8 space-y-6">
+          {recommendedProducts.length === 0 ? (
+            <div className="text-center py-10 text-[#686361] font-sans text-sm">
+              No specific recommendations generated. Please retake the test to select your preferences.
+            </div>
+          ) : (
             recommendedProducts.map((product, idx) => (
-              <div key={product.variant_id || idx} className="flex flex-col border-b border-gray-100 last:border-0 pb-6 last:pb-0">
-                {/* Category Label */}
-                <span className="text-[#8b7e7a] text-xs font-semibold uppercase tracking-wider mb-4 block">
-                  {product.category}
-                </span>
+              <div key={`${product.variant_id}-${idx}`} className="flex flex-col gap-3">
+                <ProductCartCard {...product} isEditable={false} />
 
-                {/* Reusable Checkout Component */}
-                <div className="w-full">
-                  <ProductCartCard
-                    name={product.name}
-                    price={product.price}
-                    photo={product.photo}
-                    size={product.size}
-                    quantity={product.quantity}
-                    isEditable={false}
-                    variant_id={product.variant_id}
-                    product_id={`prod-${product.variant_id}`}
-                    onIncrement={() => { }}
-                    onDecrement={() => { }}
-                    onRemove={() => { }}
-                  />
-                </div>
-
-                {/* Why chosen */}
-                <div className="mt-4 bg-[#faf5f3]/60 rounded-xl p-4 border border-[#78534a]/5">
-                  <p className="text-xs md:text-sm text-[#686361] leading-relaxed">
-                    <strong className="text-[#004956] font-medium">Why it was chosen: </strong>
-                    {product.whyChosen}
+                {/* Professional Justification Note */}
+                <div className="ml-2 pl-4 border-l-2 border-[#004956]/40 bg-[#004956]/5 py-2.5 px-3 rounded-r-lg">
+                  <p className="text-xs text-[#004956] font-sans leading-relaxed">
+                    <strong className="font-semibold">Why this works for you:</strong> {product.whyChosen}
                   </p>
                 </div>
               </div>
             ))
-          ) : (
-            <div className="text-center py-10">
-              <p className="text-[#686361] font-light text-sm md:text-base">
-                No matching products found in the catalog. Our experts are currently replenishing our stock for your specific skin type profile.
-              </p>
-            </div>
-          )}
-
-          {recommendedProducts.length > 0 && (
-            /* Add All to Cart Button */
-            <div className="pt-6 border-t border-gray-100 flex justify-center">
-              <button
-                onClick={handleAddAllToCart}
-                disabled={addingToCart}
-                className="w-full md:w-auto px-10 py-4 bg-[#004956] hover:bg-[#004956]/90 disabled:opacity-60 text-white font-medium rounded-xl transition-all duration-300 shadow-md shadow-[#004956]/10 flex items-center justify-center gap-2 cursor-pointer text-base"
-              >
-                {addingToCart ? "Adding Routine to Cart..." : "Add All to Cart"}
-              </button>
-            </div>
           )}
         </div>
       </div>
 
-      {/* Retake Button Centered */}
-      <div className="flex justify-center pt-2">
-        <Link href="/skincare-test">
-          <button className="px-8 py-3.5 bg-[#004956] text-white rounded-xl font-medium cursor-pointer hover:bg-[#004956]/90 transition-colors shadow-sm text-sm">
-            Retake the Test
-          </button>
+      {/* Action Footer */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+        <Link
+          href="/skincare-test"
+          className="text-xs font-sans text-[#78534a] hover:underline cursor-pointer"
+        >
+          ← Retake Skin Care Test
         </Link>
-      </div>
 
-      {/* Floating Add To Cart Toast Banner */}
-      {isAddedToCart && (
-        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-[#004956] text-white px-6 py-3.5 rounded-xl shadow-lg flex items-center gap-2.5 z-50 animate-in fade-in slide-in-from-bottom-2 duration-300 font-medium">
-          <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-            <Check className="w-3.5 h-3.5 text-white" />
-          </div>
-          All products added to cart successfully!
-        </div>
-      )}
+        {recommendedProducts.length > 0 && (
+          <button
+            onClick={handleAddAllToCart}
+            disabled={addingToCart || isAddedToCart}
+            className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+              isAddedToCart
+                ? "bg-emerald-700 text-white cursor-default"
+                : "bg-[#78534a] hover:bg-[#78534a]/90 text-white"
+            }`}
+          >
+            {isAddedToCart ? (
+              <>
+                <Check size={18} />
+                <span>All Items Added to Cart!</span>
+              </>
+            ) : (
+              <span>Add Complete Routine to Cart</span>
+            )}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
 
-export default function SkincareResultsPage() {
+export default function SkincareTestResultsPage() {
   return (
-    <div className="min-h-screen bg-[#faf5f3] flex flex-col items-center px-4 py-12 md:py-20 font-sans">
-      <div className="w-full max-w-4xl flex flex-col">
-        {/* Header Section */}
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl md:text-3xl font-serif text-[#78534a] font-bold tracking-wide">
-            Skin Care Test Results
-          </h1>
-          <p className="text-sm md:text-base text-[#686361]/80 mt-2 font-light">
-            Your customized skincare sequence recommended by professionals
-          </p>
-        </div>
-
-        <Suspense fallback={
-          <div className="flex justify-center items-center py-20 text-[#78534a] font-serif text-lg animate-pulse">
-            Loading skin profile details...
-          </div>
-        }>
-          <SkincareResultsContent />
-        </Suspense>
-      </div>
+    <div className="max-w-4xl mx-auto px-4 py-10 font-sans">
+      <Suspense fallback={<div className="text-center py-10 font-serif text-[#78534a]">Loading results...</div>}>
+        <SkincareResultsContent />
+      </Suspense>
     </div>
   );
 }

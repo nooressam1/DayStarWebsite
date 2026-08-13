@@ -4,6 +4,7 @@ import "./globals.css";
 import { Inter, Work_Sans, Libre_Baskerville } from "next/font/google";
 import { getCachedUser } from "@/lib/supabase/server-auth";
 import { AuthProvider } from "@/lib/supabase/auth-provider";
+import { QueryProvider } from "@/providers/QueryProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -41,9 +42,11 @@ export default async function RootLayout({
       className={`${inter.variable} ${workSans.variable} ${libreBaskerville.variable} h-full antialiased`}
     >
       <body className="font-sans antialiased">
-        <AuthProvider initialUser={initialUser}>
-          {children}
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider initialUser={initialUser}>
+            {children}
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

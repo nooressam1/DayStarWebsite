@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/supabase/auth-provider";
-import { useCartStore, usePricing } from "@/modules/shared";
-import { processCheckout, CheckoutAddressPayload } from "@/app/api/endpoints/order.endpoint";
+import { useCartStore, calculatePricing } from "@/modules/shared";
+import { CheckoutAddressPayload } from "@/app/api/endpoints/order.endpoint";
 import { createClient } from "@/utils/supabase/client";
 import { useAuthModalStore } from "./useAuthModalStore";
 import { useCheckoutAddress } from "./useCheckoutAddress";
+import { useProcessCheckoutMutation } from "./useOrderQueries";
 
 export interface CheckoutFormState {
     fullName: string;
@@ -98,19 +99,43 @@ export function useCheckout() {
     const { user } = useAuth();
     const { isOpen: isAuthModalOpen, openModal, closeModal } = useAuthModalStore();
     const setIsAuthModalOpen = useCallback((open: boolean) => open ? openModal("login") : closeModal(), [openModal, closeModal]);
-    
+
     const checkoutAddressState = useCheckoutAddress();
     const { addressForm, savedAddresses } = checkoutAddressState;
 
-    const { selectedAddressId, city, area, street, floorNumber, apartmentNumber, governorate, postalCode } = addressForm;
-    const isCustomMode = selectedAddressId === "custom";
+    const pricing = calculatePricing(cart, discount ? { discount: { type: discount.type || "percent", value: discount.value } } : undefined);
 
-    const pricing = usePricing(cart, discount ? { discount: { type: discount.type || "percent", value: discount.value } } : undefined);
 
     // Single Consolidated Checkout Form State
     const [checkoutForm, setCheckoutForm] = useState<CheckoutFormState>(initialCheckoutForm);
-    const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    // React Query process checkout mutation
+    const processCheckoutMutation = useProcessCheckoutMutation();
+    const submitting = processCheckoutMutation.isPending;
+
+    // Ref for tracking latest mutable state values to stabilize callbacks across keystrokes
+    const latestRef = useRef({
+        checkoutForm,
+        addressForm,
+        savedAddresses,
+        cart,
+        discount,
+        user,
+        isPending: processCheckoutMutation.isPending,      // NEW
+        mutateAsync: processCheckoutMutation.mutateAsync,
+    });
+
+    latestRef.current = {
+        checkoutForm,
+        addressForm,
+        savedAddresses,
+        cart,
+        discount,
+        user,
+        isPending: processCheckoutMutation.isPending,      // NEW
+        mutateAsync: processCheckoutMutation.mutateAsync,
+    };
 
     const updateCheckoutField = useCallback(<K extends keyof CheckoutFormState>(field: K, value: CheckoutFormState[K]) => {
         setCheckoutForm((prev) => ({ ...prev, [field]: value }));
@@ -128,26 +153,30 @@ export function useCheckout() {
         }
     }, [user]);
 
-    // Validation helper
+    // Stable validation helper reading from latestRef
     const validateForm = useCallback(() => {
-        const { fullName, phoneNumber, email } = checkoutForm;
+        const { checkoutForm: form, addressForm: addrForm, savedAddresses: addrs, user: currentUser } = latestRef.current;
+        const { fullName, phoneNumber, email } = form;
+        const { selectedAddressId, city, area, governorate, street } = addrForm;
+        const isCustom = selectedAddressId === "custom";
+
         return validateCheckout({
             fullName,
             phoneNumber,
             email,
-            userEmail: user?.email,
-            isCustomMode,
-            hasSavedAddresses: savedAddresses.length > 0,
+            userEmail: currentUser?.email,
+            isCustomMode: isCustom,
+            hasSavedAddresses: addrs.length > 0,
             city,
             area,
             governorate,
             street,
         });
-    }, [checkoutForm, user, isCustomMode, savedAddresses.length, city, area, governorate, street]);
+    }, []);
 
-    // Memoized handleProceedCheckout with double-click guard
+    // Completely stable handleProceedCheckout function reference
     const handleProceedCheckout = useCallback(async () => {
-        if (submitting) return; // DOUBLE CLICK GUARD
+        if (latestRef.current.isPending) return; // was: processCheckoutMutation.isPending
 
         const { isValid, errors: validationErrors, cleanPhone } = validateForm();
 
@@ -157,22 +186,25 @@ export function useCheckout() {
         }
         setErrors({});
 
-        if (cart.length === 0) {
+        const { checkoutForm: form, addressForm: addrForm, savedAddresses: addrs, cart: currentCart, discount: currentDiscount, mutateAsync } = latestRef.current; // added mutateAsync here
+
+        if (currentCart.length === 0) {
             return;
         }
 
-        const items = cart.map((item) => ({
+        const items = currentCart.map((item) => ({
             variant_id: item.variant_id,
             quantity: item.quantity,
         }));
 
         try {
-            setSubmitting(true);
             const supabase = createClient();
             const { data: { session } } = await supabase.auth.getSession();
             const token = session?.access_token || "";
 
-            const selectedAddr = !isCustomMode ? savedAddresses.find(a => a.id === selectedAddressId) : undefined;
+            const { selectedAddressId, city, area, street, floorNumber, apartmentNumber, governorate, postalCode } = addrForm;
+            const isCustom = selectedAddressId === "custom";
+            const selectedAddr = !isCustom ? addrs.find(a => a.id === selectedAddressId) : undefined;
 
             // Map checkout shipping address into a single structured payload object
             const mappedAddress: CheckoutAddressPayload = selectedAddr ? {
@@ -194,12 +226,12 @@ export function useCheckout() {
                 postalCode,
             };
 
-            const response = await processCheckout({
+            const response = await mutateAsync({
                 address: mappedAddress,
                 items,
                 token,
-                couponCode: discount?.code || undefined,
-                fullName: checkoutForm.fullName,
+                couponCode: currentDiscount?.code || undefined,
+                fullName: form.fullName,
                 phoneNumber: cleanPhone,
             });
 
@@ -207,33 +239,14 @@ export function useCheckout() {
                 clearCart();
                 router.push(`/order-confirmed/${response.orderId}`);
             } else {
-                alert("An error occurred while placing your order.");
-                setSubmitting(false);
+                const errorMsg = response?.error || "An error occurred while placing your order.";
+                setErrors((prev) => ({ ...prev, submit: errorMsg }));
             }
-        } catch (error) {
-            setSubmitting(false);
+        } catch (error: any) {
             console.error("Error submitting order:", error);
-            alert("An error occurred while placing your order.");
+            setErrors((prev) => ({ ...prev, submit: error?.message || "An error occurred while placing your order." }));
         }
-    }, [
-        submitting,
-        validateForm,
-        checkoutForm.fullName,
-        isCustomMode,
-        city,
-        area,
-        governorate,
-        street,
-        floorNumber,
-        apartmentNumber,
-        postalCode,
-        selectedAddressId,
-        savedAddresses,
-        cart,
-        discount,
-        clearCart,
-        router,
-    ]);
+    }, [validateForm, clearCart, router]);
 
     return {
         user,
@@ -255,13 +268,15 @@ export function useCheckout() {
         discountAmount: pricing.discount,
         total: pricing.total,
         submitting,
-        setSubmitting,
+        processCheckoutMutation,
         errors,
         setErrors,
         isAuthModalOpen,
         setIsAuthModalOpen,
         handleProceedCheckout,
-        // Single Shipping Address API surface (no duplicate addressForm or leaked fields)
+        // Single Shipping Address API surface
         addressData: checkoutAddressState,
     };
 }
+
+

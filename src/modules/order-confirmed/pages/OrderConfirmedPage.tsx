@@ -7,30 +7,15 @@ import { cancelOrder, getOrder } from "@/app/api/endpoints/order.endpoint";
 export interface OrderConfirmedPageProps {
   params: Promise<{ id: string }>;
 }
-import { usePricing, CustomButton } from "@/modules/shared";
+import { calculatePricing, CustomButton } from "@/modules/shared";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { OrderConfirmedPageSkeleton } from "../components/OrderConfirmedPageSkeleton";
 
+import { useOrderByIdQuery, useCancelOrderMutation } from "@/app/api/hooks/useOrderQueries";
+
 export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) {
   const { id } = use(params);
-  const [order, setOrder] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch the order when ID is available
-  useEffect(() => {
-    if (!id) return;
-
-    setLoading(true);
-    getOrder(id)
-      .then((data) => {
-        setOrder(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error loading order details:", err);
-        setLoading(false);
-      });
-  }, [id]);
+  const { data: order, isLoading: loading } = useOrderByIdQuery(id);
 
   // Map the database order items to the expected structure of ProductCartCard (safe for null/loading order)
   const mappedItems = order?.items?.map((item: any) => ({
@@ -44,8 +29,8 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
     fullname: item.variants?.product?.full_name
   })) || [];
 
-  // Reconstructing financial metrics and dates (safe for null/loading order, keeps hook calls unconditional)
-  const { subTotal, deliveryFee, discount, total: grandTotal, purchasedDate, deliveryDate } = usePricing(mappedItems, {
+  // Reconstructing financial metrics and dates (safe for null/loading order)
+  const { subTotal, deliveryFee, discount, total: grandTotal, purchasedDate, deliveryDate } = calculatePricing(mappedItems, {
     deliveryFee: 1000,
     discountAmount: order?.discount_amount,
     overrideTotal: order?.total,
@@ -57,12 +42,13 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
 
   // Status mapping
   const orderStatus = order?.status === "pending" ? "Pending (Unpaid)" : order?.status;
+  const cancelOrderMutation = useCancelOrderMutation();
+
   const handleCancel = async () => {
     try {
-      const response = await cancelOrder(id);
+      const response = await cancelOrderMutation.mutateAsync(id);
       if (response && response.success) {
         alert('Order cancelled successfully!');
-        window.location.reload();
       } else {
         alert('Failed to cancel the order.');
       }
