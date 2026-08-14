@@ -1,16 +1,24 @@
 import { ENDPOINTS } from "@/app/api/constants/endpoints";
 import { apiClient } from "@/app/api/utils/client";
 
-// Create a new contact submission
-export async function createContactSubmission(data: {
+export interface ContactSubmissionData {
     name: string;
     email: string;
     subject: string;
     message: string;
     user_id?: string;
-}): Promise<any> {
+}
+
+export interface ContactSubmissionResponse {
+    id?: string;
+    success?: boolean;
+    message?: string;
+}
+
+// Create a new contact submission
+export async function createContactSubmission(data: ContactSubmissionData): Promise<ContactSubmissionResponse | null> {
     try {
-        return await apiClient.request(ENDPOINTS.CONTACT.SUBMIT, undefined, {
+        return await apiClient.request<ContactSubmissionResponse>(ENDPOINTS.CONTACT.SUBMIT, undefined, {
             method: "POST",
             body: JSON.stringify(data),
         });

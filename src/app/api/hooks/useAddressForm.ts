@@ -10,7 +10,7 @@ export interface AddressFormFullState {
 }
 
 export type AddressFormAction =
-  | { type: "UPDATE_FIELD"; field: keyof AddressFormState; value: any }
+  | { type: "UPDATE_FIELD"; field: keyof AddressFormState; value: AddressFormState[keyof AddressFormState] }
   | { type: "RESET_FORM"; isDefault?: boolean }
   | { type: "POPULATE_FROM_ADDRESS"; address: Address }
   | { type: "SET_ERROR"; error: string }

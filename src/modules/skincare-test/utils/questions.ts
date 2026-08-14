@@ -3,6 +3,7 @@ import { SkinType, SkinConcern, SkinSensitivity, SkinGoal, SunExposure } from '@
 export interface SkincareOption {
   id: string;
   label: string;
+  description?: string;
 }
 
 export interface SkincareQuestion {

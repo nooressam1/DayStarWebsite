@@ -2,12 +2,13 @@
 
 import React, { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
-import { Check, AlertCircle } from "lucide-react";
+import { Check } from "lucide-react";
 import ProductCartCard from "../../shoppingcart/components/ProductCartCard";
 import { useCartStore } from "@/modules/shared";
 import { getProductSalePrice } from "@/modules/product";
 import { getProductVariants } from "@/app/api/endpoints/product.endpoint";
 import { SkinType, SkinSensitivity, SunExposure } from "@/enums";
+import { Product } from "@/app/api/types";
 
 export interface RecommendedProduct {
   product_id: string;
@@ -19,6 +20,19 @@ export interface RecommendedProduct {
   price: number;
   photo: string;
   whyChosen: string;
+}
+
+interface RawRoutineItem {
+  id?: string;
+  product?: Product;
+  variant_id?: string;
+  variantId?: string;
+  size?: string;
+  name?: string;
+  step?: string;
+  photo?: string;
+  price?: number;
+  category?: string;
 }
 
 function SkincareResultsContent() {
@@ -62,12 +76,12 @@ function SkincareResultsContent() {
           return `Moisturizing formula selected to reinforce your skin barrier and lock in hydration all day long.`;
         };
 
-        const rawProducts: any[] = routineData.recommendedProducts || [];
+        const rawProducts: RawRoutineItem[] = routineData.recommendedProducts || [];
 
         Promise.all(
-          rawProducts.map(async (item: any) => {
-            const product = item.product || item;
-            const finalPrice = getProductSalePrice(product);
+          rawProducts.map(async (item) => {
+            const product = item.product || (item as unknown as Product);
+            const finalPrice = product ? getProductSalePrice(product) : item.price || 0;
 
             let chosenVariantId = item.variant_id || item.variantId;
             let variantSize = item.size || "Standard";
@@ -81,9 +95,9 @@ function SkincareResultsContent() {
             }
 
             return {
-              product_id: product?.id || item.id,
-              variant_id: chosenVariantId || product?.id || item.id,
-              category: item.step || product?.category || "Routine Care",
+              product_id: product?.id || item.id || "",
+              variant_id: chosenVariantId || product?.id || item.id || "",
+              category: item.step || product?.category_id || item.category || "Routine Care",
               name: product?.name || item.name || "Skincare Essential",
               size: variantSize,
               quantity: 1,

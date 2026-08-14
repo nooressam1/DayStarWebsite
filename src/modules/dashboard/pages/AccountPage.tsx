@@ -5,9 +5,11 @@ import { apiClient } from '@/app/api/utils/client';
 import { useAuth } from '@/lib/supabase/auth-provider';
 import { ENDPOINTS } from '@/app/api/constants/endpoints';
 
+import { Profile } from '@/app/api/types';
+
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [me, setMe] = useState<any>(null);
+  const [me, setMe] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -17,7 +19,7 @@ export default function DashboardPage() {
     (async () => {
       try {
         // Calls the NestJS backend's protected /me route.
-        const data = await apiClient.request(ENDPOINTS.USER.ME);
+        const data = await apiClient.request<Profile>(ENDPOINTS.USER.ME);
         setMe(data);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to reach backend');

@@ -20,9 +20,9 @@ const ProductCartCard = ({
   quantity,
   isEditable = true,
   variant_id,
-  onIncrement = () => {},
-  onDecrement = () => {},
-  onRemove = () => {},
+  onIncrement = () => { },
+  onDecrement = () => { },
+  onRemove = () => { },
 }: CartItemCardProps) => {
   const hasImage = photo && typeof photo === "string" && photo.trim() !== "";
 
@@ -38,9 +38,8 @@ const ProductCartCard = ({
     <div className="flex flex-row w-full items-center justify-between">
       <Link
         href={`/product/${itemSlug}`}
-        className={`flex flex-row gap-5 items-center hover:opacity-80 transition-opacity cursor-pointer ${
-          isEditable ? "w-1/2" : "w-full"
-        }`}
+        className={`flex flex-row gap-5 items-center hover:opacity-80 transition-opacity cursor-pointer ${isEditable ? "w-1/2" : "w-full"
+          }`}
       >
         <div className="w-20 h-20 sm:w-24 sm:h-24 aspect-square bg-brand-light-brown/5 rounded-xl overflow-hidden shrink-0 border border-brand-light-brown/5">
           <img

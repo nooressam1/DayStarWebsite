@@ -8,6 +8,8 @@ import { useAuth } from "@/lib/supabase/auth-provider";
 import { createProductReview } from "@/app/api/endpoints/product.endpoint";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { Review } from "@/app/api/types";
+
 interface ProductReviewsProps {
   productId: string;
 }
@@ -104,7 +106,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   };
 
   // Format date helper
-  const formatDate = (review: any) => {
+  const formatDate = (review: Review) => {
     if (review.created_at) {
       try {
         return new Date(review.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' });
@@ -287,7 +289,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
             <div className="relative">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as "newest" | "highest" | "lowest")}
                 className="appearance-none bg-transparent pr-6 pl-2 py-1 font-bold text-[#78534a] cursor-pointer focus:outline-hidden"
               >
                 <option value="newest">Most Recent</option>

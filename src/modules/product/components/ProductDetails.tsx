@@ -13,7 +13,14 @@ export default function ProductDetails({ product, variants }: { product: Product
   const router = useRouter();
   const { user } = useAuth();
   const { openModal } = useAuthModalStore();
-  const [selectedSize, setSelectedSize] = useState<Variant | null>(variants[0] || null); // Default to 50ml
+  const defaultVariant: Variant = {
+    id: product.id,
+    product_id: product.id,
+    size: "Standard",
+    sku: "",
+    stock: 99,
+  };
+  const [selectedSize, setSelectedSize] = useState<Variant>(variants[0] || defaultVariant);
   const [quantity, setQuantity] = useState<number>(1);
   const { addToCart } = useCartStore();
 

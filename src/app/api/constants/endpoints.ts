@@ -32,4 +32,11 @@ export const ENDPOINTS = {
   QUIZ: {
     SUBMIT: "/quiz/submit",
   },
+  CART: {
+    GET: "/cart",
+    SYNC_ITEM: "/cart/item",
+    REMOVE_ITEM: (variantId: string) => `/cart/item/${variantId}`,
+    CLEAR: "/cart/clear",
+    MERGE_GUEST: "/cart/merge",
+  },
 } as const;

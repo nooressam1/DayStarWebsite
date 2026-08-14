@@ -21,8 +21,9 @@ export interface AddressPayloadDto {
 export async function getUserAddresses(): Promise<Address[]> {
     try {
         return await apiClient.request<Address[]>(ENDPOINTS.ADDRESS.LIST_OR_CREATE);
-    } catch (error: any) {
-        console.error("Error fetching addresses:", error?.message || error?.details || error);
+    } catch (error: unknown) {
+        const err = error as { message?: string; details?: unknown };
+        console.error("Error fetching addresses:", err?.message || err?.details || error);
         return [];
     }
 }
@@ -63,9 +64,10 @@ export async function deleteUserAddress(id: string): Promise<string | null> {
             method: "DELETE",
         });
         return null;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error deleting address:", error);
-        return error.message || "Failed to delete address.";
+        const err = error as { message?: string };
+        return err.message || "Failed to delete address.";
     }
 }
 

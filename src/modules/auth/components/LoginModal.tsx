@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import { CustomButton } from "@/modules/shared";
+import { CustomButton, useCartStore } from "@/modules/shared";
 import { useAuthModalStore } from '@/app/api/hooks';
+import { fetchServerCart, mergeGuestCartToDb } from '@/app/api/endpoints/cart.endpoint';
 
 export default function LoginModal() {
   const router = useRouter();
@@ -18,15 +19,29 @@ export default function LoginModal() {
     e.preventDefault();
     setLoading(true);
     setError(null);
- 
+
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     setLoading(false);
-    if (error) {
-      setError(error.message);
+    if (error || !data.user) {
+      setError(error?.message || "Failed to sign in");
       return;
     }
+
+    // Merge guest cart items into database cart ONCE upon successful login
+    try {
+      const guestItems = useCartStore.getState().cart;
+      useCartStore.getState().setUserId(data.user.id);
+      if (guestItems.length > 0) {
+        await mergeGuestCartToDb(data.user.id, guestItems);
+      }
+      const serverCart = await fetchServerCart(data.user.id);
+      useCartStore.getState().setCart(serverCart);
+    } catch (cartErr) {
+      console.error("Failed to merge guest cart on login:", cartErr);
+    }
+
     router.refresh();
     closeModal();
   }
@@ -62,7 +77,9 @@ export default function LoginModal() {
           />
         </div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-xs text-center font-sans font-medium">{error}</p>
+        )}
 
         <CustomButton
           type="submit"
@@ -71,9 +88,19 @@ export default function LoginModal() {
           colorScheme="secondary"
           className="w-full py-3 mt-1"
         >
-          {loading ? 'Signing in…' : 'Sign In'}
+          {loading ? 'Signing in...' : 'Sign In'}
         </CustomButton>
       </form>
+
+      <div className="text-center font-sans text-xs text-brand-gray">
+        Don&apos;t have an account?{' '}
+        <button
+          onClick={() => setView('register')}
+          className="text-brand-primary-brown font-semibold underline hover:opacity-80 transition-opacity cursor-pointer"
+        >
+          Sign up
+        </button>
+      </div>
     </div>
   );
 }

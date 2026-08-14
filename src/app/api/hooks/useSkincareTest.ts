@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SkincareQuestion } from "@/modules/skincare-test/utils/questions";
+import { apiClient } from "@/app/api/utils/client";
+import { ENDPOINTS } from "@/app/api/constants/endpoints";
 
 export interface SkincareAnswersState {
   skinType: string;
@@ -11,8 +13,6 @@ export interface SkincareAnswersState {
   goals: string[];
   sunExposure: string;
 }
-import { apiClient } from "@/app/api/utils/client";
-import { ENDPOINTS } from "@/app/api/constants/endpoints";
 
 export function useSkincareTest(questions: SkincareQuestion[]) {
   const router = useRouter();
@@ -61,7 +61,7 @@ export function useSkincareTest(questions: SkincareQuestion[]) {
       setError(null);
       try {
         // Send POST request directly upon submission event to prevent double runs
-        const routineData = await apiClient.request<Record<string, any>>(ENDPOINTS.QUIZ.SUBMIT, undefined, {
+        const routineData = await apiClient.request<Record<string, unknown>>(ENDPOINTS.QUIZ.SUBMIT, undefined, {
           method: "POST",
           body: JSON.stringify({
             skinType: answers.skinType,
@@ -76,9 +76,10 @@ export function useSkincareTest(questions: SkincareQuestion[]) {
 
         // Navigate to the separate results view page
         router.push("/skincare-test/results");
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Failed to submit skincare test quiz:", err);
-        setError(err.message || "An error occurred while submitting your test. Please try again.");
+        const errorMessage = (err as { message?: string })?.message || "An error occurred while submitting your test. Please try again.";
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }

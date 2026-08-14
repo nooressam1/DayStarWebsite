@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Inter, Work_Sans, Libre_Baskerville } from "next/font/google";
 import { getCachedUser } from "@/lib/supabase/server-auth";

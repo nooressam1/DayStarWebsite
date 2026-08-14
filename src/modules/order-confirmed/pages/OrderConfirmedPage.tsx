@@ -13,14 +13,16 @@ import { OrderConfirmedPageSkeleton } from "../components/OrderConfirmedPageSkel
 
 import { useOrderByIdQuery, useCancelOrderMutation } from "@/app/api/hooks/useOrderQueries";
 
+import { toast } from "sonner";
+
 export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) {
   const { id } = use(params);
   const { data: order, isLoading: loading } = useOrderByIdQuery(id);
 
   // Map the database order items to the expected structure of ProductCartCard (safe for null/loading order)
-  const mappedItems = order?.items?.map((item: any) => ({
-    variant_id: item.variants?.id,
-    product_id: item.variants?.product?.id,
+  const mappedItems = order?.items?.map((item) => ({
+    variant_id: item.variants?.id || item.variant_id,
+    product_id: item.variants?.product?.id || "",
     name: item.variants?.product?.name || "Skincare Product",
     price: item.unit_price_snapshot,
     size: item.variants?.size || "Standard",
@@ -48,12 +50,13 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
     try {
       const response = await cancelOrderMutation.mutateAsync(id);
       if (response && response.success) {
-        alert('Order cancelled successfully!');
+        toast.success('Order cancelled successfully!');
       } else {
-        alert('Failed to cancel the order.');
+        toast.error('Failed to cancel the order.');
       }
     } catch (error) {
       console.error('Failed to cancel order:', error);
+      toast.error('An error occurred while cancelling the order.');
     }
   };
 
@@ -150,7 +153,7 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
               <p className="text-brand-primary-brown p-5 text-center text-base">Your order contains no items.</p>
             ) : (
               <div className="flex flex-col gap-4">
-                {mappedItems.map((item: any) => (
+                {mappedItems.map((item) => (
                   <ProductCartCard
                     key={item.variant_id}
                     {...item}

@@ -242,9 +242,10 @@ export function useCheckout() {
                 const errorMsg = response?.error || "An error occurred while placing your order.";
                 setErrors((prev) => ({ ...prev, submit: errorMsg }));
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error submitting order:", error);
-            setErrors((prev) => ({ ...prev, submit: error?.message || "An error occurred while placing your order." }));
+            const err = error as { message?: string };
+            setErrors((prev) => ({ ...prev, submit: err?.message || "An error occurred while placing your order." }));
         }
     }, [validateForm, clearCart, router]);
 

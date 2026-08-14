@@ -1,12 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { User } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/client";
-
 import { clearAuthData } from "@/app/api/utils/client";
+import { useCartStore } from "@/app/api/hooks/useCartStore";
+import { fetchServerCart } from "@/app/api/endpoints/cart.endpoint";
 
 interface AuthContextType {
-  user: any;
+  user: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -18,14 +20,34 @@ export function AuthProvider({
   initialUser,
 }: {
   children: React.ReactNode;
-  initialUser: any;
+  initialUser: User | null;
 }) {
-  const [user, setUser] = useState<any>(initialUser);
+  const [user, setUser] = useState<User | null>(initialUser);
   const [loading, setLoading] = useState(!initialUser);
 
   useEffect(() => {
     setUser(initialUser);
   }, [initialUser]);
+
+  // Sync cart with backend database on user change without duplicate guest merging
+  useEffect(() => {
+    if (user) {
+      useCartStore.getState().setUserId(user.id);
+
+      const syncServerCart = async () => {
+        try {
+          const serverCart = await fetchServerCart(user.id);
+          useCartStore.getState().setCart(serverCart);
+        } catch (err) {
+          console.error("Failed to fetch database cart:", err);
+        }
+      };
+
+      syncServerCart();
+    } else {
+      useCartStore.getState().setUserId(null);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -51,6 +73,7 @@ export function AuthProvider({
 
   const signOut = async () => {
     await clearAuthData();
+    useCartStore.getState().resetLocalCart();
     setUser(null);
   };
 

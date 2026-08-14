@@ -5,6 +5,8 @@ import { getProduct } from "@/app/api/endpoints/product.endpoint";
 import { isProductOnSale, getProductSalePrice } from "@/modules/product";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 
+import { toast } from "sonner";
+
 interface FavoritesState {
   favorites: Product[];
   addFavorite: (product: Product) => void;
@@ -57,22 +59,17 @@ export const useFavoritesStore = create<FavoritesState>()(
         const onSaleItems = currentFavorites.filter((p) => isProductOnSale(p));
 
         if (onSaleItems.length === 0) {
-          // change this to a pop up clean notification
-
-          alert("None of your favorited items are currently on sale. We will monitor them and notify you!");
+          toast.info("None of your favorited items are currently on sale. We will monitor them and notify you!");
           return;
         }
 
         const itemsText = onSaleItems
           .map((p) => {
             const salePrice = getProductSalePrice(p);
-            return `- ${p.name}: Now ${formatMoney(salePrice)} (Was ${formatMoney(p.price)})`;
+            return `${p.name}: Now ${formatMoney(salePrice)} (Was ${formatMoney(p.price)})`;
           })
-          .join("\n");
-        // change this to a pop up clean notification
-        alert(
-          `An email notification has been sent containing your favorited products that are currently on sale:\n\n${itemsText}`
-        );
+          .join(" | ");
+        toast.success(`Notification sent for items on sale: ${itemsText}`);
       },
     }),
     { name: "daystore-favorites-storage" },

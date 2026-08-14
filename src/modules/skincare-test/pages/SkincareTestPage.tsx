@@ -10,7 +10,7 @@ import { ENDPOINTS } from "@/app/api/constants/endpoints";
 export default function SkincareTestPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, any>>({
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({
     skinType: "",
     concerns: [],
     sensitivity: "",
@@ -64,7 +64,7 @@ export default function SkincareTestPage() {
       setLoading(true);
       setError(null);
       try {
-        const routineData = await apiClient.request<Record<string, any>>(ENDPOINTS.QUIZ.SUBMIT, undefined, {
+        const routineData = await apiClient.request<Record<string, unknown>>(ENDPOINTS.QUIZ.SUBMIT, undefined, {
           method: "POST",
           body: JSON.stringify({
             skinType: answers.skinType,
@@ -77,9 +77,10 @@ export default function SkincareTestPage() {
         sessionStorage.setItem("skincare_results_answers", JSON.stringify(answers));
 
         router.push("/skincare-test/results");
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Failed to submit skincare test quiz:", err);
-        setError(err.message || "An error occurred while submitting your test. Please try again.");
+        const errorMessage = (err as { message?: string })?.message || "An error occurred while submitting your test. Please try again.";
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -174,13 +175,13 @@ export default function SkincareTestPage() {
                       <span className="font-sans font-semibold text-sm md:text-base">
                         {option.label}
                       </span>
-                      {(option as any).description && (
+                      {option.description && (
                         <span
                           className={`text-xs mt-0.5 font-light ${
                             isSelected ? "text-white/80" : "text-[#686361]/70"
                           }`}
                         >
-                          {(option as any).description}
+                          {option.description}
                         </span>
                       )}
                     </div>
