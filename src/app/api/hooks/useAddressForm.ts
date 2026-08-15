@@ -66,7 +66,7 @@ interface UseAddressFormProps {
   editingAddress: Address | null;
   isFirstAddress?: boolean;
   onClose: () => void;
-  onSaveSuccess: () => void;
+  onSaveSuccess?: () => void;
 }
 
 export function useAddressForm({
@@ -142,7 +142,7 @@ export function useAddressForm({
 
     if (result) {
       dispatch({ type: "SUBMIT_END" });
-      onSaveSuccess();
+      onSaveSuccess?.();
       onClose();
     } else {
       dispatch({ type: "SUBMIT_END", error: "Failed to save address. Please try again." });

@@ -44,6 +44,7 @@ export const useCartStore = create<CartState>()(
       setCart: (cart) => set({ cart }),
 
       addToCart: (newItem, quantity = 1) => {
+        const MAX_QUANTITY = 5;
         const userId = get().userId;
         set((state) => {
           const existing = state.cart.find(
@@ -53,11 +54,11 @@ export const useCartStore = create<CartState>()(
           if (existing) {
             newCart = state.cart.map((item) =>
               item.variant_id === newItem.variant_id
-                ? { ...item, quantity: item.quantity + quantity }
+                ? { ...item, quantity: Math.min(MAX_QUANTITY, item.quantity + quantity) }
                 : item
             );
           } else {
-            newCart = [...state.cart, { ...newItem, quantity }];
+            newCart = [...state.cart, { ...newItem, quantity: Math.min(MAX_QUANTITY, quantity) }];
           }
 
           if (userId) {
@@ -82,10 +83,13 @@ export const useCartStore = create<CartState>()(
       },
 
       incrementItem: (variant_id: string) => {
+        const MAX_QUANTITY = 5;
         const userId = get().userId;
         set((state) => {
           const newCart = state.cart.map((item) =>
-            item.variant_id === variant_id ? { ...item, quantity: item.quantity + 1 } : item
+            item.variant_id === variant_id
+              ? { ...item, quantity: Math.min(MAX_QUANTITY, item.quantity + 1) }
+              : item
           );
           const updatedItem = newCart.find((i) => i.variant_id === variant_id);
           if (userId && updatedItem) {

@@ -60,7 +60,7 @@ const ProductCartCard = ({
 
       {isEditable ? (<div className="flex flex-row gap-2 items-center justify-center w-1/4">
         <div className="pl-4">
-          <QuantityButton value={quantity} onDecrement={onDecrement} onIncrement={onIncrement}></QuantityButton>
+          <QuantityButton value={quantity} min={1} max={5} onDecrement={onDecrement} onIncrement={onIncrement} />
         </div>
         <button onClick={onRemove}><Trash color="#78534A"></Trash></button>
       </div>) : null}

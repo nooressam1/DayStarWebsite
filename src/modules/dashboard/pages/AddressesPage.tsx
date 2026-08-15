@@ -2,31 +2,24 @@
 
 import React, { useState } from "react";
 import { MapPin, Plus, Trash2, Edit2, CheckCircle2, Home, Briefcase, Map } from "lucide-react";
-import {
-  useAddressesQuery,
-  useSetDefaultAddressMutation,
-  useDeleteAddressMutation,
-} from "@/app/api/hooks/useAddressQueries";
-import { useAuth } from "@/lib/supabase/auth-provider";
+import { useAddresses } from "@/app/api/hooks/useAddresses";
 import AddressModal from "../components/AddressModal";
 import { CustomButton } from "@/modules/shared";
 import { Address } from "@/app/api/types";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function AddressesPage() {
-  const { user, loading: authLoading } = useAuth();
-  const queryClient = useQueryClient();
-
-  // React Query for Addresses
-  const { data: addresses = [], isLoading: loading } = useAddressesQuery();
+  const {
+    user,
+    authLoading,
+    addresses,
+    loading,
+    handleSetDefault,
+    handleDelete,
+  } = useAddresses();
 
   // Local Modal UI State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-
-  const invalidateAddresses = () => {
-    queryClient.invalidateQueries({ queryKey: ["addresses", user?.id] });
-  };
 
   const handleOpenAddModal = () => {
     setEditingAddress(null);
@@ -36,19 +29,6 @@ export default function AddressesPage() {
   const handleOpenEditModal = (address: Address) => {
     setEditingAddress(address);
     setIsModalOpen(true);
-  };
-
-  const setDefaultMutation = useSetDefaultAddressMutation();
-  const deleteAddressMutation = useDeleteAddressMutation();
-
-  const handleSetDefault = async (id: string) => {
-    await setDefaultMutation.mutateAsync(id);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this address?")) {
-      await deleteAddressMutation.mutateAsync(id);
-    }
   };
 
   // Helper to render address icons based on label
@@ -133,11 +113,10 @@ export default function AddressesPage() {
             return (
               <div
                 key={address.id}
-                className={`relative flex flex-col justify-between p-5 rounded-xl border transition-all duration-300 ${
-                  isDefault
+                className={`relative flex flex-col justify-between p-5 rounded-xl border transition-all duration-300 ${isDefault
                     ? "bg-white border-brand-primary-brown shadow-sm ring-1 ring-brand-primary-brown/20"
                     : "bg-[#FAF5F3]/40 border-[#78534a]/10 hover:border-[#78534a]/30 hover:bg-white"
-                }`}
+                  }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -211,7 +190,6 @@ export default function AddressesPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         editingAddress={editingAddress}
-        onSaveSuccess={invalidateAddresses}
       />
     </div>
   );

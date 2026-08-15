@@ -10,7 +10,7 @@ interface AddressModalProps {
   isOpen: boolean;
   onClose: () => void;
   editingAddress: Address | null;
-  onSaveSuccess: () => void;
+  onSaveSuccess?: () => void;
   isFirstAddress?: boolean;
 }
 
