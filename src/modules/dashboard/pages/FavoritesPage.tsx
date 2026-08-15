@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Heart, Mail } from "lucide-react";
+import { Heart, Mail, Check } from "lucide-react";
 import { useFavoritesStore } from "@/modules/shared";
 import { ProductCard } from "@/modules/home/components/ProductCard";
+import { useAuth } from "@/lib/supabase/auth-provider";
 
 export default function FavoritesPage() {
-  const { favorites, refreshFavorites, sendSaleEmailAlert } = useFavoritesStore();
+  const { favorites, refreshFavorites, emailAlertsEnabled, toggleEmailAlerts } = useFavoritesStore();
+  const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -56,11 +58,24 @@ export default function FavoritesPage() {
 
         {favorites.length > 0 && !loading && (
           <button
-            onClick={sendSaleEmailAlert}
-            className="px-5 py-3 rounded-lg bg-brand-primary-brown hover:bg-brand-primary-brown/90 text-white text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-sm flex items-center gap-2 w-fit border border-transparent active:scale-95"
+            onClick={() => toggleEmailAlerts(user?.email)}
+            className={`px-5 py-3 rounded-lg text-white text-xs font-semibold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-sm flex items-center gap-2 w-fit border border-transparent active:scale-95 ${
+              emailAlertsEnabled
+                ? "bg-[#557b55] hover:bg-[#466946] shadow-green-900/10"
+                : "bg-brand-primary-brown hover:bg-brand-primary-brown/90"
+            }`}
           >
-            <Mail className="h-4 w-4" />
-            <span>Email Me On-Sale Favorites</span>
+            {emailAlertsEnabled ? (
+              <>
+                <Check className="h-4 w-4 stroke-[2.5]" />
+                <span>Email Alerts Active</span>
+              </>
+            ) : (
+              <>
+                <Mail className="h-4 w-4" />
+                <span>Email Me On-Sale Favorites</span>
+              </>
+            )}
           </button>
         )}
       </div>

@@ -39,4 +39,11 @@ export const ENDPOINTS = {
     CLEAR: "/cart/clear",
     MERGE_GUEST: "/cart/merge",
   },
+  FAVORITES: {
+    GET: "/favorites",
+    ADD: (productId: string) => `/favorites/${productId}`,
+    REMOVE: (productId: string) => `/favorites/${productId}`,
+    TOGGLE_NOTIFY: "/favorites/notify",
+    SYNC_GUEST: "/favorites/sync",
+  },
 } as const;

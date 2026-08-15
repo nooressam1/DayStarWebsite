@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Check } from "lucide-react";
+import { AlertCircle, Check, Star } from "lucide-react";
 import { Product, Variant } from "@/app/api/types";
 import { CustomButton, FavoriteButton, useCartStore } from "@/modules/shared";
 import { formatMoney } from "@/utils/format/format.moneyFormat";

@@ -81,6 +81,8 @@ export function useCreateReviewMutation(productId: string) {
       createProductReview(productId, reviewData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["product-reviews", productId] });
+      queryClient.invalidateQueries({ queryKey: ["product"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 }
