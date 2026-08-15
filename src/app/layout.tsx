@@ -28,13 +28,11 @@ export const metadata: Metadata = {
   description: "DayStar ecommerce",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const initialUser = await getCachedUser();
-
   return (
     <html
       lang="en"
@@ -42,7 +40,7 @@ export default async function RootLayout({
     >
       <body className="font-sans antialiased">
         <QueryProvider>
-          <AuthProvider initialUser={initialUser}>
+          <AuthProvider initialUser={null}>
             {children}
           </AuthProvider>
         </QueryProvider>

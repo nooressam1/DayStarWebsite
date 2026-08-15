@@ -10,56 +10,64 @@ import {
   createProductReview,
 } from "@/app/api/endpoints/product.endpoint";
 import { getCategories } from "@/app/api/endpoints/category.endpoint";
-import { Product } from "@/app/api/types";
+import { Product, Category, Variant } from "@/app/api/types";
 
 // 1. Fetch Product Catalog List with Automatic Caching
-export function useProductsQuery(params: {
-  page?: number;
-  limit?: number;
-  categoryId?: string;
-  collection?: string;
-  search?: string;
-  discount?: number;
-}) {
+export function useProductsQuery(
+  params: {
+    page?: number;
+    limit?: number;
+    categoryId?: string;
+    collection?: string;
+    search?: string;
+    discount?: number;
+  },
+  initialData?: { items: Product[]; total: number }
+) {
   return useQuery<{ items: Product[]; total: number }>({
     queryKey: ["products", params],
     queryFn: () => getProducts(params),
     placeholderData: (previousData) => previousData,
+    initialData,
   });
 }
 
 // 2. Fetch Categories List with Caching
-export function useCategoriesQuery() {
+export function useCategoriesQuery(initialData?: Category[]) {
   return useQuery({
     queryKey: ["categories"],
     queryFn: getCategories,
     staleTime: 10 * 60 * 1000,
+    initialData,
   });
 }
 
 // 3. Fetch Single Product by Slug
-export function useProductBySlugQuery(slug: string) {
+export function useProductBySlugQuery(slug: string, initialData?: Product | null) {
   return useQuery({
     queryKey: ["product", slug],
     queryFn: () => getProduct(slug),
     enabled: !!slug,
+    initialData: initialData ?? undefined,
   });
 }
 
 // 4. Fetch Best Sellers
-export function useBestSellersQuery() {
+export function useBestSellersQuery(initialData?: Product[]) {
   return useQuery({
     queryKey: ["best-sellers"],
     queryFn: getBestSellers,
+    initialData,
   });
 }
 
 // 5. Fetch Product Variants
-export function useProductVariantsQuery(productId: string) {
+export function useProductVariantsQuery(productId: string, initialData?: Variant[]) {
   return useQuery({
     queryKey: ["product-variants", productId],
     queryFn: () => getProductVariants(productId),
     enabled: !!productId,
+    initialData,
   });
 }
 

@@ -14,17 +14,36 @@ import {
     useProductsQuery,
 } from "@/app/api/hooks/useProductQueries";
 import { HomePageSkeleton } from "../components/HomePageSkeleton";
+import { Category, Product } from "@/app/api/types";
 
-export default function HomePage() {
-    const { data: categories = [], isLoading: categoriesLoading } = useCategoriesQuery();
-    const { data: bestSellers = [], isLoading: bestSellersLoading } = useBestSellersQuery();
-    const { data: saleData, isLoading: saleLoading } = useProductsQuery({
-        collection: "sale",
-        discount: 50,
-    });
+interface HomePageProps {
+    initialCategories?: Category[];
+    initialBestSellers?: Product[];
+    initialSaleProducts?: Product[];
+}
 
-    const fiftyPercentOffProducts = saleData?.items || [];
-    const isLoading = categoriesLoading || bestSellersLoading || saleLoading;
+export default function HomePage({
+    initialCategories = [],
+    initialBestSellers = [],
+    initialSaleProducts = [],
+}: HomePageProps = {}) {
+    const { data: categories = initialCategories, isLoading: categoriesLoading } = useCategoriesQuery(
+        initialCategories.length > 0 ? initialCategories : undefined
+    );
+    const { data: bestSellers = initialBestSellers, isLoading: bestSellersLoading } = useBestSellersQuery(
+        initialBestSellers.length > 0 ? initialBestSellers : undefined
+    );
+    const { data: saleData, isLoading: saleLoading } = useProductsQuery(
+        {
+            collection: "sale",
+            discount: 50,
+        },
+        initialSaleProducts.length > 0 ? { items: initialSaleProducts, total: initialSaleProducts.length } : undefined
+    );
+
+    const fiftyPercentOffProducts = saleData?.items || initialSaleProducts;
+    const hasInitialData = initialCategories.length > 0 || initialBestSellers.length > 0;
+    const isLoading = !hasInitialData && (categoriesLoading || bestSellersLoading || saleLoading);
 
     if (isLoading) {
         return <HomePageSkeleton />;

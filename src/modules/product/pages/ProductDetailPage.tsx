@@ -13,23 +13,40 @@ import {
 } from "@/app/api/hooks/useProductQueries";
 import ProductDetailPageSkeleton from "../components/ProductDetailPageSkeleton";
 
+import { Product, Variant } from "@/app/api/types";
+
 interface ProductPageProps {
-  params: Promise<{ slug: string }>;
+  params?: Promise<{ slug: string }>;
+  slug?: string;
+  initialProduct?: Product | null;
+  initialVariants?: Variant[];
 }
 
-export default function ProductDetailPage({ params }: ProductPageProps) {
-  const { slug } = use(params);
+export default function ProductDetailPage({
+  params,
+  slug: propSlug,
+  initialProduct,
+  initialVariants = [],
+}: ProductPageProps) {
+  const resolvedSlug = params ? use(params).slug : propSlug || "";
 
-  // React Query Hooks (Automatic In-Memory Caching & Instant Nav)
-  const { data: product, isLoading: productLoading } = useProductBySlugQuery(slug);
-  const { data: variants = [], isLoading: variantsLoading } = useProductVariantsQuery(product?.id || "");
+  // React Query Hooks (Hydrated with initial pre-fetched data)
+  const { data: product = initialProduct, isLoading: productLoading } = useProductBySlugQuery(
+    resolvedSlug,
+    initialProduct
+  );
+  const { data: variants = initialVariants, isLoading: variantsLoading } = useProductVariantsQuery(
+    product?.id || "",
+    initialVariants.length > 0 ? initialVariants : undefined
+  );
   const { data: similarData } = useProductsQuery({
     categoryId: product?.category_id || undefined,
     limit: 6,
   });
   const { data: bestSellers = [] } = useBestSellersQuery();
 
-  const isLoading = productLoading || variantsLoading;
+  const hasInitialData = !!initialProduct;
+  const isLoading = !hasInitialData && (productLoading || variantsLoading);
 
   if (isLoading) {
     return <ProductDetailPageSkeleton />;
