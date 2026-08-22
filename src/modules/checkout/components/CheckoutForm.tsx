@@ -1,37 +1,56 @@
 "use client";
 
-import React from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import { TextInput, SelectionCard } from "@/modules/shared";
 import { EGYPT_GOVERNORATES } from "@/modules/checkout";
 import { useCheckoutForm, CheckoutFormValues } from "../hooks/useCheckoutForm";
 import { Address } from "@/app/api/types";
 import { Plus, MapPin, CheckCircle2 } from "lucide-react";
+import MockCardForm from "./MockCardForm";
 
-interface CheckoutFormProps {
+export interface CheckoutFormHandle {
+  validate: () => { isValid: boolean; errors: Record<string, string> };
+  getValues: () => CheckoutFormValues;
+}
+
+export interface CheckoutFormProps {
   user: any;
   savedAddresses: Address[];
   onChange: (values: CheckoutFormValues, errors: Record<string, string>) => void;
   onSubmit?: (values: CheckoutFormValues) => void;
 }
 
-export function CheckoutForm({ user, savedAddresses, onChange }: CheckoutFormProps) {
+export const CheckoutForm = forwardRef<CheckoutFormHandle, CheckoutFormProps>(function CheckoutForm(
+  { user, savedAddresses, onChange }: CheckoutFormProps,
+  ref
+) {
   const {
     formValues,
     errors,
     updateField,
     selectSavedAddress,
     setAddressMode,
+    validateForm,
   } = useCheckoutForm({
     user,
     savedAddresses,
     onChange,
   });
 
+  useImperativeHandle(ref, () => ({
+    validate: validateForm,
+    getValues: () => formValues,
+  }));
+
   const {
     fullName,
     phoneNumber,
     email,
     paymentMethod,
+    cardNumber,
+    cardHolder,
+    expiryDate,
+    cvv,
     city,
     area,
     street,
@@ -63,91 +82,89 @@ export function CheckoutForm({ user, savedAddresses, onChange }: CheckoutFormPro
           />
           <TextInput
             label="Phone Number *"
-            placeholder="01234567890"
+            placeholder="01012345678"
             value={phoneNumber}
             onChange={(e) => updateField("phoneNumber", e.target.value)}
             error={errors.phoneNumber}
           />
           <TextInput
-            label="Email Address"
-            placeholder="example@gmail.com"
+            label="Email Address *"
+            placeholder="john@example.com"
             value={email}
             onChange={(e) => updateField("email", e.target.value)}
             error={errors.email}
+            disabled={!!user?.email}
           />
         </div>
       </div>
 
-      {/* Saved Address Selection vs Add New Address Option */}
-      {savedAddresses.length > 0 && (
-        <div>
-          <h2 className="text-black font-regular font-sans text-md mb-3">Select Delivery Address</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            {savedAddresses.map((addr) => {
-              const isSelected = addressMode === "saved" && selectedAddressId === addr.id;
-              return (
-                <button
-                  key={addr.id}
-                  type="button"
-                  onClick={() => selectSavedAddress(addr)}
-                  className={`p-4.5 sm:p-5 rounded-2xl border text-left text-sm transition-all cursor-pointer flex justify-between items-start ${isSelected
-                    ? "border-brand-primary-brown bg-brand-primary-brown/10 font-bold shadow-xs"
-                    : "border-stone-200 hover:bg-stone-50"
-                    }`}
-                >
-                  <div className="flex flex-col gap-1">
-                    <p className="font-semibold text-sm flex items-center gap-1.5 text-stone-900">
-                      <MapPin className="w-4 h-4 shrink-0 text-brand-primary-brown" />
-                      <span>{addr.label || "Saved Address"}</span>
-                      {addr.is_default && (
-                        <span className="text-[11px] font-bold bg-brand-primary-brown/15 text-brand-primary-brown px-2 py-0.5 rounded-full ml-1">
-                          Default
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-stone-500 text-xs mt-1 leading-relaxed">
-                      {addr.street}, {addr.city}
-                    </p>
-                  </div>
-                  {isSelected && <CheckCircle2 className="w-5 h-5 text-brand-primary-brown shrink-0 mt-0.5 ml-2" />}
-                </button>
-              );
-            })}
-
-            {/* Option to Add a New Address */}
+      {/* Shipping Address */}
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-black font-regular font-sans text-md">Shipping Address</h2>
+          {user && savedAddresses.length > 0 && (
             <button
               type="button"
-              onClick={() => setAddressMode("new")}
-              className={`p-4.5 sm:p-5 rounded-2xl border border-dashed text-left text-sm transition-all cursor-pointer flex items-center gap-3 ${addressMode === "new"
-                ? "border-brand-primary-brown bg-brand-primary-brown/10 font-bold text-brand-primary-brown shadow-xs"
-                : "border-stone-300 hover:bg-stone-50 text-stone-700"
-                }`}
+              onClick={() => setAddressMode(addressMode === "saved" ? "new" : "saved")}
+              className="text-xs text-brand-primary-brown underline hover:text-black cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-full bg-brand-primary-brown/10 flex items-center justify-center shrink-0">
-                <Plus className="w-5 h-5 text-brand-primary-brown" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm">+ Add New Address</p>
-                <p className="text-stone-500 text-xs mt-0.5">Enter a new delivery location</p>
-              </div>
+              {addressMode === "saved" ? "+ Add New Address" : "← Use Saved Address"}
             </button>
-          </div>
+          )}
         </div>
-      )}
 
-      {/* Delivery Address Form (shown when adding a new address or editing) */}
-      {(isAddingNewAddress || savedAddresses.length === 0) && (
-        <div className="border-t border-stone-200 pt-4 mt-2">
-          <h2 className="text-black font-regular font-sans text-md mb-3">
-            {savedAddresses.length > 0 ? "New Address Details" : "Delivery Address"}
-          </h2>
+        {/* Saved Addresses Selector (if logged in & has saved addresses) */}
+        {user && savedAddresses.length > 0 && addressMode === "saved" && (
+          <div className="flex flex-col gap-2.5 mb-3">
+            {savedAddresses.map((addr) => {
+              const isSelected = selectedAddressId === addr.id;
+              return (
+                <div
+                  key={addr.id}
+                  onClick={() => selectSavedAddress(addr)}
+                  className={`p-4 rounded-xl border transition-all cursor-pointer flex items-start justify-between ${
+                    isSelected
+                      ? "border-brand-primary-brown bg-brand-bg/40 shadow-xs"
+                      : "border-stone-200 hover:border-stone-300 bg-white"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <MapPin className={`w-4 h-4 mt-0.5 ${isSelected ? "text-brand-primary-brown" : "text-stone-400"}`} />
+                    <div className="text-xs">
+                      <p className="font-semibold text-black">{addr.street}</p>
+                      <p className="text-stone-500">
+                        {[
+                          addr.building_no ? `Bldg ${addr.building_no}` : "",
+                          addr.floor_number ? `Floor ${addr.floor_number}` : "",
+                          addr.apartment_number ? `Apt ${addr.apartment_number}` : "",
+                          addr.area,
+                          addr.city,
+                          addr.governorate,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                    </div>
+                  </div>
+                  {isSelected && <CheckCircle2 className="w-4 h-4 text-brand-primary-brown shrink-0" />}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* New / Custom Address Form */}
+        {isAddingNewAddress && (
           <div className="flex flex-col gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-brand-primary-brown">Governorate *</label>
+            {/* Governorate Dropdown */}
+            <div>
+              <label className="block text-xs font-medium text-stone-700 mb-1">
+                Governorate *
+              </label>
               <select
                 value={governorate}
                 onChange={(e) => updateField("governorate", e.target.value)}
-                className="w-full px-3 py-4 border border-stone-300 rounded-lg text-sm  text-brand-primary-brown focus:outline-hidden focus:border-brand-primary-brown"
+                className="w-full px-3 py-2.5 rounded-lg border border-stone-300 text-xs bg-white focus:outline-hidden focus:ring-1 focus:ring-brand-primary-brown focus:border-brand-primary-brown"
               >
                 <option value="">Select Governorate</option>
                 {EGYPT_GOVERNORATES.map((gov) => (
@@ -156,20 +173,22 @@ export function CheckoutForm({ user, savedAddresses, onChange }: CheckoutFormPro
                   </option>
                 ))}
               </select>
-              {errors.governorate && <span className="text-xs text-red-500">{errors.governorate}</span>}
+              {errors.governorate && (
+                <p className="text-red-500 text-[11px] mt-1">{errors.governorate}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <TextInput
                 label="City *"
-                placeholder="Cairo"
+                placeholder="Nasr City"
                 value={city}
                 onChange={(e) => updateField("city", e.target.value)}
                 error={errors.city}
               />
               <TextInput
-                label="Area *"
-                placeholder="Maadi"
+                label="Area / District *"
+                placeholder="Zone 1"
                 value={area}
                 onChange={(e) => updateField("area", e.target.value)}
                 error={errors.area}
@@ -177,8 +196,8 @@ export function CheckoutForm({ user, savedAddresses, onChange }: CheckoutFormPro
             </div>
 
             <TextInput
-              label="Street Address *"
-              placeholder="15 El Tahrir Street"
+              label="Street Name / Details *"
+              placeholder="123 Abbas El Akkad St."
               value={street}
               onChange={(e) => updateField("street", e.target.value)}
               error={errors.street}
@@ -186,7 +205,7 @@ export function CheckoutForm({ user, savedAddresses, onChange }: CheckoutFormPro
 
             <div className="grid grid-cols-3 gap-3">
               <TextInput
-                label="Building No."
+                label="Building"
                 placeholder="12"
                 value={buildingNo}
                 onChange={(e) => updateField("buildingNo", e.target.value)}
@@ -217,8 +236,8 @@ export function CheckoutForm({ user, savedAddresses, onChange }: CheckoutFormPro
               </label>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Payment Method */}
       <div>
@@ -237,7 +256,21 @@ export function CheckoutForm({ user, savedAddresses, onChange }: CheckoutFormPro
             onChange={() => updateField("paymentMethod", "card")}
           />
         </div>
+
+        {/* Mock Card Form Embedded */}
+        {paymentMethod === "card" && (
+          <MockCardForm
+            cardState={{
+              cardNumber,
+              cardHolder,
+              expiryDate,
+              cvv,
+            }}
+            onChange={(field, value) => updateField(field, value)}
+            errors={errors}
+          />
+        )}
       </div>
     </div>
   );
-}
+});

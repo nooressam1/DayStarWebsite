@@ -208,15 +208,6 @@ export default function Navbar() {
                           Addresses
                         </Link>
                       </li>
-                      <li>
-                        <Link
-                          href="/account/payments"
-                          className="flex items-center gap-2 px-3 py-2 text-sm text-brand-primary-brown hover:bg-brand-primary-brown/5 rounded-lg transition-colors font-medium"
-                          onClick={() => setDropdownOpen(false)}
-                        >
-                          Payments
-                        </Link>
-                      </li>
                     </ul>
                     <div className="border-t border-[#78534a]/10 pt-2">
                       <button

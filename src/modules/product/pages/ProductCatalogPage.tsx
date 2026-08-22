@@ -8,8 +8,17 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { ProductCard } from "@/modules/home/components/ProductCard";
 import { Dropdown, ProductCardSkeletonGrid } from "@/modules/shared";
 import { useProductsQuery, useCategoriesQuery } from "@/app/api/hooks/useProductQueries";
+import { Product, Category } from "@/app/api/types";
 
-function ProductsCatalogContent() {
+interface ProductCatalogPageProps {
+    initialProductsData?: { items: Product[]; total: number };
+    initialCategories?: Category[];
+}
+
+function ProductsCatalogContent({
+    initialProductsData,
+    initialCategories = [],
+}: ProductCatalogPageProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -22,18 +31,26 @@ function ProductsCatalogContent() {
     const limit = 9; // Show 9 items per page (3x3 grid)
 
     const discount = discountParam ? parseInt(discountParam, 10) : undefined;
+    const isDefaultView = page === 1 && !categoryId && !collection && !search && !discount;
 
-    // React Query Data Fetching (Automatic Caching)
-    const { data: productsData, isLoading: loading } = useProductsQuery({
-        page,
-        limit,
-        categoryId,
-        collection,
-        search,
-        discount,
-    });
+    // React Query Data Fetching (Automatic Caching with SSR hydration)
+    const { data: productsData, isLoading: queryLoading } = useProductsQuery(
+        {
+            page,
+            limit,
+            categoryId,
+            collection,
+            search,
+            discount,
+        },
+        isDefaultView && initialProductsData ? initialProductsData : undefined
+    );
 
-    const { data: categories = [] } = useCategoriesQuery();
+    const { data: categories = initialCategories } = useCategoriesQuery(
+        initialCategories.length > 0 ? initialCategories : undefined
+    );
+
+    const loading = (!initialProductsData || !isDefaultView) && queryLoading;
 
     const products = productsData?.items || [];
     const totalProducts = productsData?.total || 0;
@@ -400,10 +417,10 @@ function ProductsCatalogContent() {
     );
 }
 
-export default function ProductCatalogPage() {
+export default function ProductCatalogPage(props: ProductCatalogPageProps = {}) {
     return (
         <Suspense fallback={<ProductCardSkeletonGrid count={9} />}>
-            <ProductsCatalogContent />
+            <ProductsCatalogContent {...props} />
         </Suspense>
     );
 }

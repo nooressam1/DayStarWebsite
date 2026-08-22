@@ -20,35 +20,34 @@ export interface ProcessCheckoutParams {
     couponCode?: string;
     fullName?: string;
     phoneNumber?: string;
+    paymentMethod?: string;
+    paymentStatus?: string;
 }
 
-export async function processCheckout(params: ProcessCheckoutParams): Promise<CheckoutResponse | null> {
-    const { address, items, token, couponCode, fullName, phoneNumber } = params;
-    try {
-        return await apiClient.request<CheckoutResponse>(ENDPOINTS.ORDER.CHECKOUT, undefined, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                city: address.city,
-                area: address.area,
-                address: address.address,
-                floorNumber: address.floorNumber,
-                apartmentNumber: address.apartmentNumber,
-                governorate: address.governorate,
-                postalCode: address.postalCode,
-                addressId: address.addressId,
-                items,
-                couponCode,
-                fullName,
-                phoneNumber,
-            }),
-        });
-    } catch (error) {
-        console.error("Error processing checkout:", error);
-        return null;
-    }
+export async function processCheckout(params: ProcessCheckoutParams): Promise<CheckoutResponse> {
+    const { address, items, token, couponCode, fullName, phoneNumber, paymentMethod, paymentStatus } = params;
+    return await apiClient.request<CheckoutResponse>(ENDPOINTS.ORDER.CHECKOUT, undefined, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+            city: address.city,
+            area: address.area,
+            address: address.address,
+            floorNumber: address.floorNumber,
+            apartmentNumber: address.apartmentNumber,
+            governorate: address.governorate,
+            postalCode: address.postalCode,
+            addressId: address.addressId,
+            items,
+            couponCode,
+            fullName,
+            phoneNumber,
+            paymentMethod,
+            paymentStatus,
+        }),
+    });
 }
 
 // Fetch a single order by ID

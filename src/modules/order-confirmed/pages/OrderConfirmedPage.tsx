@@ -216,14 +216,29 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
               <div className="flex justify-between font-work text-xs text-brand-light-brown">
                 <span>Payment Method</span>
                 <span className="font-medium text-black">
-                  Cash on delivery
+                  {(() => {
+                    const raw = (order.payment_method || "").toLowerCase().trim();
+                    const isCard = raw === "card" || raw.includes("card") || raw.includes("online") || order.payment_status?.toLowerCase() === "paid";
+                    return isCard ? "Credit / Debit Card" : "Cash on delivery";
+                  })()}
                 </span>
               </div>
-              <div className="flex justify-between font-work text-xs text-brand-light-brown">
+              <div className="flex justify-between items-center font-work text-xs text-brand-light-brown">
                 <span>Payment Status</span>
-                <span className="font-medium text-black capitalize">
-                  {orderStatus}
-                </span>
+                {(() => {
+                  const raw = (order.payment_method || "").toLowerCase().trim();
+                  const isCard = raw === "card" || raw.includes("card") || raw.includes("online");
+                  const isPaid = order.payment_status?.toLowerCase() === "paid" || isCard;
+                  return isPaid ? (
+                    <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[11px]">
+                      ● Paid (Online)
+                    </span>
+                  ) : (
+                    <span className="font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full text-[11px]">
+                      Pay on Delivery
+                    </span>
+                  );
+                })()}
               </div>
             </div>
           </div>

@@ -11,6 +11,10 @@ export interface CheckoutFormValues {
   email: string;
   deliveryType: string;
   paymentMethod: string;
+  cardNumber: string;
+  cardHolder: string;
+  expiryDate: string;
+  cvv: string;
   city: string;
   area: string;
   street: string;
@@ -42,6 +46,10 @@ const initialCheckoutState: CheckoutFormState = {
   email: "",
   deliveryType: "home",
   paymentMethod: "cash",
+  cardNumber: "",
+  cardHolder: "",
+  expiryDate: "",
+  cvv: "",
   city: "",
   area: "",
   street: "",
@@ -111,6 +119,7 @@ function checkoutReducer(state: CheckoutFormState, action: CheckoutAction): Chec
         ...state,
         fullName: state.fullName || action.fullName,
         email: state.email || action.email,
+        cardHolder: state.cardHolder || action.fullName,
       };
     }
     case "SET_ERRORS": {
@@ -193,21 +202,48 @@ export function useCheckoutForm({ user, savedAddresses = [], onChange }: UseChec
     if (!values.phoneNumber.trim()) {
       newErrors.phoneNumber = "Phone number is required";
     } else if (!/^01[0125]\d{8}$/.test(values.phoneNumber.trim())) {
-      newErrors.phoneNumber = "Enter a valid 11-digit Egyptian phone number";
+      newErrors.phoneNumber = "Enter a valid 11-digit Egyptian phone number (e.g. 01012345678)";
     }
 
-    if (!values.governorate) newErrors.governorate = "Governorate is required";
-    if (!values.city.trim()) newErrors.city = "City is required";
-    if (!values.area.trim()) newErrors.area = "Area is required";
-    if (!values.street.trim()) newErrors.street = "Street address is required";
+    if (values.addressMode === "new" || savedAddresses.length === 0) {
+      if (!values.governorate) newErrors.governorate = "Governorate is required";
+      if (!values.city.trim()) newErrors.city = "City is required";
+      if (!values.area.trim()) newErrors.area = "Area is required";
+      if (!values.street.trim()) newErrors.street = "Street address is required";
+    } else if (!values.selectedAddressId) {
+      newErrors.address = "Please select a delivery address";
+    }
+
+    if (values.paymentMethod === "card") {
+      const cleanCard = values.cardNumber.replace(/\s/g, "");
+      if (!cleanCard) {
+        newErrors.cardNumber = "Card number is required";
+      } else if (cleanCard.length < 15) {
+        newErrors.cardNumber = "Enter a valid 16-digit card number";
+      }
+
+      if (!values.cardHolder.trim()) {
+        newErrors.cardHolder = "Cardholder name is required";
+      }
+
+      if (!values.expiryDate.trim()) {
+        newErrors.expiryDate = "Expiry date required";
+      } else if (!/^\d{2}\/\d{2}$/.test(values.expiryDate.trim())) {
+        newErrors.expiryDate = "Format MM/YY";
+      }
+
+      if (!values.cvv.trim()) {
+        newErrors.cvv = "CVV required";
+      } else if (values.cvv.trim().length < 3) {
+        newErrors.cvv = "Min 3 digits";
+      }
+    }
 
     const isValid = Object.keys(newErrors).length === 0;
-    if (!isValid) {
-      dispatch({ type: "SET_ERRORS", errors: newErrors });
-    }
+    dispatch({ type: "SET_ERRORS", errors: newErrors });
 
     return { isValid, errors: newErrors };
-  }, []);
+  }, [savedAddresses.length]);
 
   const getAddressPayload = useCallback(() => {
     const values = formRef.current;

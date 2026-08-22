@@ -7,6 +7,8 @@ import { createClient } from "@/utils/supabase/client";
 import { useAuthModalStore } from "./useAuthModalStore";
 import { useCheckoutAddress } from "./useCheckoutAddress";
 import { useProcessCheckoutMutation } from "./useOrderQueries";
+import { MockCardState } from "@/modules/checkout/components/MockCardForm";
+import { toast } from "sonner";
 
 export interface CheckoutFormState {
     fullName: string;
@@ -24,6 +26,13 @@ export const initialCheckoutForm: CheckoutFormState = {
     paymentMethod: "cash",
 };
 
+export const initialCardState: MockCardState = {
+    cardNumber: "",
+    cardHolder: "",
+    expiryDate: "",
+    cvv: "",
+};
+
 export interface ValidateCheckoutParams {
     fullName: string;
     phoneNumber: string;
@@ -35,6 +44,8 @@ export interface ValidateCheckoutParams {
     area: string;
     governorate: string;
     street: string;
+    paymentMethod?: string;
+    cardState?: MockCardState;
 }
 
 export function validateCheckout(params: ValidateCheckoutParams): {
@@ -53,6 +64,8 @@ export function validateCheckout(params: ValidateCheckoutParams): {
         area,
         governorate,
         street,
+        paymentMethod = "cash",
+        cardState,
     } = params;
 
     const finalEmail = userEmail || email;
@@ -86,6 +99,32 @@ export function validateCheckout(params: ValidateCheckoutParams): {
         if (!street) errors.address = "Street address is required";
     }
 
+    // Card validation when Credit / Debit Card is selected
+    if (paymentMethod === "card") {
+        const cleanCard = (cardState?.cardNumber || "").replace(/\s/g, "");
+        if (!cleanCard) {
+            errors.cardNumber = "Card number is required";
+        } else if (cleanCard.length < 15) {
+            errors.cardNumber = "Please enter a valid card number";
+        }
+
+        if (!cardState?.cardHolder?.trim()) {
+            errors.cardHolder = "Cardholder name is required";
+        }
+
+        if (!cardState?.expiryDate?.trim()) {
+            errors.expiryDate = "Expiry date required";
+        } else if (!/^\d{2}\/\d{2}$/.test(cardState.expiryDate.trim())) {
+            errors.expiryDate = "Format MM/YY";
+        }
+
+        if (!cardState?.cvv?.trim()) {
+            errors.cvv = "CVV required";
+        } else if (cardState.cvv.trim().length < 3) {
+            errors.cvv = "Min 3 digits";
+        }
+    }
+
     return {
         isValid: Object.keys(errors).length === 0,
         errors,
@@ -105,35 +144,38 @@ export function useCheckout() {
 
     const pricing = calculatePricing(cart, discount ? { discount: { type: discount.type || "percent", value: discount.value } } : undefined);
 
-
-    // Single Consolidated Checkout Form State
+    // Form states
     const [checkoutForm, setCheckoutForm] = useState<CheckoutFormState>(initialCheckoutForm);
+    const [cardState, setCardState] = useState<MockCardState>(initialCardState);
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     // React Query process checkout mutation
     const processCheckoutMutation = useProcessCheckoutMutation();
     const submitting = processCheckoutMutation.isPending;
 
-    // Ref for tracking latest mutable state values to stabilize callbacks across keystrokes
+    // Ref for tracking latest mutable state values
     const latestRef = useRef({
         checkoutForm,
+        cardState,
         addressForm,
         savedAddresses,
         cart,
         discount,
         user,
-        isPending: processCheckoutMutation.isPending,      // NEW
+        isPending: processCheckoutMutation.isPending,
         mutateAsync: processCheckoutMutation.mutateAsync,
     });
 
     latestRef.current = {
         checkoutForm,
+        cardState,
         addressForm,
         savedAddresses,
         cart,
         discount,
         user,
-        isPending: processCheckoutMutation.isPending,      // NEW
+        isPending: processCheckoutMutation.isPending,
         mutateAsync: processCheckoutMutation.mutateAsync,
     };
 
@@ -141,22 +183,47 @@ export function useCheckout() {
         setCheckoutForm((prev) => ({ ...prev, [field]: value }));
     }, []);
 
+    const updateCardField = useCallback((field: keyof MockCardState, value: string) => {
+        setCardState((prev) => ({ ...prev, [field]: value }));
+        // Clear specific error on change
+        setErrors((prev) => {
+            if (prev[field]) {
+                const updated = { ...prev };
+                delete updated[field];
+                return updated;
+            }
+            return prev;
+        });
+    }, []);
+
     // Pre-fill user profile info if logged in
     useEffect(() => {
         if (user) {
+            const userName = user.user_metadata?.full_name || user.user_metadata?.name || "";
             setCheckoutForm((prev) => ({
                 ...prev,
-                fullName: prev.fullName || user.user_metadata?.full_name || user.user_metadata?.name || "",
+                fullName: prev.fullName || userName,
                 phoneNumber: prev.phoneNumber || user.user_metadata?.phone || user.phone || "",
                 email: user.email || "",
+            }));
+
+            setCardState((prev) => ({
+                ...prev,
+                cardHolder: prev.cardHolder || userName,
             }));
         }
     }, [user]);
 
     // Stable validation helper reading from latestRef
     const validateForm = useCallback(() => {
-        const { checkoutForm: form, addressForm: addrForm, savedAddresses: addrs, user: currentUser } = latestRef.current;
-        const { fullName, phoneNumber, email } = form;
+        const {
+            checkoutForm: form,
+            cardState: card,
+            addressForm: addrForm,
+            savedAddresses: addrs,
+            user: currentUser,
+        } = latestRef.current;
+        const { fullName, phoneNumber, email, paymentMethod } = form;
         const { selectedAddressId, city, area, governorate, street } = addrForm;
         const isCustom = selectedAddressId === "custom";
 
@@ -171,26 +238,25 @@ export function useCheckout() {
             area,
             governorate,
             street,
+            paymentMethod,
+            cardState: card,
         });
     }, []);
 
-    // Completely stable handleProceedCheckout function reference
-    const handleProceedCheckout = useCallback(async () => {
-        if (latestRef.current.isPending) return; // was: processCheckoutMutation.isPending
+    // Core Order Submission Execution
+    const executeOrderSubmission = useCallback(async (paymentMethod = "cash", paymentStatus = "pending") => {
+        const {
+            checkoutForm: form,
+            addressForm: addrForm,
+            savedAddresses: addrs,
+            cart: currentCart,
+            discount: currentDiscount,
+            mutateAsync,
+        } = latestRef.current;
 
-        const { isValid, errors: validationErrors, cleanPhone } = validateForm();
+        if (currentCart.length === 0) return;
 
-        if (!isValid) {
-            setErrors(validationErrors);
-            return;
-        }
-        setErrors({});
-
-        const { checkoutForm: form, addressForm: addrForm, savedAddresses: addrs, cart: currentCart, discount: currentDiscount, mutateAsync } = latestRef.current; // added mutateAsync here
-
-        if (currentCart.length === 0) {
-            return;
-        }
+        const { cleanPhone } = validateForm();
 
         const items = currentCart.map((item) => ({
             variant_id: item.variant_id,
@@ -204,27 +270,28 @@ export function useCheckout() {
 
             const { selectedAddressId, city, area, street, floorNumber, apartmentNumber, governorate, postalCode } = addrForm;
             const isCustom = selectedAddressId === "custom";
-            const selectedAddr = !isCustom ? addrs.find(a => a.id === selectedAddressId) : undefined;
+            const selectedAddr = !isCustom ? addrs.find((a) => a.id === selectedAddressId) : undefined;
 
-            // Map checkout shipping address into a single structured payload object
-            const mappedAddress: CheckoutAddressPayload = selectedAddr ? {
-                city: selectedAddr.city || city,
-                area: selectedAddr.area || area,
-                address: selectedAddr.street || street,
-                floorNumber: selectedAddr.floor_number || floorNumber,
-                apartmentNumber: selectedAddr.apartment_number || apartmentNumber,
-                governorate: selectedAddr.governorate || governorate,
-                postalCode: selectedAddr.postal_code || postalCode,
-                addressId: selectedAddr.id,
-            } : {
-                city,
-                area,
-                address: street,
-                floorNumber,
-                apartmentNumber,
-                governorate,
-                postalCode,
-            };
+            const mappedAddress: CheckoutAddressPayload = selectedAddr
+                ? {
+                      city: selectedAddr.city || city,
+                      area: selectedAddr.area || area,
+                      address: selectedAddr.street || street,
+                      floorNumber: selectedAddr.floor_number || floorNumber,
+                      apartmentNumber: selectedAddr.apartment_number || apartmentNumber,
+                      governorate: selectedAddr.governorate || governorate,
+                      postalCode: selectedAddr.postal_code || postalCode,
+                      addressId: selectedAddr.id,
+                  }
+                : {
+                      city,
+                      area,
+                      address: street,
+                      floorNumber,
+                      apartmentNumber,
+                      governorate,
+                      postalCode,
+                  };
 
             const response = await mutateAsync({
                 address: mappedAddress,
@@ -233,6 +300,8 @@ export function useCheckout() {
                 couponCode: currentDiscount?.code || undefined,
                 fullName: form.fullName,
                 phoneNumber: cleanPhone,
+                paymentMethod,
+                paymentStatus,
             });
 
             if (response && response.success) {
@@ -241,13 +310,52 @@ export function useCheckout() {
             } else {
                 const errorMsg = response?.error || "An error occurred while placing your order.";
                 setErrors((prev) => ({ ...prev, submit: errorMsg }));
+                toast.error(errorMsg);
             }
-        } catch (error: unknown) {
+        } catch (error: any) {
             console.error("Error submitting order:", error);
-            const err = error as { message?: string };
-            setErrors((prev) => ({ ...prev, submit: err?.message || "An error occurred while placing your order." }));
+            const errorMsg =
+                error?.message ||
+                error?.details?.message ||
+                error?.details?.error ||
+                "An error occurred while placing your order.";
+            setErrors((prev) => ({
+                ...prev,
+                submit: errorMsg,
+            }));
+            toast.error(errorMsg);
         }
     }, [validateForm, clearCart, router]);
+
+    // Handle Click on Proceed / Place Order
+    const handleProceedCheckout = useCallback(async () => {
+        if (latestRef.current.isPending) return;
+
+        const { isValid, errors: validationErrors } = validateForm();
+
+        if (!isValid) {
+            setErrors(validationErrors);
+            return;
+        }
+        setErrors({});
+
+        const { checkoutForm: form } = latestRef.current;
+
+        // If Credit Card is selected: trigger the simulated 3D-Secure modal first!
+        if (form.paymentMethod === "card") {
+            setIsPaymentModalOpen(true);
+            return;
+        }
+
+        // Otherwise (Cash on Delivery): direct submission
+        await executeOrderSubmission("cash", "pending");
+    }, [validateForm, executeOrderSubmission]);
+
+    // Callback when simulated payment authorization completes
+    const handlePaymentModalComplete = useCallback(async () => {
+        setIsPaymentModalOpen(false);
+        await executeOrderSubmission("card", "paid");
+    }, [executeOrderSubmission]);
 
     return {
         user,
@@ -258,10 +366,13 @@ export function useCheckout() {
         incrementItem,
         decrementItem,
         removeFromCart,
-        // Single Form State & Updater for Checkout info
+        // Checkout Form State & Card State
         checkoutForm,
         setCheckoutForm,
         updateCheckoutField,
+        cardState,
+        setCardState,
+        updateCardField,
         validateForm,
         // Pricing & Errors
         subtotal: pricing.subTotal,
@@ -274,10 +385,11 @@ export function useCheckout() {
         setErrors,
         isAuthModalOpen,
         setIsAuthModalOpen,
+        isPaymentModalOpen,
+        setIsPaymentModalOpen,
         handleProceedCheckout,
-        // Single Shipping Address API surface
+        handlePaymentModalComplete,
+        // Shipping Address API
         addressData: checkoutAddressState,
     };
 }
-
-

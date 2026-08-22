@@ -28,6 +28,8 @@ export const metadata: Metadata = {
   description: "DayStar ecommerce",
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,6 +44,7 @@ export default function RootLayout({
         <QueryProvider>
           <AuthProvider initialUser={null}>
             {children}
+            <Toaster position="top-center" richColors closeButton />
           </AuthProvider>
         </QueryProvider>
       </body>

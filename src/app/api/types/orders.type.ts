@@ -31,6 +31,8 @@ export interface Order {
   full_name?: string;
   phone_number?: string;
   email?: string;
+  payment_method?: string;
+  payment_status?: string;
   addresses?: Address | Address[];
   items?: DetailedOrderItem[];
 }

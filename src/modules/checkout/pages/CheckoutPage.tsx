@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { CustomButton, useCartStore, calculatePricing } from "@/modules/shared";
 import ProductCartCard from "@/modules/shoppingcart/components/ProductCartCard";
-import { CheckoutPageSkeleton, CheckoutForm, CheckoutFormValues } from "@/modules/checkout";
+import { CheckoutPageSkeleton, CheckoutForm, CheckoutFormValues, CheckoutFormHandle } from "@/modules/checkout";
+import PaymentProcessingModal from "../components/PaymentProcessingModal";
 import { useAuth } from "@/lib/supabase/auth-provider";
 import { useAuthModalStore } from "@/app/api/hooks/useAuthModalStore";
 import { useProcessCheckoutMutation } from "@/app/api/hooks/useOrderQueries";
@@ -24,8 +25,10 @@ export default function CheckoutPage() {
     const addAddressMutation = useAddAddressMutation();
 
     const [submitting, setSubmitting] = useState(false);
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
-    // Stable form values reference updated by CheckoutForm child component
+    // Stable form handle and values reference
+    const checkoutFormRef = useRef<CheckoutFormHandle | null>(null);
     const formValuesRef = useRef<CheckoutFormValues | null>(null);
 
     const handleFormChange = (values: CheckoutFormValues) => {
@@ -38,41 +41,19 @@ export default function CheckoutPage() {
 
     const processCheckoutMutation = useProcessCheckoutMutation();
 
-    const handleProceedCheckout = async () => {
-        if (cart.length === 0) {
-            toast.warning("Your cart is empty.");
-            return;
-        }
-
-        if (!user) {
-            openModal("login");
-            return;
-        }
-
-        const values = formValuesRef.current;
+    const executeCheckoutSubmission = async () => {
+        const values = formValuesRef.current || checkoutFormRef.current?.getValues();
         if (!values) return;
-
-        // Perform validation
-        if (!values.fullName.trim()) {
-            toast.error("Please enter your full name.");
-            return;
-        }
-        if (!values.phoneNumber.trim()) {
-            toast.error("Please enter your phone number.");
-            return;
-        }
-        if (!values.governorate) {
-            toast.error("Please select your governorate.");
-            return;
-        }
-        if (!values.city.trim() || !values.area.trim() || !values.street.trim()) {
-            toast.error("Please fill out all required address fields (City, Area, Street).");
-            return;
-        }
 
         setSubmitting(true);
         try {
+            const isSavedAddress =
+                values.addressMode === "saved" &&
+                values.selectedAddressId &&
+                values.selectedAddressId !== "new";
+
             const addressPayload = {
+                addressId: isSavedAddress ? values.selectedAddressId : undefined,
                 address: values.street.trim(),
                 street: values.street.trim(),
                 area: values.area.trim(),
@@ -110,6 +91,10 @@ export default function CheckoutPage() {
             const supabase = createClient();
             const { data: { session } } = await supabase.auth.getSession();
 
+            const isCard = values.paymentMethod === "card";
+            const paymentMethod = isCard ? "card" : "cash";
+            const paymentStatus = isCard ? "paid" : "pending";
+
             const result = await processCheckoutMutation.mutateAsync({
                 items: cart.map((item) => ({ variant_id: item.variant_id, quantity: item.quantity })),
                 address: addressPayload,
@@ -117,6 +102,8 @@ export default function CheckoutPage() {
                 couponCode: discount?.code,
                 fullName: values.fullName.trim(),
                 phoneNumber: values.phoneNumber.trim(),
+                paymentMethod,
+                paymentStatus,
             });
 
             if (result && result.success && result.orderId) {
@@ -125,12 +112,71 @@ export default function CheckoutPage() {
             } else {
                 toast.error(result?.error || "Checkout failed. Please try again.");
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error("Checkout error:", err);
-            toast.error("An unexpected error occurred during checkout.");
+            const errorMessage =
+                err?.message ||
+                err?.details?.message ||
+                err?.details?.error ||
+                "An unexpected error occurred during checkout.";
+            toast.error(errorMessage);
         } finally {
             setSubmitting(false);
         }
+    };
+
+    const handleProceedCheckout = async () => {
+        if (cart.length === 0) {
+            toast.warning("Your cart is empty.");
+            return;
+        }
+
+        if (!user) {
+            openModal("login");
+            return;
+        }
+
+        // Trigger comprehensive validation in CheckoutForm child component
+        if (checkoutFormRef.current) {
+            const { isValid, errors } = checkoutFormRef.current.validate();
+            if (!isValid) {
+                const errorMessages = Object.values(errors).filter(Boolean);
+                const firstError = errorMessages[0] || "Please fill in all required fields.";
+                toast.error(firstError);
+                return;
+            }
+        }
+
+        const values = formValuesRef.current || checkoutFormRef.current?.getValues();
+        if (!values) return;
+
+        // Perform Card validation if Card is selected
+        if (values.paymentMethod === "card") {
+            const cleanCard = (values.cardNumber || "").replace(/\s/g, "");
+            if (!cleanCard || cleanCard.length < 15) {
+                toast.error("Please enter a valid 16-digit card number.");
+                return;
+            }
+            if (!values.cardHolder?.trim()) {
+                toast.error("Please enter the cardholder name.");
+                return;
+            }
+            if (!values.expiryDate?.trim() || !/^\d{2}\/\d{2}$/.test(values.expiryDate)) {
+                toast.error("Please enter a valid expiry date (MM/YY).");
+                return;
+            }
+            if (!values.cvv?.trim() || values.cvv.length < 3) {
+                toast.error("Please enter a valid 3-digit CVV code.");
+                return;
+            }
+
+            // Open 3D-Secure Payment Simulation modal!
+            setIsPaymentModalOpen(true);
+            return;
+        }
+
+        // Cash on delivery: submit directly
+        await executeCheckoutSubmission();
     };
 
     // Render Loading Skeleton while loading addresses
@@ -142,6 +188,7 @@ export default function CheckoutPage() {
         <div className="p-6 md:p-10 flex flex-col md:flex-row gap-8 h-full font-sans text-brand-primary-brown max-w-7xl mx-auto">
             {/* Dedicated Checkout Form Component */}
             <CheckoutForm
+                ref={checkoutFormRef}
                 user={user}
                 savedAddresses={savedAddresses}
                 onChange={handleFormChange}
@@ -181,28 +228,45 @@ export default function CheckoutPage() {
                     </div>
                 </div>
 
-                {/* Order products Section using ProductCartCard in view-only mode */}
-                <div className="flex flex-col gap-3 border-t border-stone-300/40 pt-4">
+                {/* Items in Order */}
+                <div className="flex flex-col gap-3 border-t border-stone-300/40 pt-5">
                     <h3 className="font-sans text-base font-medium text-stone-900">
-                        Order products
+                        Items ({cart.length})
                     </h3>
-                    <div className="flex flex-col gap-3 max-h-[360px] overflow-y-auto pr-1">
+                    <div className="flex flex-col gap-3 max-h-[280px] overflow-y-auto pr-1">
                         {cart.map((item) => (
-                            <ProductCartCard key={item.variant_id} {...item} isEditable={false} />
+                            <ProductCartCard
+                                key={item.variant_id}
+                                {...item}
+                                isEditable={false}
+                            />
                         ))}
                     </div>
                 </div>
 
-                <CustomButton
-                    onClick={handleProceedCheckout}
-                    disabled={submitting}
-                    variant="solid"
-                    colorScheme="secondary"
-                    className="w-full py-4 text-sm font-semibold rounded-xl cursor-pointer shadow-md mt-2"
-                >
-                    {submitting ? "Processing Order..." : "Place Order"}
-                </CustomButton>
+                {/* Place Order CTA Button */}
+                <div className="pt-2">
+                    <CustomButton
+                        variant="solid"
+                        colorScheme="secondary"
+                        disabled={submitting || isPaymentModalOpen}
+                        onClick={handleProceedCheckout}
+                        className="w-full py-4 text-base tracking-wide"
+                    >
+                        {submitting || isPaymentModalOpen ? "Processing Order..." : "Place Order"}
+                    </CustomButton>
+                </div>
             </div>
+
+            {/* Simulated 3D-Secure Payment Authorization Modal */}
+            <PaymentProcessingModal
+                isOpen={isPaymentModalOpen}
+                amount={total}
+                onComplete={async () => {
+                    setIsPaymentModalOpen(false);
+                    await executeCheckoutSubmission();
+                }}
+            />
         </div>
     );
 }
