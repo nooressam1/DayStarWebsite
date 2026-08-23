@@ -7,34 +7,22 @@ import { cancelOrder, getOrder } from "@/app/api/endpoints/order.endpoint";
 export interface OrderConfirmedPageProps {
   params: Promise<{ id: string }>;
 }
-import { usePricing, CustomButton } from "@/modules/shared";
+import { calculatePricing, CustomButton } from "@/modules/shared";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
+import { OrderConfirmedPageSkeleton } from "../components/OrderConfirmedPageSkeleton";
+
+import { useOrderByIdQuery, useCancelOrderMutation } from "@/app/api/hooks/useOrderQueries";
+
+import { toast } from "sonner";
 
 export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) {
   const { id } = use(params);
-  const [order, setOrder] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch the order when ID is available
-  useEffect(() => {
-    if (!id) return;
-
-    setLoading(true);
-    getOrder(id)
-      .then((data) => {
-        setOrder(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error loading order details:", err);
-        setLoading(false);
-      });
-  }, [id]);
+  const { data: order, isLoading: loading } = useOrderByIdQuery(id);
 
   // Map the database order items to the expected structure of ProductCartCard (safe for null/loading order)
-  const mappedItems = order?.items?.map((item: any) => ({
-    variant_id: item.variants?.id,
-    product_id: item.variants?.product?.id,
+  const mappedItems = order?.items?.map((item) => ({
+    variant_id: item.variants?.id || item.variant_id,
+    product_id: item.variants?.product?.id || "",
     name: item.variants?.product?.name || "Skincare Product",
     price: item.unit_price_snapshot,
     size: item.variants?.size || "Standard",
@@ -43,8 +31,8 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
     fullname: item.variants?.product?.full_name
   })) || [];
 
-  // Reconstructing financial metrics and dates (safe for null/loading order, keeps hook calls unconditional)
-  const { subTotal, deliveryFee, discount, total: grandTotal, purchasedDate, deliveryDate } = usePricing(mappedItems, {
+  // Reconstructing financial metrics and dates (safe for null/loading order)
+  const { subTotal, deliveryFee, discount, total: grandTotal, purchasedDate, deliveryDate } = calculatePricing(mappedItems, {
     deliveryFee: 1000,
     discountAmount: order?.discount_amount,
     overrideTotal: order?.total,
@@ -56,30 +44,25 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
 
   // Status mapping
   const orderStatus = order?.status === "pending" ? "Pending (Unpaid)" : order?.status;
+  const cancelOrderMutation = useCancelOrderMutation();
+
   const handleCancel = async () => {
     try {
-      const response = await cancelOrder(id);
+      const response = await cancelOrderMutation.mutateAsync(id);
       if (response && response.success) {
-        alert('Order cancelled successfully!');
-        window.location.reload();
+        toast.success('Order cancelled successfully!');
       } else {
-        alert('Failed to cancel the order.');
+        toast.error('Failed to cancel the order.');
       }
     } catch (error) {
       console.error('Failed to cancel order:', error);
+      toast.error('An error occurred while cancelling the order.');
     }
   };
 
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-brand-bg py-20 px-4 flex flex-col justify-center items-center font-sans antialiased text-brand-light-brown">
-        <div className="flex flex-col items-center">
-          <div className="w-10 h-10 border-4 border-brand-primary-brown border-t-transparent rounded-full animate-spin"></div>
-          <span className="mt-4 text-sm font-work">Loading order details...</span>
-        </div>
-      </div>
-    );
+    return <OrderConfirmedPageSkeleton />;
   }
 
   // If the order was not found (or access is unauthorized)
@@ -170,7 +153,7 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
               <p className="text-brand-primary-brown p-5 text-center text-base">Your order contains no items.</p>
             ) : (
               <div className="flex flex-col gap-4">
-                {mappedItems.map((item: any) => (
+                {mappedItems.map((item) => (
                   <ProductCartCard
                     key={item.variant_id}
                     {...item}
@@ -233,14 +216,29 @@ export default function OrderConfirmedPage({ params }: OrderConfirmedPageProps) 
               <div className="flex justify-between font-work text-xs text-brand-light-brown">
                 <span>Payment Method</span>
                 <span className="font-medium text-black">
-                  Cash on delivery
+                  {(() => {
+                    const raw = (order.payment_method || "").toLowerCase().trim();
+                    const isCard = raw === "card" || raw.includes("card") || raw.includes("online") || order.payment_status?.toLowerCase() === "paid";
+                    return isCard ? "Credit / Debit Card" : "Cash on delivery";
+                  })()}
                 </span>
               </div>
-              <div className="flex justify-between font-work text-xs text-brand-light-brown">
+              <div className="flex justify-between items-center font-work text-xs text-brand-light-brown">
                 <span>Payment Status</span>
-                <span className="font-medium text-black capitalize">
-                  {orderStatus}
-                </span>
+                {(() => {
+                  const raw = (order.payment_method || "").toLowerCase().trim();
+                  const isCard = raw === "card" || raw.includes("card") || raw.includes("online");
+                  const isPaid = order.payment_status?.toLowerCase() === "paid" || isCard;
+                  return isPaid ? (
+                    <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[11px]">
+                      ● Paid (Online)
+                    </span>
+                  ) : (
+                    <span className="font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full text-[11px]">
+                      Pay on Delivery
+                    </span>
+                  );
+                })()}
               </div>
             </div>
           </div>

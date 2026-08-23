@@ -49,11 +49,19 @@ export async function clearAuthData(): Promise<void> {
     document.cookie = "user=; path=/; max-age=0; SameSite=Lax";
   }
 
-  // Clear localStorage
+  // Clear localStorage and reset Zustand Cart
   if (typeof localStorage !== "undefined") {
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
+    localStorage.removeItem("daystore-cart-storage");
+  }
+
+  try {
+    const { useCartStore } = await import("@/app/api/hooks/useCartStore");
+    useCartStore.getState().resetLocalCart();
+  } catch {
+    // Ignore if store not initialized
   }
 }
 

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useCartStore } from "@/modules/shared";
 import { getProductSalePrice } from "@/modules/product";
 import { getProductVariants } from "@/app/api/endpoints/product.endpoint";
-
 import { SkinType, SkinSensitivity, SunExposure } from "@/enums";
+import { Product, Variant } from "@/app/api/types";
 
 export interface RecommendedProduct {
   productId: string;
@@ -18,6 +18,11 @@ export interface RecommendedProduct {
   photo: string;
   whyChosen: string;
 }
+
+type RoutineProductItem = Product & {
+  variants?: Variant[];
+  step_type?: string;
+};
 
 export function useSkincareResults() {
   const { addToCart } = useCartStore();
@@ -68,7 +73,7 @@ export function useSkincareResults() {
           const productsList: RecommendedProduct[] = [];
           Object.entries(routineData).forEach(([stepName, product]) => {
             if (product) {
-              const prod = product as any;
+              const prod = product as RoutineProductItem;
               const inlineVariant = prod.variants && prod.variants.length > 0 ? prod.variants[0] : null;
 
               productsList.push({

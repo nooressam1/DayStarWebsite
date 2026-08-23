@@ -5,14 +5,25 @@ import { CartItem } from "@/modules/shared";
 
 export interface CartItemCardProps extends CartItem {
   isEditable?: boolean;
-  onIncrement: () => void;
-  onDecrement: () => void;
-  onRemove: () => void;
+  onIncrement?: () => void;
+  onDecrement?: () => void;
+  onRemove?: () => void;
 }
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { Trash } from "lucide-react";
 
-const ProductCartCard = ({ name, price, photo, size, quantity, isEditable = true, variant_id, onIncrement, onDecrement, onRemove }: CartItemCardProps) => {
+const ProductCartCard = ({
+  name,
+  price,
+  photo,
+  size,
+  quantity,
+  isEditable = true,
+  variant_id,
+  onIncrement = () => { },
+  onDecrement = () => { },
+  onRemove = () => { },
+}: CartItemCardProps) => {
   const hasImage = photo && typeof photo === "string" && photo.trim() !== "";
 
   const displayImage = hasImage ? photo : "/no-image.png";
@@ -27,9 +38,8 @@ const ProductCartCard = ({ name, price, photo, size, quantity, isEditable = true
     <div className="flex flex-row w-full items-center justify-between">
       <Link
         href={`/product/${itemSlug}`}
-        className={`flex flex-row gap-5 items-center hover:opacity-80 transition-opacity cursor-pointer ${
-          isEditable ? "w-1/2" : "w-full"
-        }`}
+        className={`flex flex-row gap-5 items-center hover:opacity-80 transition-opacity cursor-pointer ${isEditable ? "w-1/2" : "w-full"
+          }`}
       >
         <div className="w-20 h-20 sm:w-24 sm:h-24 aspect-square bg-brand-light-brown/5 rounded-xl overflow-hidden shrink-0 border border-brand-light-brown/5">
           <img
@@ -50,7 +60,7 @@ const ProductCartCard = ({ name, price, photo, size, quantity, isEditable = true
 
       {isEditable ? (<div className="flex flex-row gap-2 items-center justify-center w-1/4">
         <div className="pl-4">
-          <QuantityButton value={quantity} onDecrement={onDecrement} onIncrement={onIncrement}></QuantityButton>
+          <QuantityButton value={quantity} min={1} max={5} onDecrement={onDecrement} onIncrement={onIncrement} />
         </div>
         <button onClick={onRemove}><Trash color="#78534A"></Trash></button>
       </div>) : null}

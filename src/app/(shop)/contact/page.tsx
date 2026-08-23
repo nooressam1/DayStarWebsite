@@ -1,16 +1,12 @@
 import { Suspense } from "react";
-import { ContactPage } from "@/modules/contact";
-import { Spinner } from "@/modules/shared";
+import { ContactPage, ContactPageSkeleton } from "@/modules/contact";
+
+// Pre-render statically and revalidate cache every hour
+export const revalidate = 3600;
 
 export default function Contact() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
-      }
-    >
+    <Suspense fallback={<ContactPageSkeleton />}>
       <ContactPage />
     </Suspense>
   );

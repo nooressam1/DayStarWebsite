@@ -10,4 +10,6 @@ export interface Product {
   is_active: boolean;
   on_sale?: boolean;
   discount_percentage?: number | null;
+  rating?: number;
+  reviews_count?: number;
 }

@@ -1,58 +1,122 @@
-import { useState, useEffect } from "react";
+import { useReducer, useEffect, useCallback } from "react";
 import { Address } from "@/app/api/types";
-import { addUserAddress, updateUserAddress } from "@/app/api/endpoints/address.endpoint";
-import { useAddresses } from "./useAddresses";
+import { useAddAddressMutation, useUpdateAddressMutation } from "./useAddressQueries";
+import { AddressFormState, initialAddressForm } from "./useAddresses";
+
+export interface AddressFormFullState {
+  values: AddressFormState;
+  formError: string;
+  submitting: boolean;
+}
+
+export type AddressFormAction =
+  | { type: "UPDATE_FIELD"; field: keyof AddressFormState; value: AddressFormState[keyof AddressFormState] }
+  | { type: "RESET_FORM"; isDefault?: boolean }
+  | { type: "POPULATE_FROM_ADDRESS"; address: Address }
+  | { type: "SET_ERROR"; error: string }
+  | { type: "SUBMIT_START" }
+  | { type: "SUBMIT_END"; error?: string };
+
+function addressFormReducer(state: AddressFormFullState, action: AddressFormAction): AddressFormFullState {
+  switch (action.type) {
+    case "UPDATE_FIELD":
+      return {
+        ...state,
+        values: { ...state.values, [action.field]: action.value },
+      };
+    case "RESET_FORM":
+      return {
+        values: { ...initialAddressForm, isDefault: !!action.isDefault },
+        formError: "",
+        submitting: false,
+      };
+    case "POPULATE_FROM_ADDRESS":
+      return {
+        values: {
+          city: action.address.city || "",
+          country: action.address.country || "Egypt",
+          isDefault: action.address.is_default || false,
+          label: (action.address.label === "Home" || action.address.label === "Work") ? action.address.label : "Other",
+          customLabel: (action.address.label === "Home" || action.address.label === "Work") ? "" : (action.address.label || ""),
+          street: action.address.street || "",
+          area: action.address.area || "",
+          governorate: action.address.governorate || "",
+          postalCode: action.address.postal_code || "",
+          buildingNo: action.address.building_no || "",
+          floorNumber: action.address.floor_number || "",
+          apartmentNumber: action.address.apartment_number || "",
+          selectedAddressId: action.address.id,
+        },
+        formError: "",
+        submitting: false,
+      };
+    case "SET_ERROR":
+      return { ...state, formError: action.error };
+    case "SUBMIT_START":
+      return { ...state, submitting: true, formError: "" };
+    case "SUBMIT_END":
+      return { ...state, submitting: false, formError: action.error || "" };
+    default:
+      return state;
+  }
+}
 
 interface UseAddressFormProps {
   isOpen: boolean;
   editingAddress: Address | null;
-  isFirstAddress: boolean;
+  isFirstAddress?: boolean;
   onClose: () => void;
-  onSaveSuccess: () => void;
+  onSaveSuccess?: () => void;
 }
 
 export function useAddressForm({
   isOpen,
   editingAddress,
-  isFirstAddress,
+  isFirstAddress = false,
   onClose,
   onSaveSuccess,
 }: UseAddressFormProps) {
-  const addressState = useAddresses();
-  const {
-    addressForm,
-    updateField,
-    populateFromAddress,
-    resetAddress,
-  } = addressState;
+  const [state, dispatch] = useReducer(addressFormReducer, {
+    values: initialAddressForm,
+    formError: "",
+    submitting: false,
+  });
 
-  const [formError, setFormError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const addAddressMutation = useAddAddressMutation();
+  const updateAddressMutation = useUpdateAddressMutation();
+
+  const updateField = useCallback(<K extends keyof AddressFormState>(field: K, value: AddressFormState[K]) => {
+    dispatch({ type: "UPDATE_FIELD", field, value });
+  }, []);
+
+  const resetAddress = useCallback(() => {
+    dispatch({ type: "RESET_FORM" });
+  }, []);
+
+  const populateFromAddress = useCallback((addr: Address) => {
+    dispatch({ type: "POPULATE_FROM_ADDRESS", address: addr });
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
       if (editingAddress) {
-        populateFromAddress(editingAddress);
+        dispatch({ type: "POPULATE_FROM_ADDRESS", address: editingAddress });
       } else {
-        resetAddress();
-        updateField("isDefault", isFirstAddress);
+        dispatch({ type: "RESET_FORM", isDefault: isFirstAddress });
       }
-      setFormError("");
-      setSubmitting(false);
     }
   }, [isOpen, editingAddress, isFirstAddress]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { street, area, governorate, buildingNo, city, postalCode, floorNumber, apartmentNumber, label, customLabel, country, isDefault } = addressForm;
+    const { street, area, governorate, buildingNo, city, postalCode, floorNumber, apartmentNumber, label, customLabel, country, isDefault } = state.values;
 
     if (!street.trim() || !area.trim() || !governorate.trim() || !buildingNo.trim() || !city.trim()) {
-      setFormError("Please fill out all required fields (Street, Area, Governorate, Building info, and City).");
+      dispatch({ type: "SET_ERROR", error: "Please fill out all required fields (Street, Area, Governorate, Building info, and City)." });
       return;
     }
 
-    setFormError("");
-    setSubmitting(true);
+    dispatch({ type: "SUBMIT_START" });
 
     const finalLabel = label === "Other" ? (customLabel.trim() || "Other") : label;
     const payload = {
@@ -71,25 +135,31 @@ export function useAddressForm({
 
     let result;
     if (editingAddress) {
-      result = await updateUserAddress(editingAddress.id, payload);
+      result = await updateAddressMutation.mutateAsync({ id: editingAddress.id, payload });
     } else {
-      result = await addUserAddress(payload);
+      result = await addAddressMutation.mutateAsync(payload);
     }
 
-    setSubmitting(false);
     if (result) {
-      onSaveSuccess();
+      dispatch({ type: "SUBMIT_END" });
+      onSaveSuccess?.();
       onClose();
     } else {
-      setFormError("Failed to save address. Please try again.");
+      dispatch({ type: "SUBMIT_END", error: "Failed to save address. Please try again." });
     }
   };
 
   return {
-    ...addressState,
-    formError,
-    setFormError,
-    submitting,
+    addressForm: state.values,
+    updateField,
+    populateFromAddress,
+    resetAddress,
+    formError: state.formError,
+    setFormError: (error: string) => dispatch({ type: "SET_ERROR", error }),
+    submitting: state.submitting,
     handleSubmit,
+    dispatch,
   };
 }
+
+

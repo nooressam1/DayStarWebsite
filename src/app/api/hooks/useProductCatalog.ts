@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Product, Category } from "@/app/api/types";
-import { getProducts } from "@/app/api/endpoints/product.endpoint";
-import { getCategories } from "@/app/api/endpoints/category.endpoint";
+import { useProductsQuery, useCategoriesQuery } from "./useProductQueries";
 
 export function useProductCatalog() {
   const router = useRouter();
@@ -18,11 +16,26 @@ export function useProductCatalog() {
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = 9; // Show 9 items per page (3x3 grid)
 
-  // Local state
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const discount = discountParam ? parseInt(discountParam, 10) : undefined;
+
+  // React Query for Products & Categories (Automatic Caching & Instant Nav)
+  const { data: productsData, isLoading: productsLoading } = useProductsQuery({
+    page,
+    limit,
+    categoryId,
+    collection,
+    search,
+    discount,
+  });
+
+  const { data: categoriesData = [] } = useCategoriesQuery();
+
+  const products = productsData?.items || [];
+  const categories = categoriesData || [];
+  const totalProducts = productsData?.total || 0;
+  const loading = productsLoading;
+
+  // Local state for header title & filters
   const [activeCategoryName, setActiveCategoryName] = useState("");
   const [sortBy, setSortBy] = useState<string>("newest"); // newest, price-asc, price-desc
 
@@ -31,29 +44,6 @@ export function useProductCatalog() {
   const [showPriceDropdown, setShowPriceDropdown] = useState(false);
   const [showAvailabilityDropdown, setShowAvailabilityDropdown] = useState(false);
   const [availability, setAvailability] = useState<string>("all"); // "all", "in-stock", "out-of-stock"
-
-  // Fetch categories on mount
-  useEffect(() => {
-    getCategories()
-      .then((data) => setCategories(data))
-      .catch((err) => console.error("Error loading categories:", err));
-  }, []);
-
-  // Fetch products when query parameters change
-  useEffect(() => {
-    setLoading(true);
-    const discount = discountParam ? parseInt(discountParam, 10) : undefined;
-    getProducts({ page, limit, categoryId, collection, search, discount })
-      .then((data) => {
-        setProducts(data.items);
-        setTotalProducts(data.total);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error loading products:", err);
-        setLoading(false);
-      });
-  }, [categoryId, collection, page, search, discountParam]);
 
   // Determine active title / header name
   useEffect(() => {
@@ -70,6 +60,7 @@ export function useProductCatalog() {
       setActiveCategoryName("All Skincare");
     }
   }, [categoryId, collection, categories, search]);
+
   const totalPages = Math.ceil(totalProducts / limit) || 1;
 
   // Handle category selection
@@ -94,13 +85,18 @@ export function useProductCatalog() {
     if (sortBy === "price-desc") return b.price - a.price;
     return 0; // keep backend ordering
   });
+
   const filteredProducts = sortedProducts.filter((product) => {
     const inStock = product.name.charCodeAt(0) % 6 !== 0; // 83% in stock
-    const matchesAvailability = availability === "in-stock" ? inStock : availability === "out-of-stock" ? !inStock : true;
+    const matchesAvailability =
+      availability === "in-stock"
+        ? inStock
+        : availability === "out-of-stock"
+        ? !inStock
+        : true;
     if (!matchesAvailability) return false;
     return true;
   });
-
 
   return {
     router,

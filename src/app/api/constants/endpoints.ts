@@ -31,5 +31,20 @@ export const ENDPOINTS = {
   },
   QUIZ: {
     SUBMIT: "/quiz/submit",
+    CHAT: "/quiz/chat",
+  },
+  CART: {
+    GET: "/cart",
+    SYNC_ITEM: "/cart/item",
+    REMOVE_ITEM: (variantId: string) => `/cart/item/${variantId}`,
+    CLEAR: "/cart/clear",
+    MERGE_GUEST: "/cart/merge",
+  },
+  FAVORITES: {
+    GET: "/favorites",
+    ADD: (productId: string) => `/favorites/${productId}`,
+    REMOVE: (productId: string) => `/favorites/${productId}`,
+    TOGGLE_NOTIFY: "/favorites/notify",
+    SYNC_GUEST: "/favorites/sync",
   },
 } as const;

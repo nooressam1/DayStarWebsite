@@ -1,50 +1,16 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { ShoppingBag, ChevronRight, Calendar, DollarSign } from "lucide-react";
-import { getOrders } from "@/app/api/endpoints/order.endpoint";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
+import { useOrdersQuery } from "@/app/api/hooks/useOrderQueries";
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const limit = 5;
 
-  const fetchOrders = (offset: number) => {
-    const limit = 5;
-    if (offset === 0) {
-      setLoading(true);
-    } else {
-      setLoadingMore(true);
-    }
-
-    getOrders(limit, offset)
-      .then((data) => {
-        if (offset === 0) {
-          setOrders(data);
-        } else {
-          setOrders((prev) => [...prev, ...data]);
-        }
-        setHasMore(data.length === limit);
-        setLoading(false);
-        setLoadingMore(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-        setLoadingMore(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchOrders(0);
-  }, []);
-
-  const handleLoadMore = () => {
-    fetchOrders(orders.length);
-  };
+  const { data: orders = [], isLoading: loading } = useOrdersQuery(limit + offset, 0);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -127,25 +93,6 @@ export default function OrdersPage() {
               </div>
             ))}
           </div>
-
-          {hasMore && (
-            <div className="flex justify-center mt-6">
-              <button
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                className="px-6 py-2.5 bg-brand-primary-brown text-white text-sm font-medium rounded-lg hover:bg-brand-primary-brown/90 shadow-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
-              >
-                {loadingMore ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Loading...
-                  </>
-                ) : (
-                  "View More"
-                )}
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>

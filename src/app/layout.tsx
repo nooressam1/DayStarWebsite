@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Inter, Work_Sans, Libre_Baskerville } from "next/font/google";
 import { getCachedUser } from "@/lib/supabase/server-auth";
 import { AuthProvider } from "@/lib/supabase/auth-provider";
+import { QueryProvider } from "@/providers/QueryProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,22 +28,25 @@ export const metadata: Metadata = {
   description: "DayStar ecommerce",
 };
 
-export default async function RootLayout({
+import { Toaster } from "sonner";
+
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const initialUser = await getCachedUser();
-
   return (
     <html
       lang="en"
       className={`${inter.variable} ${workSans.variable} ${libreBaskerville.variable} h-full antialiased`}
     >
       <body className="font-sans antialiased">
-        <AuthProvider initialUser={initialUser}>
-          {children}
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider initialUser={null}>
+            {children}
+            <Toaster position="top-center" richColors closeButton />
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

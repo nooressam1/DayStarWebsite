@@ -1,16 +1,9 @@
 import { Suspense } from "react";
-import { CheckoutPage } from "@/modules/checkout";
-import { Spinner } from "@/modules/shared";
+import { CheckoutPage, CheckoutPageSkeleton } from "@/modules/checkout";
 
 export default function Checkout() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
-      }
-    >
+    <Suspense fallback={<CheckoutPageSkeleton />}>
       <CheckoutPage />
     </Suspense>
   );

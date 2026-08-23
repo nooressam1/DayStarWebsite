@@ -3,15 +3,14 @@ import { createPortal } from "react-dom";
 import { X, Home, Briefcase, Map } from "lucide-react";
 import { Address } from "@/app/api/types";
 import { TextInput, CustomButton } from "@/modules/shared";
-import { useAddressForm } from "@/app/api/hooks";
-
+import { useAddressForm } from "@/app/api/hooks/useAddressForm";
 import { EGYPT_GOVERNORATES } from "@/modules/checkout";
 
 interface AddressModalProps {
   isOpen: boolean;
   onClose: () => void;
   editingAddress: Address | null;
-  onSaveSuccess: () => void;
+  onSaveSuccess?: () => void;
   isFirstAddress?: boolean;
 }
 
@@ -22,6 +21,13 @@ export default function AddressModal({
   onSaveSuccess,
   isFirstAddress = false,
 }: AddressModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
   const {
     addressForm,
     updateField,
@@ -35,6 +41,9 @@ export default function AddressModal({
     onClose,
     onSaveSuccess,
   });
+
+
+  if (!isOpen) return null;
 
   const {
     label,
@@ -51,217 +60,196 @@ export default function AddressModal({
     isDefault,
   } = addressForm;
 
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
+  const modalContent = (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-xl border border-[#78534a]/10 p-6 sm:p-8 relative text-[#78534a]">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 p-1.5 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
 
-  if (!isOpen) return null;
-  if (!mounted) return null;
+        <h2 className="font-serif text-xl sm:text-2xl font-bold mb-1">
+          {editingAddress ? "Edit Address" : "Add New Address"}
+        </h2>
+        <p className="text-xs text-brand-gray mb-6">
+          Provide your shipping details for delivery.
+        </p>
 
-  return createPortal(
-    <div
-      onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs font-sans px-4 animate-fade-in"
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl border border-[#78534a]/15 shadow-xl w-full max-w-lg overflow-hidden flex flex-col animate-scale-in"
-      >
-        {/* Modal Header */}
-        <div className="flex justify-between items-center p-4 border-b border-[#78534a]/10 bg-[#FAF5F3]">
-          <h2 className="font-serif text-lg font-bold text-brand-primary-brown">
-            {editingAddress ? "Edit Address" : "Add Shipping Address"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-1.5 text-brand-gray hover:text-brand-primary-brown hover:bg-[#78534a]/5 rounded-lg transition-colors cursor-pointer"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+        {formError && (
+          <div className="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded-lg border border-red-200">
+            {formError}
+          </div>
+        )}
 
-        {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-8 py-4 flex flex-col gap-3">
-          {formError && (
-            <div className="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
-              {formError}
-            </div>
-          )}
-
-          {/* Label Selector */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 font-sans">
+          {/* Address Label Selector */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-brand-primary-brown">Address Label / Name</label>
-            <div className="grid grid-cols-3 gap-2">
+            <label className="text-xs font-semibold text-brand-primary-brown">Address Label</label>
+            <div className="grid grid-cols-3 gap-3">
               {[
-                { val: "Home", icon: Home },
-                { val: "Work", icon: Briefcase },
-                { val: "Other", icon: Map },
-              ].map((opt) => {
-                const IconComp = opt.icon;
+                { name: "Home", icon: Home },
+                { name: "Work", icon: Briefcase },
+                { name: "Other", icon: Map },
+              ].map((item) => {
+                const Icon = item.icon;
+                const active = label === item.name;
                 return (
                   <button
-                    key={opt.val}
+                    key={item.name}
                     type="button"
-                    onClick={() => updateField("label", opt.val)}
-                    className={`flex items-center justify-center gap-2 py-2 px-3 border rounded-xl text-sm font-semibold transition-all cursor-pointer ${label === opt.val
-                      ? "border-brand-primary-brown bg-[#FAF5F3] text-brand-primary-brown"
-                      : "border-[#78534a]/20 text-brand-gray hover:border-[#78534a]/40"
-                      }`}
+                    onClick={() => updateField("label", item.name)}
+                    className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
+                      active
+                        ? "border-brand-primary-brown bg-brand-primary-brown/10 text-brand-primary-brown font-bold"
+                        : "border-stone-200 text-stone-600 hover:bg-stone-50"
+                    }`}
                   >
-                    <IconComp className="h-4 w-4" />
-                    <span>{opt.val}</span>
+                    <Icon className="w-4 h-4" />
+                    <span>{item.name}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Custom Label Input */}
           {label === "Other" && (
             <TextInput
               label="Custom Label Name"
-              required
-              placeholder="e.g. Office, Parents, Gym"
+              placeholder="e.g. Summer House, Mom's Place"
               value={customLabel}
               onChange={(e) => updateField("customLabel", e.target.value)}
-              maxLength={30}
             />
           )}
 
-          {/* City & Country */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Street & Area */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <TextInput
-              label="City"
+              label="Street Name / Number *"
+              placeholder="e.g. 15 El Tahrir Street"
+              value={street}
+              onChange={(e) => updateField("street", e.target.value)}
               required
-              placeholder="e.g. Cairo"
-              value={city}
-              onChange={(e) => updateField("city", e.target.value)}
-              maxLength={50}
             />
             <TextInput
-              label="Country"
+              label="District / Area *"
+              placeholder="e.g. Maadi, Zamalek, New Cairo"
+              value={area}
+              onChange={(e) => updateField("area", e.target.value)}
               required
-              placeholder="Egypt"
-              value={country}
-              onChange={(e) => updateField("country", e.target.value)}
-              maxLength={50}
             />
           </div>
 
-          {/* Governorate & Postal Code */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1 w-full">
-              <label className="text-brand-primary-brown font-sans text-sm font-medium">
-                Governorate <span className="text-red-500">*</span>
+          {/* Building, Floor, Apartment */}
+          <div className="grid grid-cols-3 gap-3">
+            <TextInput
+              label="Building No. *"
+              placeholder="e.g. 12"
+              value={buildingNo}
+              onChange={(e) => updateField("buildingNo", e.target.value)}
+              required
+            />
+            <TextInput
+              label="Floor"
+              placeholder="e.g. 4"
+              value={floorNumber}
+              onChange={(e) => updateField("floorNumber", e.target.value)}
+            />
+            <TextInput
+              label="Apt No."
+              placeholder="e.g. 14"
+              value={apartmentNumber}
+              onChange={(e) => updateField("apartmentNumber", e.target.value)}
+            />
+          </div>
+
+          {/* Governorate & City */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-brand-primary-brown">
+                Governorate *
               </label>
               <select
                 value={governorate}
-                onChange={(e) => updateField("governorate", e.target.value)}
-                className="rounded-lg border px-4 py-2.5 text-sm outline-none transition-colors font-sans w-full bg-white border-brand-primary-brown/20 focus:border-brand-primary-brown cursor-pointer"
+                onChange={(e) => {
+                  updateField("governorate", e.target.value);
+                  if (!city) updateField("city", e.target.value);
+                }}
+                required
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs font-sans focus:outline-hidden focus:border-brand-primary-brown bg-white text-brand-primary-brown"
               >
-                <option value="" disabled>Select Governorate</option>
+                <option value="">Select Governorate</option>
                 {EGYPT_GOVERNORATES.map((gov) => (
-                  <option key={gov} value={gov}>{gov}</option>
+                  <option key={gov} value={gov}>
+                    {gov}
+                  </option>
                 ))}
               </select>
             </div>
+
             <TextInput
-              label="Postal Code"
-              placeholder="e.g. 11728 (Optional)"
-              value={postalCode}
-              onChange={(e) => updateField("postalCode", e.target.value)}
-              maxLength={20}
+              label="City *"
+              placeholder="e.g. Cairo, Giza, Alexandria"
+              value={city}
+              onChange={(e) => updateField("city", e.target.value)}
+              required
             />
           </div>
 
-          {/* Area / District */}
-          <TextInput
-            label="Area / District"
-            required
-            placeholder="e.g. Maadi"
-            value={area}
-            onChange={(e) => updateField("area", e.target.value)}
-            maxLength={100}
-          />
-
-          {/* Street Address */}
-          <TextInput
-            label="Street Address"
-            required
-            placeholder="e.g. 15 Tahrir Street"
-            value={street}
-            onChange={(e) => updateField("street", e.target.value)}
-            maxLength={200}
-          />
-
-          {/* Building No, Floor, Apt */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* Postal Code & Country */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <TextInput
-              label="Building No."
-              required
-              placeholder="e.g. Bldg 12"
-              value={buildingNo}
-              onChange={(e) => updateField("buildingNo", e.target.value)}
-              maxLength={50}
+              label="Postal Code (Optional)"
+              placeholder="e.g. 11511"
+              value={postalCode}
+              onChange={(e) => updateField("postalCode", e.target.value)}
             />
             <TextInput
-              label="Floor No."
-              placeholder="e.g. 4th Floor"
-              value={floorNumber}
-              onChange={(e) => updateField("floorNumber", e.target.value)}
-              maxLength={30}
-            />
-            <TextInput
-              label="Apartment No."
-              placeholder="e.g. Apt 4B"
-              value={apartmentNumber}
-              onChange={(e) => updateField("apartmentNumber", e.target.value)}
-              maxLength={30}
+              label="Country"
+              value={country}
+              disabled
+              readOnly
             />
           </div>
 
           {/* Set as Default Checkbox */}
           <div className="flex items-center gap-2 mt-2">
             <input
-              id="set-default-checkbox"
               type="checkbox"
+              id="isDefault"
               checked={isDefault}
-              disabled={editingAddress?.is_default}
               onChange={(e) => updateField("isDefault", e.target.checked)}
-              className="rounded border-brand-primary-brown/30 text-brand-primary-brown focus:ring-brand-primary-brown h-4 w-4 cursor-pointer"
+              className="w-4 h-4 text-brand-primary-brown rounded-xs border-stone-300 focus:ring-brand-primary-brown cursor-pointer"
             />
-            <label
-              htmlFor="set-default-checkbox"
-              className="text-sm font-medium text-brand-primary-brown cursor-pointer select-none"
-            >
+            <label htmlFor="isDefault" className="text-xs font-medium text-brand-gray cursor-pointer">
               Set as my default shipping address
             </label>
           </div>
 
-          {/* Modal Footer Actions */}
-          <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-[#78534a]/10">
+          {/* Modal Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-stone-100 mt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 border border-brand-primary-brown/20 text-brand-primary-brown hover:bg-[#78534a]/5 rounded-lg text-sm font-semibold transition-all cursor-pointer"
+              className="px-4 py-2 text-xs font-medium text-stone-600 hover:text-stone-800 cursor-pointer"
             >
               Cancel
             </button>
             <CustomButton
               type="submit"
-              variant="solid"
-              colorScheme="primary"
               disabled={submitting}
-              className="px-5 py-2.5 text-sm font-semibold rounded-lg"
+              className="px-6 py-2 bg-brand-primary-brown text-white text-xs font-semibold rounded-lg hover:bg-brand-primary-brown/90 shadow-sm cursor-pointer"
             >
-              {submitting ? "Saving..." : "Save Address"}
+              {submitting ? "Saving..." : editingAddress ? "Save Changes" : "Add Address"}
             </CustomButton>
           </div>
         </form>
       </div>
-    </div>,
-    document.body
+    </div>
   );
+
+  if (!mounted) return null;
+  return createPortal(modalContent, document.body);
 }

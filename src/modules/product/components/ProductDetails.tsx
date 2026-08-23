@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AlertCircle, Check, Star } from "lucide-react";
 import { Product, Variant } from "@/app/api/types";
 import { CustomButton, FavoriteButton, useCartStore } from "@/modules/shared";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
@@ -13,15 +14,67 @@ export default function ProductDetails({ product, variants }: { product: Product
   const router = useRouter();
   const { user } = useAuth();
   const { openModal } = useAuthModalStore();
-  const [selectedSize, setSelectedSize] = useState<Variant | null>(variants[0] || null); // Default to 50ml
+  const defaultVariant: Variant = {
+    id: product.id,
+    product_id: product.id,
+    size: "Standard",
+    sku: "",
+    stock: 99,
+  };
+  const [selectedSize, setSelectedSize] = useState<Variant>(variants[0] || defaultVariant);
   const [quantity, setQuantity] = useState<number>(1);
-  const { addToCart } = useCartStore();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isAdded, setIsAdded] = useState<boolean>(false);
+  const { cart, addToCart } = useCartStore();
 
   const displayPrice = getProductSalePrice(product);
+
+  const existingItem = cart.find((item) => item.variant_id === selectedSize?.id);
+  const existingQuantity = existingItem ? existingItem.quantity : 0;
+
+  const handleAddToCart = () => {
+    if (!selectedSize) return;
+
+    if (existingQuantity >= 5) {
+      setErrorMessage("You already have the maximum limit of 5 units in your cart.");
+      return;
+    }
+
+    if (existingQuantity + quantity > 5) {
+      setErrorMessage(`Cannot add ${quantity} more. You already have ${existingQuantity} in your cart (maximum limit is 5).`);
+      return;
+    }
+
+    setErrorMessage(null);
+    addToCart({
+      variant_id: selectedSize.id,
+      product_id: product.id,
+      name: product.name,
+      price: displayPrice,
+      size: selectedSize.size,
+      photo: product.images[0],
+    }, quantity);
+
+    setIsAdded(true);
+    setTimeout(() => {
+      setIsAdded(false);
+    }, 1800);
+  };
 
   const handleBuyNow = () => {
     if (!selectedSize) return;
 
+    if (existingQuantity >= 5) {
+      setErrorMessage("You already have the maximum limit of 5 units in your cart.");
+      return;
+    }
+
+    if (existingQuantity + quantity > 5) {
+      setErrorMessage(`Cannot add ${quantity} more. You already have ${existingQuantity} in your cart (maximum limit is 5).`);
+      return;
+    }
+
+    setErrorMessage(null);
     addToCart({
       variant_id: selectedSize.id,
       product_id: product.id,
@@ -41,11 +94,11 @@ export default function ProductDetails({ product, variants }: { product: Product
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="flex flex-col gap-2">
-        <h1 className="text-brand-primary-brown font-medium font-serif text-xl">
+        <h1 className="text-brand-primary-brown font-bold font-serif text-2xl md:text-3xl">
           {product.name}
         </h1>
         <div className="flex items-center gap-2 mt-1">
-          <span className="font-serif font-bold text-brand-primary-brown text-xl">
+          <span className="font-serif font-semibold text-brand-primary-brown text-lg">
             {formatMoney(displayPrice)}
           </span>
           {product.on_sale && (
@@ -77,7 +130,10 @@ export default function ProductDetails({ product, variants }: { product: Product
                 variant={isSelected ? "solid" : "outline"}
                 colorScheme={isSelected ? "secondary" : "secondary"}
                 // 5. Update state when the user presses the option
-                onClick={() => setSelectedSize(size)}
+                onClick={() => {
+                  setSelectedSize(size);
+                  setErrorMessage(null);
+                }}
                 className="py-2.5 px-5 text-sm rounded-lg w-fit" // Make size buttons slightly smaller
               >
                 {size.size}
@@ -87,7 +143,19 @@ export default function ProductDetails({ product, variants }: { product: Product
         </div>
       </div>
       <div className="flex flex-col gap-3">
-        <QuantityButton value={quantity} onDecrement={() => setQuantity(Math.max(1, quantity - 1))} onIncrement={() => setQuantity(quantity + 1)}></QuantityButton>
+        <QuantityButton
+          value={quantity}
+          min={1}
+          max={5}
+          onDecrement={() => {
+            setQuantity(Math.max(1, quantity - 1));
+            setErrorMessage(null);
+          }}
+          onIncrement={() => {
+            setQuantity(Math.min(5, quantity + 1));
+            setErrorMessage(null);
+          }}
+        />
         <CustomButton
           key={"buy_now"}
           variant={"solid"}
@@ -98,30 +166,27 @@ export default function ProductDetails({ product, variants }: { product: Product
           Buy Now
         </CustomButton>
         <div className="flex flex-row gap-2">
-          {" "}
-
           <CustomButton
             key={"add_to_cart"}
-            variant={"outline"}
+            variant={isAdded ? "solid" : "outline"}
             colorScheme={"primary"}
-            onClick={() => {
-              console.log("pressed button")
-              if (!selectedSize) return;
-              addToCart({
-                variant_id: selectedSize.id,
-                product_id: product.id,
-                name: product.name,
-                price: displayPrice,
-                size: selectedSize.size,
-                photo: product.images[0],
-              }, quantity)
-            }}
-            className="py-4 px-2 w-full  flex-1 text-sm font-normal rounded-lg "
+            onClick={handleAddToCart}
+            icon={isAdded ? Check : undefined}
+            className={`py-4 px-2 w-full flex-1 text-sm font-normal rounded-lg transition-all duration-300 ${
+              isAdded ? "bg-[#557b55] text-white border-[#557b55] hover:bg-[#466946]" : ""
+            }`}
           >
-            Add to Cart
+            {isAdded ? "Added to Cart" : "Add to Cart"}
           </CustomButton>
           <FavoriteButton product={product}></FavoriteButton>
         </div>
+
+        {errorMessage && (
+          <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-200/80 px-3.5 py-2.5 rounded-lg text-xs font-sans mt-1 animate-in fade-in duration-200">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
       </div>
     </div>
   );

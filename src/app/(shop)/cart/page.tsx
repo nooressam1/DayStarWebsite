@@ -1,16 +1,9 @@
 import { Suspense } from "react";
-import { CartPage } from "@/modules/shoppingcart";
-import { Spinner } from "@/modules/shared";
+import { CartPage, CartPageSkeleton } from "@/modules/shoppingcart";
 
 export default function Cart() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
-      }
-    >
+    <Suspense fallback={<CartPageSkeleton />}>
       <CartPage />
     </Suspense>
   );

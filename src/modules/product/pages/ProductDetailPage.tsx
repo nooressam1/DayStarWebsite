@@ -1,18 +1,57 @@
-import React from "react";
+"use client";
+
+import React, { use } from "react";
 import ProductDetails from "../components/ProductDetails";
-import { Product } from "@/app/api/types";
 import ImageCarousel from "../components/ImageCarousel";
-import { getProduct, getProductVariants, getProducts, getBestSellers } from "@/app/api/endpoints/product.endpoint";
 import ProductReviews from "../components/ProductReviews";
 import { ProductCard } from "@/modules/home/components/ProductCard";
+import {
+  useProductBySlugQuery,
+  useProductVariantsQuery,
+  useProductsQuery,
+  useBestSellersQuery,
+} from "@/app/api/hooks/useProductQueries";
+import ProductDetailPageSkeleton from "../components/ProductDetailPageSkeleton";
+
+import { Product, Variant } from "@/app/api/types";
 
 interface ProductPageProps {
-  params: Promise<{ slug: string }>;
+  params?: Promise<{ slug: string }>;
+  slug?: string;
+  initialProduct?: Product | null;
+  initialVariants?: Variant[];
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
-  const { slug } = await params;
-  const product = await getProduct(slug);
+export default function ProductDetailPage({
+  params,
+  slug: propSlug,
+  initialProduct,
+  initialVariants = [],
+}: ProductPageProps) {
+  const resolvedSlug = params ? use(params).slug : propSlug || "";
+
+  // React Query Hooks (Hydrated with initial pre-fetched data)
+  const { data: product = initialProduct, isLoading: productLoading } = useProductBySlugQuery(
+    resolvedSlug,
+    initialProduct
+  );
+  const { data: variants = initialVariants, isLoading: variantsLoading } = useProductVariantsQuery(
+    product?.id || "",
+    initialVariants.length > 0 ? initialVariants : undefined
+  );
+  const { data: similarData } = useProductsQuery({
+    categoryId: product?.category_id || undefined,
+    limit: 6,
+  });
+  const { data: bestSellers = [] } = useBestSellersQuery();
+
+  const hasInitialData = !!initialProduct;
+  const isLoading = !hasInitialData && (productLoading || variantsLoading);
+
+  if (isLoading) {
+    return <ProductDetailPageSkeleton />;
+  }
+
   if (!product) {
     return (
       <div className="text-center py-20 font-serif text-brand-primary-brown">
@@ -23,17 +62,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
     );
   }
-  const variants = await getProductVariants(product.id);
 
-  // Fetch similar products (same category)
-  const categoryId = product.category_id || undefined;
-  const { items: rawSimilar } = await getProducts({ categoryId, limit: 6 });
-  
-  let similarProducts = (rawSimilar || []).filter((p) => p.id !== product.id);
-  
-  // Fallback to best sellers if we don't have enough similar products
+  const rawSimilar = similarData?.items || [];
+  let similarProducts = rawSimilar.filter((p) => p.id !== product.id);
+
   if (similarProducts.length < 4) {
-    const bestSellers = await getBestSellers();
     const remainingCount = 4 - similarProducts.length;
     const fallbacks = bestSellers.filter(
       (p) => p.id !== product.id && !similarProducts.some((s) => s.id === p.id)
@@ -41,16 +74,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
     similarProducts = [...similarProducts, ...fallbacks.slice(0, remainingCount)];
   }
 
-  // Ensure we show exactly 4
   similarProducts = similarProducts.slice(0, 4);
 
   return (
     <div className="py-10 px-10 flex flex-col gap-16">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-14 items-center">
-        <div className="md:max-w-1/2">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-14 items-start w-full">
+        <div className="w-full md:w-1/2 shrink-0">
           <ImageCarousel images={product.images} productName={product.name} />
         </div>
-        <div className="md:max-w-1/2">
+        <div className="w-full md:w-1/2">
           <ProductDetails product={product} variants={variants} />
         </div>
       </div>

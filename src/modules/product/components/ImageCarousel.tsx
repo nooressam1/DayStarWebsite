@@ -20,29 +20,18 @@ export default function ImageCarousel({
 
   const displayImages = hasImages ? images : ["/no-image.png"];
 
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) =>
-      prev === 0 ? displayImages.length - 1 : prev - 1,
-    );
-  };
-  const handleNext = () => {
-    setCurrentIndex((prev) =>
-      prev === displayImages.length - 1 ? 0 : prev + 1,
-    );
-  };
-
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col md:flex-row gap-4">
+    <div className="w-full max-w-lg  flex flex-col md:flex-row  items-start">
+      {/* Thumbnail List */}
       {displayImages.length >= 1 && (
-        <div className="flex flex-row md:flex-col gap-3 order-2 md:order-1 w-full md:w-36 pb-2 md:pb-0 scrollbar-none">
+        <div className="flex flex-row md:flex-col gap-3 order-2 md:order-1 w-full md:w-28 pb-2 md:pb-0 scrollbar-none shrink-0 overflow-x-auto md:overflow-y-auto">
           {displayImages.map((src, index) => {
             const isActive = index === currentIndex;
             return (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
-                className={`w-28 h-28  md:w-36 md:h-36 rounded-xl overflow-hidden border-2 cursor-pointer transition-all shrink-0 focus:outline-none ${isActive
+                className={`w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-24 rounded-xl overflow-hidden border-2 cursor-pointer transition-all shrink-0 focus:outline-none ${isActive
                   ? "border-brand-primary-brown scale-95 shadow-sm"
                   : "border-transparent opacity-60 hover:opacity-100"
                   }`}
@@ -58,7 +47,8 @@ export default function ImageCarousel({
         </div>
       )}
 
-      <div className="relative order-1 md:order-2 aspect-square w-full bg-white rounded-2xl overflow-hidden border border-brand-light-brown/10 shadow-sm group">
+      {/* Main Image Display Box with Fixed Consistent Dimensions */}
+      <div className="relative order-1 md:order-2 aspect-square w-full h-[320px] sm:h-[450px] md:h-[500px] bg-white rounded-2xl overflow-hidden border border-brand-light-brown/10 shadow-sm group shrink-0">
         <div
           className="flex h-full w-full transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}

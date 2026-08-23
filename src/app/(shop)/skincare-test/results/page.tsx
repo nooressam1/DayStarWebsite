@@ -1,16 +1,9 @@
 import { Suspense } from "react";
-import { SkincareTestResultsPage } from "@/modules/skincare-test";
-import { Spinner } from "@/modules/shared";
+import { SkincareTestResultsPage, SkincareTestResultsSkeleton } from "@/modules/skincare-test";
 
 export default function SkincareTestResults() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
-      }
-    >
+    <Suspense fallback={<SkincareTestResultsSkeleton />}>
       <SkincareTestResultsPage />
     </Suspense>
   );
