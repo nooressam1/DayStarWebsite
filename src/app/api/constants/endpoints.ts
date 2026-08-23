@@ -31,6 +31,7 @@ export const ENDPOINTS = {
   },
   QUIZ: {
     SUBMIT: "/quiz/submit",
+    CHAT: "/quiz/chat",
   },
   CART: {
     GET: "/cart",

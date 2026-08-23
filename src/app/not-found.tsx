@@ -14,10 +14,7 @@ export default function NotFound() {
 
         <div className="w-full max-w-2xl text-center relative z-10 flex flex-col items-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-primary-brown/10 text-brand-primary-brown text-xs font-semibold uppercase tracking-wider mb-6">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Lost in Radiance</span>
-          </div>
+
 
           {/* 404 Heading */}
           <h1 className="font-serif text-7xl sm:text-9xl font-bold text-brand-primary-brown tracking-tight leading-none drop-shadow-xs">

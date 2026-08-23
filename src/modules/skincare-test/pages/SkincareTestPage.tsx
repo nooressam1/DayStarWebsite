@@ -2,13 +2,15 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, AlertCircle, Loader2 } from "lucide-react";
+import { ArrowRight, AlertCircle, Loader2, Sparkles, ClipboardList } from "lucide-react";
 import { QUESTIONS } from "../utils/questions";
 import { apiClient } from "@/app/api/utils/client";
 import { ENDPOINTS } from "@/app/api/constants/endpoints";
+import { AiSkincareChat } from "../components/AiSkincareChat";
 
 export default function SkincareTestPage() {
   const router = useRouter();
+  const [mode, setMode] = useState<'ai' | 'classic'>('ai');
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({
     skinType: "",
@@ -105,145 +107,171 @@ export default function SkincareTestPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-12 md:py-20 font-sans">
+    <div className="min-h-screen flex flex-col items-center px-4 py-12 md:py-16 font-sans">
       <div className="w-full max-w-4xl flex flex-col">
         {/* Header Section */}
-        <div className="mb-10 text-center">
+        <div className="mb-6 text-center">
           <h1 className="text-2xl md:text-3xl font-serif text-[#78534a] font-bold tracking-wide">
-            Skin Care Test
+            Skin Care Consultation
           </h1>
           <p className="text-sm md:text-base text-[#686361]/80 mt-2 font-light">
-            Learn your routine from professionals
+            Curate your personal routine using Groq AI or standard quiz
           </p>
         </div>
 
-        {/* Progress Tracker Segments */}
-        <div className="flex gap-2 w-full mb-10 px-1">
-          {QUESTIONS.map((q, idx) => {
-            const isActiveOrDone = idx <= currentStep;
-            return (
-              <div
-                key={q.id}
-                className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-                  isActiveOrDone ? "bg-[#004956]" : "bg-[#e8dfdc]"
+        {/* Mode Selector Tabs */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="bg-[#FAF5F3] p-1.5 rounded-2xl border border-[#78534a]/15 shadow-sm inline-flex gap-2">
+            <button
+              onClick={() => setMode('ai')}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${mode === 'ai'
+                ? 'bg-[#004956] text-white shadow-sm'
+                : 'text-[#78534a] hover:bg-white/60'
                 }`}
-              />
-            );
-          })}
+            >
+              <span>Groq AI Consultant</span>
+            </button>
+
+            <button
+              onClick={() => setMode('classic')}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${mode === 'classic'
+                ? 'bg-[#78534a] text-white shadow-sm'
+                : 'text-[#78534a] hover:bg-white/60'
+                }`}
+            >
+              <ClipboardList className="w-4 h-4" />
+              <span>Classic Step Quiz</span>
+            </button>
+          </div>
         </div>
 
-        {/* Quiz Container Card */}
-        <div
-          className={`bg-[#FDF9F8] rounded-xl shadow-md shadow-[#78534a]/5 border border-[#78534a]/10 p-8 md:p-12 min-h-[400px] flex flex-col justify-between transition-all duration-300 transform ${
-            isAnimating ? "opacity-0 scale-[0.98]" : "opacity-100 scale-100"
-          }`}
-        >
-          <div>
-            {/* Question Number */}
-            <span className="text-sm md:text-md font-semibold text-secondary tracking-wide uppercase font-mono">
-              Question #{currentQuestion.id}
-            </span>
-
-            {/* Question Title & Subtitle */}
-            <h2 className="text-xl md:text-2xl font-serif text-[#78534a] font-bold mt-2">
-              {currentQuestion.title}
-            </h2>
-            <p className="text-xs md:text-sm text-[#686361]/70 mt-1 font-light">
-              {currentQuestion.subtitle}
-            </p>
-
-            {/* Options List */}
-            <div className="mt-8 flex flex-col gap-3">
-              {currentQuestion.options.map((option) => {
-                const currentAnswer = answers[currentQuestion.key];
-                const isSelected =
-                  currentQuestion.type === "single"
-                    ? currentAnswer === option.id
-                    : Array.isArray(currentAnswer) && currentAnswer.includes(option.id);
-
+        {/* Render Selected Quiz Mode */}
+        {mode === 'ai' ? (
+          <AiSkincareChat />
+        ) : (
+          <>
+            {/* Progress Tracker Segments */}
+            <div className="flex gap-2 w-full mb-8 px-1">
+              {QUESTIONS.map((q, idx) => {
+                const isActiveOrDone = idx <= currentStep;
                 return (
-                  <button
-                    key={option.id}
-                    onClick={() => handleOptionSelect(option.id)}
-                    className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
-                      isSelected
-                        ? "bg-[#004956] text-white border-[#004956] shadow-sm"
-                        : "bg-white text-[#78534a] border-[#78534a]/15 hover:border-[#78534a]/40 hover:bg-[#FAF5F3]"
-                    }`}
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-sans font-semibold text-sm md:text-base">
-                        {option.label}
-                      </span>
-                      {option.description && (
-                        <span
-                          className={`text-xs mt-0.5 font-light ${
-                            isSelected ? "text-white/80" : "text-[#686361]/70"
-                          }`}
-                        >
-                          {option.description}
-                        </span>
-                      )}
-                    </div>
-                    <div
-                      className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
-                        isSelected
-                          ? "border-white bg-white/20 text-white"
-                          : "border-[#78534a]/30"
+                  <div
+                    key={q.id}
+                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${isActiveOrDone ? "bg-[#004956]" : "bg-[#e8dfdc]"
                       }`}
-                    >
-                      {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
-                    </div>
-                  </button>
+                  />
                 );
               })}
             </div>
 
-            {error && (
-              <div className="mt-6 p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3 text-red-700 text-xs md:text-sm">
-                <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
-                <span>{error}</span>
+            {/* Quiz Container Card */}
+            <div
+              className={`bg-[#FDF9F8] rounded-xl shadow-md shadow-[#78534a]/5 border border-[#78534a]/10 p-8 md:p-12 min-h-[400px] flex flex-col justify-between transition-all duration-300 transform ${isAnimating ? "opacity-0 scale-[0.98]" : "opacity-100 scale-100"
+                }`}
+            >
+              <div>
+                {/* Question Number */}
+                <span className="text-sm md:text-md font-semibold text-secondary tracking-wide uppercase font-mono">
+                  Question #{currentQuestion.id}
+                </span>
+
+                {/* Question Title & Subtitle */}
+                <h2 className="text-xl md:text-2xl font-serif text-[#78534a] font-bold mt-2">
+                  {currentQuestion.title}
+                </h2>
+                <p className="text-xs md:text-sm text-[#686361]/70 mt-1 font-light">
+                  {currentQuestion.subtitle}
+                </p>
+
+                {/* Options List */}
+                <div className="mt-8 flex flex-col gap-3">
+                  {currentQuestion.options.map((option) => {
+                    const currentAnswer = answers[currentQuestion.key];
+                    const isSelected =
+                      currentQuestion.type === "single"
+                        ? currentAnswer === option.id
+                        : Array.isArray(currentAnswer) && currentAnswer.includes(option.id);
+
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => handleOptionSelect(option.id)}
+                        className={`w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer ${isSelected
+                          ? "bg-[#004956] text-white border-[#004956] shadow-sm"
+                          : "bg-white text-[#78534a] border-[#78534a]/15 hover:border-[#78534a]/40 hover:bg-[#FAF5F3]"
+                          }`}
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-sans font-semibold text-sm md:text-base">
+                            {option.label}
+                          </span>
+                          {option.description && (
+                            <span
+                              className={`text-xs mt-0.5 font-light ${isSelected ? "text-white/80" : "text-[#686361]/70"
+                                }`}
+                            >
+                              {option.description}
+                            </span>
+                          )}
+                        </div>
+                        <div
+                          className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${isSelected
+                            ? "border-white bg-white/20 text-white"
+                            : "border-[#78534a]/30"
+                            }`}
+                        >
+                          {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {error && (
+                  <div className="mt-6 p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3 text-red-700 text-xs md:text-sm">
+                    <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
+                    <span>{error}</span>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Navigation Controls */}
-          <div className="flex items-center justify-between mt-10 pt-6 border-t border-[#78534a]/10">
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 0 || loading}
-              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                currentStep === 0 || loading
-                  ? "opacity-0 pointer-events-none"
-                  : "text-[#78534a] hover:bg-[#78534a]/5 cursor-pointer"
-              }`}
-            >
-              Previous
-            </button>
+              {/* Navigation Controls */}
+              <div className="flex items-center justify-between mt-10 pt-6 border-t border-[#78534a]/10">
+                <button
+                  onClick={handlePrevious}
+                  disabled={currentStep === 0 || loading}
+                  className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-colors ${currentStep === 0 || loading
+                    ? "opacity-0 pointer-events-none"
+                    : "text-[#78534a] hover:bg-[#78534a]/5 cursor-pointer"
+                    }`}
+                >
+                  Previous
+                </button>
 
-            <button
-              onClick={handleNext}
-              disabled={!isCurrentStepValid() || loading}
-              className={`flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold transition-all duration-300 cursor-pointer ${
-                isCurrentStepValid() && !loading
-                  ? "bg-[#78534a] text-white hover:bg-[#78534a]/95 shadow-sm hover:shadow-md"
-                  : "bg-stone-200 text-stone-400 cursor-not-allowed"
-              }`}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Submitting...</span>
-                </>
-              ) : (
-                <>
-                  <span>{isLastQuestion ? "Complete & See Routine" : "Next Question"}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </div>
-        </div>
+                <button
+                  onClick={handleNext}
+                  disabled={!isCurrentStepValid() || loading}
+                  className={`flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold transition-all duration-300 cursor-pointer ${isCurrentStepValid() && !loading
+                    ? "bg-[#78534a] text-white hover:bg-[#78534a]/95 shadow-sm hover:shadow-md"
+                    : "bg-stone-200 text-stone-400 cursor-not-allowed"
+                    }`}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{isLastQuestion ? "Complete & See Routine" : "Next Question"}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
