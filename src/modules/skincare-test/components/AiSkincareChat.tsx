@@ -31,11 +31,17 @@ export interface ExtractedProfile {
   goals: string[];
 }
 
-
+const INITIAL_AI_MESSAGE: ChatMessage = {
+  id: 'ai-welcome',
+  sender: 'ai',
+  text: "Hello! I'm your DayStar AI Aesthetician. ✨\n\nI'll help analyze your skin and build a customized DayStar skincare routine tailored specifically for you.\n\nTo get started, what is your skin type, or how does your skin feel throughout the day?",
+  timestamp: 'Just now',
+  suggestions: ['Oily', 'Dry', 'Combination', 'Normal', 'Sensitive'],
+};
 
 export function AiSkincareChat() {
   const router = useRouter();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_AI_MESSAGE]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -194,7 +200,7 @@ export function AiSkincareChat() {
   };
 
   const handleReset = () => {
-    setMessages(INITIAL_MESSAGES);
+    setMessages([INITIAL_AI_MESSAGE]);
     setProfile({
       skinType: '',
       concerns: [],
