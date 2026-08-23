@@ -76,7 +76,23 @@ function SkincareResultsContent() {
           return `Moisturizing formula selected to reinforce your skin barrier and lock in hydration all day long.`;
         };
 
-        const rawProducts: RawRoutineItem[] = routineData.recommendedProducts || [];
+        let rawProducts: RawRoutineItem[] = [];
+        if (Array.isArray(routineData)) {
+          rawProducts = routineData;
+        } else if (Array.isArray(routineData?.recommendedProducts)) {
+          rawProducts = routineData.recommendedProducts;
+        } else if (routineData && typeof routineData === "object") {
+          Object.entries(routineData).forEach(([key, val]) => {
+            if (val && typeof val === "object" && key !== "recommendedProducts") {
+              rawProducts.push({
+                step: key,
+                product: val as Product,
+                name: (val as Product).name,
+                price: (val as Product).price,
+              });
+            }
+          });
+        }
 
         Promise.all(
           rawProducts.map(async (item) => {

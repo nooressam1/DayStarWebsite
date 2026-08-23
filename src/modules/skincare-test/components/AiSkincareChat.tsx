@@ -28,6 +28,7 @@ export interface ExtractedProfile {
   skinType: string;
   concerns: string[];
   sensitivity: string;
+  sunExposure: string;
   goals: string[];
 }
 
@@ -52,6 +53,7 @@ export function AiSkincareChat() {
     skinType: '',
     concerns: [],
     sensitivity: '',
+    sunExposure: '',
     goals: []
   });
   // Keep a ref in sync so handleSendMessage always reads the latest profile
@@ -125,7 +127,6 @@ export function AiSkincareChat() {
         suggestions?: string[];
         isComplete?: boolean;
       } = await rawRes.json();
-      console.log("response.extractedProfile", response.extractedProfile);
       if (response.extractedProfile) {
         setProfile((prev) => ({
           skinType: response.extractedProfile?.skinType || prev.skinType,
@@ -133,6 +134,7 @@ export function AiSkincareChat() {
             ? Array.from(new Set([...prev.concerns, ...response.extractedProfile.concerns]))
             : prev.concerns,
           sensitivity: response.extractedProfile?.sensitivity || prev.sensitivity,
+          sunExposure: response.extractedProfile?.sunExposure || prev.sunExposure,
           goals: response.extractedProfile?.goals || prev.goals,
         }));
       }
@@ -171,6 +173,7 @@ export function AiSkincareChat() {
     const finalSkinType = profile.skinType || 'combination';
     const finalConcerns = profile.concerns.length > 0 ? profile.concerns : ['acne'];
     const finalSensitivity = profile.sensitivity || 'moderately_sensitive';
+    const finalSunExposure = profile.sunExposure || 'moderate';
 
     try {
       const routineData = await apiClient.request<Record<string, unknown>>(ENDPOINTS.QUIZ.SUBMIT, undefined, {
@@ -179,6 +182,7 @@ export function AiSkincareChat() {
           skinType: finalSkinType,
           concerns: finalConcerns,
           sensitivity: finalSensitivity,
+          sunExposure: finalSunExposure,
         }),
       });
 
@@ -187,6 +191,7 @@ export function AiSkincareChat() {
         skinType: finalSkinType,
         concerns: finalConcerns,
         sensitivity: finalSensitivity,
+        sunExposure: finalSunExposure,
       }));
 
       router.push('/skincare-test/results');
@@ -205,6 +210,7 @@ export function AiSkincareChat() {
       skinType: '',
       concerns: [],
       sensitivity: '',
+      sunExposure: '',
       goals: []
     });
     setError(null);
@@ -259,6 +265,11 @@ export function AiSkincareChat() {
           <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${profile.sensitivity ? "bg-amber-800 text-white border-amber-800" : "bg-stone-100 text-stone-400 border-stone-200"
             }`}>
             Sensitivity: {profile.sensitivity ? profile.sensitivity.replace('_', ' ') : 'Pending'}
+          </span>
+
+          <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${profile.sunExposure ? "bg-[#c47c5d] text-white border-[#c47c5d]" : "bg-stone-100 text-stone-400 border-stone-200"
+            }`}>
+            Sun: {profile.sunExposure ? profile.sunExposure.toUpperCase() : 'Pending'}
           </span>
         </div>
 
