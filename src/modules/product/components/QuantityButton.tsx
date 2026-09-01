@@ -4,6 +4,7 @@ export interface QuantityButtonProps {
   value: number;
   min?: number;
   max?: number;
+  disabled?: boolean;
   onDecrement?: () => void;
   onIncrement?: () => void;
 }
@@ -12,11 +13,12 @@ export default function QuantityButton({
   value,
   min = 1,
   max = 5,
+  disabled = false,
   onDecrement,
   onIncrement,
 }: QuantityButtonProps) {
-  const isMin = value <= min;
-  const isMax = value >= max;
+  const isMin = disabled || value <= min;
+  const isMax = disabled || value >= max;
 
   return (
     <div className="rounded-sm h-full w-full flex items-center justify-center border border-brand-primary-brown">

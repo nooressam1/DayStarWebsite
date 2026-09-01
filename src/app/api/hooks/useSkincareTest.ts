@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { SkincareQuestion } from "@/modules/skincare-test/utils/questions";
 import { apiClient } from "@/app/api/utils/client";
 import { ENDPOINTS } from "@/app/api/constants/endpoints";
+import { useSkincareRoutineStore } from "./useSkincareRoutineStore";
 
 export interface SkincareAnswersState {
   skinType: string;
@@ -70,9 +71,10 @@ export function useSkincareTest(questions: SkincareQuestion[]) {
           })
         });
 
-        // Store result routine and profile answer details in sessionStorage
+        // Store result routine and profile answer details in sessionStorage & persistent localStorage store
         sessionStorage.setItem('skincare_results_routine', JSON.stringify(routineData));
         sessionStorage.setItem('skincare_results_answers', JSON.stringify(answers));
+        useSkincareRoutineStore.getState().setRoutineData(routineData, answers);
 
         // Navigate to the separate results view page
         router.push("/skincare-test/results");

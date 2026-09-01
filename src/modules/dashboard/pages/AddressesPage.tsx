@@ -80,11 +80,13 @@ export default function AddressesPage() {
 
         <CustomButton
           onClick={handleOpenAddModal}
+          icon={Plus}
+          iconPosition="left"
           variant="solid"
-          className="flex items-center gap-2 px-4 py-2.5 bg-brand-primary-brown text-white text-xs font-semibold uppercase tracking-wider rounded-lg hover:bg-brand-primary-brown/90 shadow-sm transition-all cursor-pointer w-fit"
+          colorScheme="primary"
+          className="w-fit px-5 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider"
         >
-          <Plus className="h-4 w-4" />
-          <span>Add New Address</span>
+          Add New Address
         </CustomButton>
       </div>
 
@@ -99,12 +101,16 @@ export default function AddressesPage() {
           <p className="text-sm text-brand-gray max-w-sm mt-1 mb-6">
             Save your shipping addresses for a faster and smoother checkout experience.
           </p>
-          <button
+          <CustomButton
             onClick={handleOpenAddModal}
-            className="px-6 py-2.5 bg-brand-primary-brown text-white text-sm font-medium rounded-lg hover:bg-brand-primary-brown/90 shadow-sm transition-all cursor-pointer"
+            icon={Plus}
+            iconPosition="left"
+            variant="solid"
+            colorScheme="primary"
+            className="px-6 py-2.5 rounded-lg text-sm font-medium"
           >
-            Add Address
-          </button>
+            Add New Address
+          </CustomButton>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2">
@@ -114,8 +120,8 @@ export default function AddressesPage() {
               <div
                 key={address.id}
                 className={`relative flex flex-col justify-between p-5 rounded-xl border transition-all duration-300 ${isDefault
-                    ? "bg-white border-brand-primary-brown shadow-sm ring-1 ring-brand-primary-brown/20"
-                    : "bg-[#FAF5F3]/40 border-[#78534a]/10 hover:border-[#78534a]/30 hover:bg-white"
+                  ? "bg-white border-brand-primary-brown shadow-sm ring-1 ring-brand-primary-brown/20"
+                  : "bg-[#FAF5F3]/40 border-[#78534a]/10 hover:border-[#78534a]/30 hover:bg-white"
                   }`}
               >
                 <div>

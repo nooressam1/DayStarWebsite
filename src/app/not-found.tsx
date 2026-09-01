@@ -6,9 +6,9 @@ import { ArrowLeft, ShoppingBag, Sparkles, Home, Mail, Compass } from "lucide-re
 
 export default function NotFound() {
   return (
-    <>
+    <div className="min-h-screen flex flex-col justify-between bg-[#FAF5F3]">
       <Navbar />
-      <main className="min-h-[75vh] bg-[#FAF5F3] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 font-sans relative overflow-hidden">
+      <main className="flex-1 bg-[#FAF5F3] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 font-sans relative overflow-hidden">
         {/* Soft background ambient glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-primary-brown/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -68,6 +68,6 @@ export default function NotFound() {
       </main>
       <Footer />
       <AuthModal />
-    </>
+    </div>
   );
 }

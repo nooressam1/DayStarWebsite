@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Check, Star } from "lucide-react";
 import { Product, Variant } from "@/app/api/types";
@@ -10,22 +11,29 @@ import { getProductSalePrice } from "@/modules/product";
 import { useAuth } from "@/lib/supabase/auth-provider";
 import { useAuthModalStore } from "@/app/api/hooks/useAuthModalStore";
 
-export default function ProductDetails({ product, variants }: { product: Product, variants: Variant[] }) {
+export default function ProductDetails({ product, variants = [] }: { product: Product, variants: Variant[] }) {
   const router = useRouter();
   const { user } = useAuth();
   const { openModal } = useAuthModalStore();
-  const defaultVariant: Variant = {
-    id: product.id,
-    product_id: product.id,
-    size: "Standard",
-    sku: "",
-    stock: 99,
-  };
-  const [selectedSize, setSelectedSize] = useState<Variant>(variants[0] || defaultVariant);
+  const hasVariants = Boolean(variants && variants.length > 0);
+  const [selectedSize, setSelectedSize] = useState<Variant | null>(variants[0] || null);
   const [quantity, setQuantity] = useState<number>(1);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isAdded, setIsAdded] = useState<boolean>(false);
   const { cart, addToCart } = useCartStore();
+
+  useEffect(() => {
+    if (variants && variants.length > 0) {
+      setSelectedSize((prev) => {
+        if (prev && variants.some((v) => v.id === prev.id)) {
+          return prev;
+        }
+        return variants[0];
+      });
+    } else {
+      setSelectedSize(null);
+    }
+  }, [variants]);
 
   const displayPrice = getProductSalePrice(product);
 
@@ -33,7 +41,10 @@ export default function ProductDetails({ product, variants }: { product: Product
   const existingQuantity = existingItem ? existingItem.quantity : 0;
 
   const handleAddToCart = () => {
-    if (!selectedSize) return;
+    if (!hasVariants || !selectedSize || !selectedSize.id) {
+      setErrorMessage("This product is currently unavailable for purchase.");
+      return;
+    }
 
     if (existingQuantity >= 5) {
       setErrorMessage("You already have the maximum limit of 5 units in your cart.");
@@ -62,7 +73,10 @@ export default function ProductDetails({ product, variants }: { product: Product
   };
 
   const handleBuyNow = () => {
-    if (!selectedSize) return;
+    if (!selectedSize || !hasVariants) {
+      setErrorMessage("This product is currently unavailable for purchase.");
+      return;
+    }
 
     if (existingQuantity >= 5) {
       setErrorMessage("You already have the maximum limit of 5 units in your cart.");
@@ -98,7 +112,7 @@ export default function ProductDetails({ product, variants }: { product: Product
           {product.name}
         </h1>
         <div className="flex items-center gap-2 mt-1">
-          <span className="font-serif font-semibold text-brand-primary-brown text-lg">
+          <span className="font-sans  text-[#686361] text-lg">
             {formatMoney(displayPrice)}
           </span>
           {product.on_sale && (
@@ -112,41 +126,46 @@ export default function ProductDetails({ product, variants }: { product: Product
             </span>
           )}
         </div>
-        <p className=" text-brand-gray font-sans text-md">
+        <p className=" text-[#757575] font-sans text-md">
           {" "}
           {product.description}
         </p>
       </div>
       <div className="flex flex-col gap-4">
         <h1 className="text-brand-light-brown font-sans text-md">Size</h1>
-        <div className="flex gap-3">
-          {variants.map((size) => {
-            const isSelected = selectedSize?.id === size.id;
+        {hasVariants ? (
+          <div className="flex gap-3">
+            {variants.map((size) => {
+              const isSelected = selectedSize?.id === size.id;
 
-            return (
-              <CustomButton
-                key={size.id}
-                // 4. If it's selected, turn it SOLID. If not, keep it OUTLINE!
-                variant={isSelected ? "solid" : "outline"}
-                colorScheme={isSelected ? "secondary" : "secondary"}
-                // 5. Update state when the user presses the option
-                onClick={() => {
-                  setSelectedSize(size);
-                  setErrorMessage(null);
-                }}
-                className="py-2.5 px-5 text-sm rounded-lg w-fit" // Make size buttons slightly smaller
-              >
-                {size.size}
-              </CustomButton>
-            );
-          })}
-        </div>
+              return (
+                <CustomButton
+                  key={size.id}
+                  variant={isSelected ? "solid" : "outline"}
+                  colorScheme={isSelected ? "secondary" : "secondary"}
+                  onClick={() => {
+                    setSelectedSize(size);
+                    setErrorMessage(null);
+                  }}
+                  className="py-2.5 px-5 text-sm rounded-lg w-fit"
+                >
+                  {size.size}
+                </CustomButton>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200/80 px-3 py-2 rounded-lg w-fit font-sans">
+            Currently Unavailable (No sizes/variants available)
+          </p>
+        )}
       </div>
       <div className="flex flex-col gap-3">
         <QuantityButton
           value={quantity}
           min={1}
           max={5}
+          disabled={!hasVariants}
           onDecrement={() => {
             setQuantity(Math.max(1, quantity - 1));
             setErrorMessage(null);
@@ -161,9 +180,10 @@ export default function ProductDetails({ product, variants }: { product: Product
           variant={"solid"}
           colorScheme={"primary"}
           onClick={handleBuyNow}
-          className="py-4 px-2 text-sm font-normal rounded-lg min-w-[80px]" // Make size buttons slightly smaller
+          disabled={!hasVariants}
+          className="py-4 px-2 text-sm font-normal rounded-lg min-w-[80px] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Buy Now
+          {hasVariants ? "Buy Now" : "Unavailable"}
         </CustomButton>
         <div className="flex flex-row gap-2">
           <CustomButton
@@ -171,12 +191,12 @@ export default function ProductDetails({ product, variants }: { product: Product
             variant={isAdded ? "solid" : "outline"}
             colorScheme={"primary"}
             onClick={handleAddToCart}
+            disabled={!hasVariants}
             icon={isAdded ? Check : undefined}
-            className={`py-4 px-2 w-full flex-1 text-sm font-normal rounded-lg transition-all duration-300 ${
-              isAdded ? "bg-[#557b55] text-white border-[#557b55] hover:bg-[#466946]" : ""
-            }`}
+            className={`py-4 px-2 w-full flex-1 text-sm font-normal rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${isAdded ? "bg-[#557b55] text-white border-[#557b55] hover:bg-[#466946]" : ""
+              }`}
           >
-            {isAdded ? "Added to Cart" : "Add to Cart"}
+            {!hasVariants ? "Unavailable" : isAdded ? "Added to Cart" : "Add to Cart"}
           </CustomButton>
           <FavoriteButton product={product}></FavoriteButton>
         </div>

@@ -1,3 +1,5 @@
+import { Variant } from "./variant.type";
+
 export interface Product {
   id: string;
   category_id: string | null;
@@ -12,4 +14,6 @@ export interface Product {
   discount_percentage?: number | null;
   rating?: number;
   reviews_count?: number;
+  step_type?: string;
+  variants?: Variant[];
 }

@@ -44,6 +44,10 @@ export const useCartStore = create<CartState>()(
       setCart: (cart) => set({ cart }),
 
       addToCart: (newItem, quantity = 1) => {
+        if (!newItem || !newItem.variant_id || newItem.variant_id.trim() === "") {
+          console.warn("Cannot add item to cart: Product has no valid variant_id", newItem);
+          return;
+        }
         const MAX_QUANTITY = 5;
         const userId = get().userId;
         set((state) => {
@@ -58,7 +62,11 @@ export const useCartStore = create<CartState>()(
                 : item
             );
           } else {
-            newCart = [...state.cart, { ...newItem, quantity: Math.min(MAX_QUANTITY, quantity) }];
+            const sanitizedItem = {
+              ...newItem,
+              size: newItem.size === "Standard" ? "" : (newItem.size || ""),
+            };
+            newCart = [...state.cart, { ...sanitizedItem, quantity: Math.min(MAX_QUANTITY, quantity) }];
           }
 
           if (userId) {
