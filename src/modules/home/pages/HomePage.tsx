@@ -5,6 +5,7 @@ import Link from "next/link";
 import BannerImage from "../components/BannerImage";
 import { CategoriesBox } from "../components/CategoriesBox";
 import { ProductCard } from "../components/ProductCard";
+import { PersonalizedRoutineSection } from "../components/PersonalizedRoutineSection";
 import { SkincareBanner } from "../components/SkincareBanner";
 import { SaleBanner } from "../components/SaleBanner";
 import { ProductCarousel } from "../components/ProductCarousel";
@@ -13,8 +14,8 @@ import {
     useBestSellersQuery,
     useProductsQuery,
 } from "@/app/api/hooks/useProductQueries";
-import { HomePageSkeleton } from "../components/HomePageSkeleton";
 import { Category, Product } from "@/app/api/types";
+import { ProductCardSkeletonGrid, CategorySkeletonGrid } from "@/modules/shared";
 
 interface HomePageProps {
     initialCategories?: Category[];
@@ -42,12 +43,7 @@ export default function HomePage({
     );
 
     const fiftyPercentOffProducts = saleData?.items || initialSaleProducts;
-    const hasInitialData = initialCategories.length > 0 || initialBestSellers.length > 0;
-    const isLoading = !hasInitialData && (categoriesLoading || bestSellersLoading || saleLoading);
-
-    if (isLoading) {
-        return <HomePageSkeleton />;
-    }
+    const hasSaleProducts = Boolean(fiftyPercentOffProducts && fiftyPercentOffProducts.length > 0);
 
     return (
         <div className="flex flex-col gap-12 md:gap-25">
@@ -63,29 +59,34 @@ export default function HomePage({
                             Everything you need to care for &amp; more
                         </h1>
                     </div>
-                    <div className="overflow-hidden">
-                        {/* Mobile and Tablet: static grid */}
-                        <div className="grid grid-cols-2 lg:hidden gap-5 px-10 md:px-5">
-                            {categories.map((cat) => (
-                                <Link key={cat.id} href={`/product?category=${cat.id}`} className="cursor-pointer">
-                                    <CategoriesBox photo={cat.photo} categoryName={cat.name} />
-                                </Link>
-                            ))}
-                        </div>
 
-                        {/* Desktop: infinite marquee slider */}
-                        <div className="hidden gap-5 lg:flex w-max animate-slide">
-                            {[...categories, ...categories].map((cat, index) => (
-                                <Link
-                                    key={`${cat.id}-${index}`}
-                                    href={`/product?category=${cat.id}`}
-                                    className="cursor-pointer w-[20vw] shrink-0"
-                                >
-                                    <CategoriesBox photo={cat.photo} categoryName={cat.name} />
-                                </Link>
-                            ))}
+                    {categoriesLoading && categories.length === 0 ? (
+                        <CategorySkeletonGrid count={4} />
+                    ) : (
+                        <div className="overflow-hidden">
+                            {/* Mobile and Tablet: static grid */}
+                            <div className="grid grid-cols-2 lg:hidden gap-5 px-10 md:px-5">
+                                {categories.map((cat) => (
+                                    <Link key={cat.id} href={`/product?category=${cat.id}`} className="cursor-pointer">
+                                        <CategoriesBox photo={cat.photo} categoryName={cat.name} />
+                                    </Link>
+                                ))}
+                            </div>
+
+                            {/* Desktop: infinite marquee slider */}
+                            <div className="hidden gap-5 lg:flex w-max animate-slide">
+                                {[...categories, ...categories].map((cat, index) => (
+                                    <Link
+                                        key={`${cat.id}-${index}`}
+                                        href={`/product?category=${cat.id}`}
+                                        className="cursor-pointer w-[20vw] shrink-0"
+                                    >
+                                        <CategoriesBox photo={cat.photo} categoryName={cat.name} />
+                                    </Link>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 <div className="flex flex-col gap-8 md:gap-12 items-start px-10 sm:px-10 md:px-15">
@@ -101,51 +102,45 @@ export default function HomePage({
                                 </h1>
                             </Link>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full">
-                            {bestSellers.slice(0, 4).map((product, index) => (
-                                <div
-                                    key={product.id}
-                                    className={index === 2 ? "hidden md:block" : index === 3 ? "hidden lg:block" : ""}
-                                >
-                                    <ProductCard product={product} />
-                                </div>
-                            ))}
-                        </div>
+
+                        {bestSellersLoading && bestSellers.length === 0 ? (
+                            <ProductCardSkeletonGrid
+                                count={4}
+                                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full"
+                            />
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full">
+                                {bestSellers.slice(0, 4).map((product, index) => (
+                                    <div
+                                        key={product.id}
+                                        className={index === 2 ? "hidden md:block" : index === 3 ? "hidden lg:block" : ""}
+                                    >
+                                        <ProductCard product={product} />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Skincare Banner */}
                     <SkincareBanner />
-                    <div className="flex flex-col gap-5 items-start w-full">
-                        <div className="flex flex-row justify-between items-center w-full">
-                            <h1 className="text-brand-primary-brown font-bold font-serif text-2xl md:text-3xl">
-                                Best Selling Products
-                            </h1>
-                            <Link href="/product?collection=best-sellers">
-                                <h1 className="text-brand-primary-brown/70 font-regular font-sans text-sm md:text-md cursor-pointer hover:underline">
-                                    View More
-                                </h1>
-                            </Link>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full">
-                            {bestSellers.slice(0, 4).map((product, index) => (
-                                <div
-                                    key={product.id}
-                                    className={index === 2 ? "hidden md:block" : index === 3 ? "hidden lg:block" : ""}
-                                >
-                                    <ProductCard product={product} />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
 
-                    {/* Sale Banner + Product Carousel side by side */}
+                    {/* Personalized Skincare Routine Carousel (shows when routine is cached) */}
+                    <PersonalizedRoutineSection />
+
+                    {/* Sale Banner + Product Carousel side by side (or full-width if no 50% products) */}
                     <div className="flex flex-col md:flex-row gap-5 w-full items-stretch">
-                        <div className="flex flex-[4] w-full min-h-[350px] md:min-h-0">
-                            <SaleBanner />
+                        <div className={`flex ${hasSaleProducts || saleLoading ? "flex-[4]" : "w-full"} w-full min-h-[350px] md:min-h-0`}>
+                            <SaleBanner hasDiscountProducts={hasSaleProducts || saleLoading} />
                         </div>
-                        <div className="flex flex-[2] w-full">
-                            <ProductCarousel products={fiftyPercentOffProducts.slice(0, 4)} />
-                        </div>
+                        {saleLoading && fiftyPercentOffProducts.length === 0 ? (
+                            <div className="hidden sm:flex flex-[2] w-full">
+                                <ProductCardSkeletonGrid count={1} className="w-full h-full" />
+                            </div>
+                        ) : hasSaleProducts ? (
+                            <div className="flex flex-[2] w-full">
+                                <ProductCarousel products={fiftyPercentOffProducts.slice(0, 4)} />
+                            </div>
+                        ) : null}
                     </div>
                 </div>
             </div>

@@ -1,21 +1,20 @@
 "use client";
+import React, { useState, useEffect } from "react";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { CustomButton, FavoriteButton } from "@/modules/shared";
 import { Product } from "@/app/api/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getProductSalePrice, isProductOnSale, getProductDiscountPercentage } from "@/modules/product";
+import { sanitizeProductImage } from "@/utils/image/image.utils";
 
 export function ProductCard({ product }: { product: Product }) {
     const router = useRouter();
-    const hasImage =
-        Array.isArray(product.images) &&
-        product.images.length > 0 &&
-        product.images[0] &&
-        typeof product.images[0] === "string" &&
-        product.images[0].trim() !== "";
+    const [imgSrc, setImgSrc] = useState<string>(() => sanitizeProductImage(product.images));
 
-    const displayImage = hasImage ? product.images![0] : "/no-image.png";
+    useEffect(() => {
+        setImgSrc(sanitizeProductImage(product.images));
+    }, [product.images]);
 
     const onSale = isProductOnSale(product);
     const salePrice = getProductSalePrice(product);
@@ -29,7 +28,16 @@ export function ProductCard({ product }: { product: Product }) {
                         {discountPercent > 0 ? `${discountPercent}% OFF` : "Sale"}
                     </span>
                 )}
-                <Image fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover" src={displayImage} alt={product.name} />
+                <Image
+                    fill
+                    sizes="(max-width: 768px) 100vw, 25vw"
+                    className="object-cover"
+                    src={imgSrc}
+                    alt={product.name}
+                    onError={() => {
+                        setImgSrc("/no-image.png");
+                    }}
+                />
             </div>
             <div className="p-4 flex flex-col gap-5 flex-1 justify-between">
                 <div className="flex flex-col ">

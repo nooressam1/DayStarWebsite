@@ -173,6 +173,9 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
         {/* Action Button */}
         <CustomButton
           variant="outline"
+          icon={PenLine}
+          iconPosition="left"
+          colorScheme="primary"
           onClick={() => {
             if (!user) {
               openModal("login");
@@ -180,10 +183,9 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
               setShowForm(!showForm);
             }
           }}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg border-[#78534a]/30 hover:border-[#78534a] hover:bg-[#78534a]/5 text-xs font-semibold tracking-wider uppercase transition-all"
+          className="w-fit px-5 py-2.5 rounded-lg text-xs font-semibold tracking-wider uppercase"
         >
-          <PenLine className="w-4 h-4" />
-          <span>{showForm ? "Cancel Review" : "Write a Review"}</span>
+          {showForm ? "Cancel Review" : "Write a Review"}
         </CustomButton>
       </div>
 
@@ -268,7 +270,8 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
             <CustomButton
               type="submit"
               variant="solid"
-              className="px-6 py-2 bg-[#78534a] hover:bg-[#78534a]/90 text-white text-xs font-semibold rounded-md shadow-xs transition-all cursor-pointer"
+              colorScheme="primary"
+              className="px-6 py-2 text-xs font-semibold rounded-md shadow-xs transition-all cursor-pointer"
             >
               Submit Review
             </CustomButton>

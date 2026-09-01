@@ -3,7 +3,7 @@ import { useAuthModalStore } from '@/app/api/hooks/useAuthModalStore';
 import { toast } from 'sonner';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-const DEFAULT_TIMEOUT = Number(process.env.NEXT_PUBLIC_API_TIMEOUT) || 10000;
+const DEFAULT_TIMEOUT = Number(process.env.NEXT_PUBLIC_API_TIMEOUT) || 60000;
 
 export interface ApiResponseWrapper<T> {
   data: T;
@@ -98,7 +98,7 @@ export class ApiClient {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      
+
       if (session?.access_token) {
         merged["Authorization"] = `Bearer ${session.access_token}`;
       }

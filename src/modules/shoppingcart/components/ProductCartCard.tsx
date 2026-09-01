@@ -11,6 +11,8 @@ export interface CartItemCardProps extends CartItem {
 }
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { Trash } from "lucide-react";
+import { sanitizeImageUrl } from "@/utils/image/image.utils";
+import { useState, useEffect } from "react";
 
 const ProductCartCard = ({
   name,
@@ -24,9 +26,11 @@ const ProductCartCard = ({
   onDecrement = () => { },
   onRemove = () => { },
 }: CartItemCardProps) => {
-  const hasImage = photo && typeof photo === "string" && photo.trim() !== "";
+  const [imgSrc, setImgSrc] = useState(() => sanitizeImageUrl(photo));
 
-  const displayImage = hasImage ? photo : "/no-image.png";
+  useEffect(() => {
+    setImgSrc(sanitizeImageUrl(photo));
+  }, [photo]);
 
   // Derive kebab-case slug from product name
   const itemSlug = name
@@ -43,9 +47,10 @@ const ProductCartCard = ({
       >
         <div className="w-20 h-20 sm:w-24 sm:h-24 aspect-square bg-brand-light-brown/5 rounded-xl overflow-hidden shrink-0 border border-brand-light-brown/5">
           <img
-            src={displayImage}
+            src={imgSrc}
             alt={name}
             className="w-full h-full object-cover"
+            onError={() => setImgSrc("/no-image.png")}
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -53,7 +58,7 @@ const ProductCartCard = ({
             {name}
           </h1>
           <h1 className="font-work text-gray-500 text-sm">
-            {size} / x{quantity}
+            {size ? `${size} / ` : ""}x{quantity}
           </h1>
         </div>
       </Link>

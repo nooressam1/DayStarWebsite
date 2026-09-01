@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ENDPOINTS } from '@/app/api/constants/endpoints';
 import { apiClient } from '@/app/api/utils/client';
+import { useSkincareRoutineStore } from '@/app/api/hooks/useSkincareRoutineStore';
 
 export interface ChatMessage {
   id: string;
@@ -187,12 +188,14 @@ export function AiSkincareChat() {
       });
 
       sessionStorage.setItem('skincare_results_routine', JSON.stringify(routineData));
-      sessionStorage.setItem('skincare_results_answers', JSON.stringify({
+      const answersPayload = {
         skinType: finalSkinType,
         concerns: finalConcerns,
         sensitivity: finalSensitivity,
         sunExposure: finalSunExposure,
-      }));
+      };
+      sessionStorage.setItem('skincare_results_answers', JSON.stringify(answersPayload));
+      useSkincareRoutineStore.getState().setRoutineData(routineData, answersPayload);
 
       router.push('/skincare-test/results');
     } catch (err: unknown) {

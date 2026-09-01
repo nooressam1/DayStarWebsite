@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { sanitizeImageUrl } from "@/utils/image/image.utils";
 
 export interface ProductCarouselProps {
   images: string[];
@@ -12,13 +13,12 @@ export default function ImageCarousel({
 }: ProductCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-  // Safety net: Use fallback if the image array from Supabase is empty
-  const hasImages =
-    Array.isArray(images) &&
-    images.length > 0 &&
-    images.some((img) => img && typeof img === "string" && img.trim() !== "");
+  // Safety net: Filter out invalid/blob strings and use fallback if empty
+  const validImages = Array.isArray(images)
+    ? images.map((img) => sanitizeImageUrl(img)).filter((img) => img !== "/no-image.png")
+    : [];
 
-  const displayImages = hasImages ? images : ["/no-image.png"];
+  const displayImages = validImages.length > 0 ? validImages : ["/no-image.png"];
 
   return (
     <div className="w-full max-w-lg  flex flex-col md:flex-row  items-start">
@@ -40,6 +40,9 @@ export default function ImageCarousel({
                   src={src}
                   alt={`Thumbnail indicator ${index + 1}`}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/no-image.png";
+                  }}
                 />
               </button>
             );
@@ -59,6 +62,9 @@ export default function ImageCarousel({
                 src={src}
                 alt={`${productName} view ${index + 1}`}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/no-image.png";
+                }}
               />
             </div>
           ))}
