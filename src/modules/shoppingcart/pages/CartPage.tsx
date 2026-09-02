@@ -1,18 +1,31 @@
 "use client";
 import React from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCartStore, calculatePricing, CustomButton } from "@/modules/shared";
 import ProductCartCard from "../components/ProductCartCard";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import DiscountButton from "../components/DiscountButton";
+import { useAuth } from "@/lib/supabase/auth-provider";
+import { useAuthModalStore } from "@/app/api/hooks/useAuthModalStore";
 
-const shoppingcart = () => {
+const ShoppingCart = () => {
+  const router = useRouter();
+  const { user } = useAuth();
+  const { openModal } = useAuthModalStore();
   const { cart, incrementItem, decrementItem, removeFromCart, discount, setDiscount } = useCartStore();
 
   const { subTotal: subtotal, deliveryFee: DELIVERY_FEE, discount: discountAmount, total } = calculatePricing(cart, {
     deliveryFee: 1000,
     discount,
   });
+
+  const handleProceedToCheckout = () => {
+    if (!user) {
+      openModal("login");
+      return;
+    }
+    router.push("/checkout");
+  };
 
   return (
     <div className="p-4 sm:p-6 md:p-10 flex flex-col md:flex-row gap-5 min-h-screen pb-32">
@@ -81,14 +94,19 @@ const shoppingcart = () => {
             </div>
           </div>
         </div>
-        <Link href="/checkout" className="w-full">
-          <CustomButton className="w-full py-4" variant="solid" colorScheme="secondary">
-            Proceed to Checkout
-          </CustomButton>
-        </Link>
+        <CustomButton
+          onClick={handleProceedToCheckout}
+          className="w-full py-4"
+          variant="solid"
+          colorScheme="secondary"
+          disabled={cart.length === 0}
+        >
+          Proceed to Checkout
+        </CustomButton>
       </div>
     </div>
   );
 };
 
-export default shoppingcart;
+export default ShoppingCart;
+

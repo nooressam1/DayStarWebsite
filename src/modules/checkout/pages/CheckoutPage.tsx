@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { AlertCircle } from "lucide-react";
 import { formatMoney } from "@/utils/format/format.moneyFormat";
 import { CustomButton, useCartStore, calculatePricing } from "@/modules/shared";
 import ProductCartCard from "@/modules/shoppingcart/components/ProductCartCard";
@@ -26,6 +27,7 @@ export default function CheckoutPage() {
 
     const [submitting, setSubmitting] = useState(false);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
     // Stable form handle and values reference
     const checkoutFormRef = useRef<CheckoutFormHandle | null>(null);
@@ -110,22 +112,28 @@ export default function CheckoutPage() {
                 clearCart();
                 router.push(`/order-confirmed/${result.orderId}`);
             } else {
-                toast.error(result?.error || "Checkout failed. Please try again.");
+                const failMsg = result?.error || "Checkout failed. Please try again.";
+                setCheckoutError(failMsg);
+                toast.error(failMsg);
             }
         } catch (err: any) {
             console.error("Checkout error:", err);
             const errorMessage =
-                err?.message ||
+                err?.response?.data?.message ||
                 err?.details?.message ||
                 err?.details?.error ||
+                err?.message ||
                 "An unexpected error occurred during checkout.";
-            toast.error(errorMessage);
+            const cleanMsg = Array.isArray(errorMessage) ? errorMessage.join(", ") : String(errorMessage);
+            setCheckoutError(cleanMsg);
+            toast.error(cleanMsg);
         } finally {
             setSubmitting(false);
         }
     };
 
     const handleProceedCheckout = async () => {
+        setCheckoutError(null);
         if (cart.length === 0) {
             toast.warning("Your cart is empty.");
             return;
@@ -142,6 +150,7 @@ export default function CheckoutPage() {
             if (!isValid) {
                 const errorMessages = Object.values(errors).filter(Boolean);
                 const firstError = errorMessages[0] || "Please fill in all required fields.";
+                setCheckoutError(firstError);
                 toast.error(firstError);
                 return;
             }
@@ -154,49 +163,67 @@ export default function CheckoutPage() {
         if (values.paymentMethod === "card") {
             const cleanCard = (values.cardNumber || "").replace(/\s/g, "");
             if (!cleanCard || cleanCard.length < 15) {
-                toast.error("Please enter a valid 16-digit card number.");
+                const cardErr = "Please enter a valid 16-digit card number.";
+                setCheckoutError(cardErr);
+                toast.error(cardErr);
                 return;
             }
             if (!values.cardHolder?.trim()) {
-                toast.error("Please enter the cardholder name.");
+                const cardErr = "Please enter the cardholder name.";
+                setCheckoutError(cardErr);
+                toast.error(cardErr);
                 return;
             }
             if (!values.expiryDate?.trim() || !/^\d{2}\/\d{2}$/.test(values.expiryDate)) {
-                toast.error("Please enter a valid expiry date (MM/YY).");
+                const cardErr = "Please enter a valid expiry date (MM/YY).";
+                setCheckoutError(cardErr);
+                toast.error(cardErr);
                 return;
             }
             if (!values.cvv?.trim() || values.cvv.length < 3) {
-                toast.error("Please enter a valid 3-digit CVV code.");
+                const cardErr = "Please enter a valid 3-digit CVV code.";
+                setCheckoutError(cardErr);
+                toast.error(cardErr);
                 return;
             }
 
-            // Open 3D-Secure Payment Simulation modal!
+            // Open Simulated 3D-Secure modal for card payments
             setIsPaymentModalOpen(true);
             return;
         }
 
-        // Cash on delivery: submit directly
+        // For Cash On Delivery, execute immediately
         await executeCheckoutSubmission();
     };
 
-    // Render Loading Skeleton while loading addresses
-    if (user && addressesLoading) {
+    if (addressesLoading) {
         return <CheckoutPageSkeleton />;
     }
 
     return (
-        <div className="p-6 md:p-10 flex flex-col md:flex-row gap-8 h-full font-sans text-brand-primary-brown max-w-7xl mx-auto">
-            {/* Dedicated Checkout Form Component */}
-            <CheckoutForm
-                ref={checkoutFormRef}
-                user={user}
-                savedAddresses={savedAddresses}
-                onChange={handleFormChange}
-                onSubmit={handleProceedCheckout}
-            />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col lg:flex-row gap-8 lg:gap-12 min-h-screen">
+            {/* Left Column: Form Sections */}
+            <div className="flex-1 w-full flex flex-col gap-6">
+                <div>
+                    <h1 className="text-3xl sm:text-4xl font-serif text-[#78534a] font-normal tracking-tight">
+                        Check Out
+                    </h1>
+                    <p className="text-sm text-stone-500 mt-1 font-sans">
+                        Complete your order details below
+                    </p>
+                </div>
 
-            {/* Order Summary Column using ProductCartCard in View-Only Mode */}
-            <div className="w-full md:w-[420px] shrink-0 flex flex-col gap-6 bg-[#F9F4F1] border border-[#78534a]/10 rounded-2xl p-7 shadow-xs h-fit sticky top-24">
+                <CheckoutForm
+                    ref={checkoutFormRef}
+                    user={user}
+                    savedAddresses={savedAddresses}
+                    onChange={handleFormChange}
+                    onSubmit={handleProceedCheckout}
+                />
+            </div>
+
+            {/* Right Column: Order Summary Card */}
+            <div className="w-full lg:w-[420px] bg-stone-50/70 border border-stone-200/80 rounded-2xl p-6 sm:p-8 flex flex-col gap-6 h-fit sticky top-24 shadow-xs">
                 <h2 className="text-[#78534a] font-serif text-3xl font-normal leading-none">
                     Order Summary
                 </h2>
@@ -243,6 +270,17 @@ export default function CheckoutPage() {
                         ))}
                     </div>
                 </div>
+
+                {/* In-page Checkout / Stock Error Notice */}
+                {checkoutError && (
+                    <div className="p-3.5 bg-red-50 border border-red-200/90 text-red-700 rounded-xl text-xs sm:text-sm flex items-start gap-2.5 animate-in fade-in duration-200">
+                        <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                        <div className="flex flex-col gap-0.5">
+                            <span className="font-semibold">Unable to place order</span>
+                            <span className="text-xs text-red-600 leading-relaxed break-words">{checkoutError}</span>
+                        </div>
+                    </div>
+                )}
 
                 {/* Place Order CTA Button */}
                 <div className="pt-2">

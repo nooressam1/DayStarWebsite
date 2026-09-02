@@ -20,14 +20,34 @@ export function ProductCard({ product }: { product: Product }) {
     const salePrice = getProductSalePrice(product);
     const discountPercent = getProductDiscountPercentage(product);
 
+    const hasVariants = Boolean(product.variants && product.variants.length > 0);
+    const totalStock = hasVariants
+        ? product.variants!.reduce((acc, v) => acc + (v.stock ?? 0), 0)
+        : undefined;
+
+    const isOutOfStock = hasVariants && totalStock !== undefined && totalStock <= 0;
+    const isLowStock = hasVariants && totalStock !== undefined && totalStock > 0 && totalStock < 10;
+
     return (
         <div className="flex flex-col gap-2 w-full h-full border border-brand-primary-brown/10 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow">
             <div className="relative w-full aspect-square sm:aspect-[4/5] bg-[#faf5f3] overflow-hidden">
-                {onSale && (
-                    <span className="absolute top-3 left-3 bg-[#c94a29] text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase z-10 shadow-sm">
-                        {discountPercent > 0 ? `${discountPercent}% OFF` : "Sale"}
-                    </span>
-                )}
+                {/* Badges Stack */}
+                <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+                    {onSale && (
+                        <span className="bg-[#c94a29] text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase shadow-sm w-fit">
+                            {discountPercent > 0 ? `${discountPercent}% OFF` : "Sale"}
+                        </span>
+                    )}
+                    {isOutOfStock ? (
+                        <span className="bg-stone-900/90 text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase shadow-sm w-fit">
+                            Out of Stock
+                        </span>
+                    ) : isLowStock ? (
+                        <span className="bg-amber-600 text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full uppercase shadow-sm w-fit">
+                            Low Stock ({totalStock})
+                        </span>
+                    ) : null}
+                </div>
                 <Image
                     fill
                     sizes="(max-width: 768px) 100vw, 25vw"

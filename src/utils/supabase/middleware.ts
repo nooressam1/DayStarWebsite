@@ -40,7 +40,8 @@ export async function updateSession(request: NextRequest) {
     url.pathname.startsWith('/order-confirmed');
 
   if (!user && isProtectedPath) {
-    const redirectResponse = NextResponse.redirect(new URL('/', request.url));
+    const redirectPath = url.pathname.startsWith('/checkout') ? '/cart' : '/';
+    const redirectResponse = NextResponse.redirect(new URL(redirectPath, request.url));
     
     // Copy the cookies from the supabaseResponse to the redirectResponse
     supabaseResponse.cookies.getAll().forEach((cookie) => {
