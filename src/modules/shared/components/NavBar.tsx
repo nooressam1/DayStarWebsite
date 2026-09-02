@@ -1,66 +1,79 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ShoppingBag, Search, User, Menu } from "lucide-react"; // Example icon library
-import { useCartStore, useNavbarAuth } from "@/app/api/hooks";
+import { useRouter, usePathname } from "next/navigation";
+import { ShoppingBag, Search, Menu, X } from "lucide-react";
+import { useCartStore } from "@/app/api/hooks";
+import { AiSkincareChat } from "@/modules/skincare-test/components/AiSkincareChat";
+import NavAccountDropdown from "./NavAccountDropdown";
+
+interface NavLinkItem {
+  label: string;
+  href: string;
+
+}
+
+const NAV_LINKS: NavLinkItem[] = [
+  { label: "Home", href: "/" },
+  { label: "Shop By", href: "/product" },
+  { label: "On Sale", href: "/product?collection=sale" },
+  { label: "AI Skin Test", href: "/skincare-test", },
+  { label: "Contact Us", href: "/contact" },
+];
 
 export default function Navbar() {
   const { cart } = useCartStore();
   const router = useRouter();
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [aiChatOpen, setAiChatOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, [])
-  const {
-    user,
-    authOpen,
-    setAuthOpen,
-    dropdownOpen,
-    setDropdownOpen,
-    handleMouseEnter,
-    handleMouseLeave,
-    handleSignOut,
-  } = useNavbarAuth();
+  }, []);
+
+  // Close AI Chat modal and menus when route changes
+  useEffect(() => {
+    setAiChatOpen(false);
+    setMenuOpen(false);
+    setSearchOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
-    }
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleSearchSubmit = () => {
     if (searchQuery.trim()) {
-      // 1. Redirect to the catalog page with the URL-encoded query
       router.push(`/product?search=${encodeURIComponent(searchQuery.trim())}`);
-
-      // 2. Collapse the search bar
       setSearchOpen(false);
-
       setSearchQuery("");
     }
   };
 
-
   return (
     <>
-      <nav className={`sticky top-0 z-50 w-full transition-all duration-500 flex justify-between items-center px-10 py-5 ${scrolled || menuOpen ? "bg-[#FAF5F3] shadow-md" : "bg-transparent"}`}>
+      <nav className={`sticky top-0 z-50 w-full transition-all duration-500 flex justify-between items-center px-4 sm:px-6 md:px-10 py-4 md:py-5 ${scrolled || menuOpen ? "bg-[#FAF5F3] shadow-md" : "bg-transparent"}`}>
+        {/* Mobile Menu Hamburger */}
         <div className="block md:hidden">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="relative flex p-2 text-brand-primary-brown hover:text-gray-900 focus:outline-none"
+            className="relative flex p-2 text-brand-primary-brown hover:text-gray-900 focus:outline-none cursor-pointer"
             aria-label="Menu"
           >
             <Menu className="h-5 w-5" />
           </button>
         </div>
+
+        {/* Brand Logo */}
         <div className={searchOpen ? "hidden md:block" : "block"}>
           <Link
             href="/"
@@ -69,39 +82,22 @@ export default function Navbar() {
             DAYSTORE
           </Link>
         </div>
-        <div className=" gap-8 hidden md:flex">
-          <Link
-            href="/"
-            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-80 transition-opacity"
-          >
-            Home
-          </Link>
-          <Link
-            href="/product"
-            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-80 transition-opacity"
-          >
-            Shop By
-          </Link>
-          <Link
-            href="/product?collection=sale"
-            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-80 transition-opacity"
-          >
-            On Sale
-          </Link>
-          <Link
-            href="/about"
-            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-80 transition-opacity"
-          >
-            About Us
-          </Link>
-          <Link
-            href="/contact"
-            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-80 transition-opacity"
-          >
-            Contact Us
-          </Link>
+
+        {/* Desktop Navigation Links */}
+        <div className="gap-6 lg:gap-8 hidden md:flex items-center">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="cursor-pointer  text-brand-primary-brown font-mediumfont-serif text-base transition-opacity hover:opacity-80"
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
-        <div className="flex gap-2">
+
+        {/* Right Action Icons */}
+        <div className="flex items-center gap-1 sm:gap-2">
           {/* Search Icon with Slide-out Input */}
           <div className="relative flex items-center gap-1.5">
             {searchOpen && (
@@ -116,7 +112,6 @@ export default function Navbar() {
                   }
                 }}
                 onBlur={() => {
-                  // Collapse if input is blurred and empty
                   setTimeout(() => {
                     if (!searchQuery.trim()) setSearchOpen(false);
                   }, 150);
@@ -142,7 +137,9 @@ export default function Navbar() {
             >
               <Search className="h-5 w-5" />
             </button>
-          </div>{" "}
+          </div>
+
+          {/* Cart Icon */}
           <Link
             href="/cart"
             className="relative flex p-2 text-brand-primary-brown hover:text-gray-900"
@@ -155,134 +152,55 @@ export default function Navbar() {
               </span>
             )}
           </Link>
-          {/* Account Icon with Hover Dropdown */}
-          <div
-            className="relative flex items-center"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            <button
-              onClick={() => {
-                if (user) {
-                  router.push("/account");
-                } else {
-                  setAuthOpen(true);
-                }
-              }}
-              className="relative flex p-2 text-brand-primary-brown hover:text-gray-900 transition-colors cursor-pointer"
-              aria-label="Account"
-            >
-              <User className="h-5 w-5" />
-            </button>
 
-            {dropdownOpen && (
-              <div
-                className="absolute right-0 top-full mt-1 w-64 bg-white border border-[#78534a]/15 rounded-xl shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                {user ? (
-                  <div className="p-4 flex flex-col gap-3 font-sans">
-                    <div className="border-b border-[#78534a]/10 pb-3">
-                      <p className="text-xs text-brand-gray">Logged in as</p>
-                      <p className="text-sm font-semibold text-brand-primary-brown truncate max-w-full">
-                        {user.email}
-                      </p>
-                    </div>
-                    <ul className="flex flex-col gap-1">
-                      <li>
-                        <Link
-                          href="/account/orders"
-                          className="flex items-center gap-2 px-3 py-2 text-sm text-brand-primary-brown hover:bg-brand-primary-brown/5 rounded-lg transition-colors font-medium"
-                          onClick={() => setDropdownOpen(false)}
-                        >
-                          Orders
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/account/addresses"
-                          className="flex items-center gap-2 px-3 py-2 text-sm text-brand-primary-brown hover:bg-brand-primary-brown/5 rounded-lg transition-colors font-medium"
-                          onClick={() => setDropdownOpen(false)}
-                        >
-                          Addresses
-                        </Link>
-                      </li>
-                    </ul>
-                    <div className="border-t border-[#78534a]/10 pt-2">
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium cursor-pointer"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 flex flex-col gap-3 font-sans text-center">
-                    <p className="text-sm text-brand-primary-brown">
-                      Access your orders, addresses, and more
-                    </p>
-                    <button
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        setAuthOpen(true);
-                      }}
-                      className="w-full py-2.5 bg-brand-primary-brown hover:bg-brand-primary-brown/90 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer shadow-sm"
-                    >
-                      Sign In / Sign Up
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Account Dropdown Component */}
+          <NavAccountDropdown />
         </div>
       </nav>
 
       {/* Mobile Menu Dropdown */}
       {menuOpen && (
-        <div className="md:hidden fixed top-[64px] left-0 right-0 bg-[#FAF5F3] shadow-md border-t border-[#78534a]/10 px-10 py-6 flex flex-col gap-4 z-40 animate-in slide-in-from-top duration-300">
-          <Link
-            href="/"
-            onClick={() => setMenuOpen(false)}
-            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-85 py-1 border-b border-[#78534a]/5"
-          >
-            Home
-          </Link>
-          <Link
-            href="/product"
-            onClick={() => setMenuOpen(false)}
-            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-85 py-1 border-b border-[#78534a]/5"
-          >
-            Shop By
-          </Link>
-          <Link
-            href="/product?collection=sale"
-            onClick={() => setMenuOpen(false)}
-            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-85 py-1 border-b border-[#78534a]/5"
-          >
-            On Sale
-          </Link>
-          <Link
-            href="/about"
-            onClick={() => setMenuOpen(false)}
-            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-85 py-1 border-b border-[#78534a]/5"
-          >
-            About Us
-          </Link>
-          <Link
-            href="/contact"
-            onClick={() => setMenuOpen(false)}
-            className="cursor-pointer font-serif text-brand-primary-brown font-medium text-base hover:opacity-85 py-1"
-          >
-            Contact Us
-          </Link>
+        <div className="md:hidden fixed top-[64px] left-0 right-0 bg-[#FAF5F3] shadow-md border-t border-[#78534a]/10 px-6 sm:px-10 py-6 flex flex-col gap-4 z-40 animate-in slide-in-from-top duration-300">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMenuOpen(false)}
+              className="cursor-pointer  text-brand-primary-brown font-mediumfont-serif text-base transition-opacity hover:opacity-80"
+
+            >
+              {link.label}
+            </Link>
+          ))}
+
         </div>
       )}
 
-      {/* AuthModal is now loaded globally in storefront layout */}
+      {/* Interactive AI Chat Box Modal */}
+      {aiChatOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setAiChatOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setAiChatOpen(false)}
+              className="absolute top-3.5 right-4 z-50 p-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors cursor-pointer"
+              aria-label="Close AI Chat"
+              title="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {/* Embedded AI Chat Box */}
+            <AiSkincareChat />
+          </div>
+        </div>
+      )}
     </>
   );
 }
-

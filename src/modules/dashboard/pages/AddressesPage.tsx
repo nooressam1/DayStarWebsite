@@ -125,41 +125,41 @@ export default function AddressesPage() {
                   }`}
               >
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2.5 text-brand-primary-brown">
-                      <div className="p-2 rounded-lg bg-brand-primary-brown/10">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-2.5 text-brand-primary-brown min-w-0 flex-1">
+                      <div className="p-2 rounded-lg bg-brand-primary-brown/10 shrink-0">
                         {renderAddressIcon(address.label)}
                       </div>
-                      <span className="font-serif font-bold text-base">
+                      <span className="font-serif font-bold text-sm sm:text-base truncate min-w-0">
                         {address.label || "Address"}
                       </span>
                     </div>
 
                     {isDefault ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-brand-primary-brown text-white px-2.5 py-0.5 rounded-full">
-                        <CheckCircle2 className="h-3 w-3" />
+                      <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold bg-brand-primary-brown text-white px-2.5 py-0.5 rounded-full">
+                        <CheckCircle2 className="h-3 w-3 shrink-0" />
                         Default
                       </span>
                     ) : (
                       <button
                         onClick={() => handleSetDefault(address.id)}
-                        className="text-xs text-brand-primary-brown/70 hover:text-brand-primary-brown underline font-medium cursor-pointer"
+                        className="text-xs shrink-0 text-brand-primary-brown/70 hover:text-brand-primary-brown underline font-medium cursor-pointer"
                       >
                         Set as default
                       </button>
                     )}
                   </div>
 
-                  <div className="text-xs text-brand-gray flex flex-col gap-1 mt-3 pl-1">
-                    <p className="font-semibold text-black/80">
+                  <div className="text-xs text-brand-gray flex flex-col gap-1 mt-3 pl-1 min-w-0 break-words [overflow-wrap:anywhere]">
+                    <p className="font-semibold text-black/80 break-words">
                       {address.street}
                     </p>
-                    <p>
+                    <p className="break-words">
                       {address.building_no ? `Building ${address.building_no}, ` : ""}
                       {address.floor_number ? `Floor ${address.floor_number}, ` : ""}
                       {address.apartment_number ? `Apt ${address.apartment_number}` : ""}
                     </p>
-                    <p>
+                    <p className="break-words">
                       {address.area ? `${address.area}, ` : ""}
                       {address.city ? `${address.city}, ` : ""}
                       {address.governorate || ""}

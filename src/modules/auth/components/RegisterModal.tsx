@@ -76,15 +76,7 @@ export default function RegisterModal() {
         </CustomButton>
       </form>
 
-      <p className="text-center text-sm text-brand-gray font-sans">
-        Already have an account?{' '}
-        <button
-          onClick={() => setView('login')}
-          className="text-brand-primary-brown underline font-medium hover:text-brand-light-brown transition-colors cursor-pointer"
-        >
-          Sign in
-        </button>
-      </p>
+
     </div>
   );
 }

@@ -5,6 +5,7 @@ export { default as Dropdown } from "./components/Dropdown";
 export { default as FavoriteButton } from "./components/FavoriteButton";
 export { Footer } from "./components/Footer";
 export { default as Navbar } from "./components/NavBar";
+export { default as NavAccountDropdown } from "./components/NavAccountDropdown";
 export { default as SelectionCard } from "./components/SelectionCard";
 export { default as TextInput } from "./components/TextInput";
 export { Spinner } from "./components/Spinner";

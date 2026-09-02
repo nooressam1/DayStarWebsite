@@ -139,7 +139,6 @@ export default function SkincareTestPage() {
                 : 'text-[#78534a] hover:bg-white/60'
                 }`}
             >
-              <ClipboardList className="w-4 h-4" />
               <span>Classic Step Quiz</span>
             </button>
           </div>

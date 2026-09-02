@@ -12,7 +12,7 @@ export default function BannerImage() {
                 {/* Left Image */}
                 <div className="w-full flex-[1] h-full relative overflow-hidden">
                     <Image
-                        src="/assets/images/BannerImage3.jpg"
+                        src="/assets/images/bannerImage3.jpg"
                         alt="Banner"
                         fill
                         sizes="(max-width: 768px) 50vw, 50vw"
