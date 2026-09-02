@@ -92,15 +92,7 @@ export default function LoginModal() {
         </CustomButton>
       </form>
 
-      <div className="text-center font-sans text-xs text-brand-gray">
-        Don&apos;t have an account?{' '}
-        <button
-          onClick={() => setView('register')}
-          className="text-brand-primary-brown font-semibold underline hover:opacity-80 transition-opacity cursor-pointer"
-        >
-          Sign up
-        </button>
-      </div>
+
     </div>
   );
 }

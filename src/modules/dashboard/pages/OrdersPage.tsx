@@ -63,8 +63,8 @@ export default function OrdersPage() {
                 key={order.id}
                 className="bg-[#FAF5F3]/40 border border-[#78534a]/10 rounded-xl p-5 hover:shadow-md hover:bg-white transition-all duration-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
               >
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-col  gap-4 md:gap-2">
+                  <div className="flex flex-wrap items-center md:gap-3 gap-1">
                     <span className="font-serif font-bold text-brand-primary-brown text-lg">
                       Order #{order.order_number}
                     </span>
@@ -72,8 +72,8 @@ export default function OrdersPage() {
                       {order.status}
                     </span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-brand-gray">
-                    <span className="flex items-center gap-1">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-brand-gray">
+                    <span className="flex items-center  gap-1">
                       <Calendar className="h-3.5 w-3.5 text-[#78534a]/45" />
                       {new Date(order.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                     </span>

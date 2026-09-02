@@ -58,7 +58,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className=" p-10 flex flex-col md:flex-row min-h-[calc(100vh-80px)] bg-[#FAF5F3]">
+    <div className=" p-10 flex gap-5 flex-col md:flex-row min-h-[calc(100vh-80px)] bg-[#FAF5F3]">
       {/* Sidebar navigation */}
       <aside className="w-full rounded-lg md:w-64 bg-white/60 backdrop-blur-md border-r border-[#78534a]/10 p-6 flex flex-col justify-between shadow-sm">
         <div className="flex flex-col gap-1.5">
@@ -99,8 +99,8 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 md:p-10 flex flex-col justify-stretch">
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-[#78534a]/10 p-8 shadow-sm flex-1">
+      <main className="flex-1 w-full flex flex-col justify-stretch">
+        <div className="bg-white/80 backdrop-blur-md rounded-lg border border-[#78534a]/10 p-8 shadow-sm flex-1">
           {children}
         </div>
       </main>

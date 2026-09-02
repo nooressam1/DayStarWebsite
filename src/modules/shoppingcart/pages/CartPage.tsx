@@ -15,18 +15,19 @@ const shoppingcart = () => {
   });
 
   return (
-    <div className="p-10 flex flex-col md:flex-row gap-5 min-h-screen pb-32">
+    <div className="p-4 sm:p-6 md:p-10 flex flex-col md:flex-row gap-5 min-h-screen pb-32">
+      {/* Products Section */}
       <div className="w-full">
         <h1 className="text-brand-primary-brown font-bold font-serif text-xl">
           Shopping Cart
         </h1>
 
-        <div className="px-5">
+        <div className="px-0 sm:px-5">
           {cart.length === 0 ? (
             <p className="text-brand-primary-brown p-5 text-center text-base"> your cart is empty</p>
           ) : (
             <div>
-              <div className="flex flex-row py-5 justify-between text-black font-sans">
+              <div className="hidden sm:flex flex-row py-5 justify-between text-black font-sans">
                 <h1 className="w-1/2">Products</h1>
                 <h1 className="w-1/4 flex justify-center">Quantity</h1>
                 <h1 className="w-1/6 flex justify-end">Price</h1>
@@ -50,6 +51,7 @@ const shoppingcart = () => {
 
       <div className="w-0.5 bg-[#78534A]/10 self-stretch my-2"></div>
 
+      {/* Order Summary Section */}
       <div className="w-full md:w-1/2">
         <h1 className="text-brand-primary-brown font-bold font-serif text-xl">
           Order Summary

@@ -41,7 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
             </div>
             <div className="p-4 flex flex-col gap-5 flex-1 justify-between">
                 <div className="flex flex-col ">
-                    <h1 className="font-serif text-black text-lg truncate">{product.name}</h1>
+                    <h1 className="font-serif text-black text-base md:text-lg truncate">{product.name}</h1>
                     {onSale ? (
                         <div className="flex items-center gap-2">
                             <span className="font-work text-brand-primary-brown font-bold text-md">

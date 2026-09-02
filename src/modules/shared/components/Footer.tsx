@@ -1,8 +1,25 @@
+'use client';
+
 import React from "react";
 import Link from "next/link";
 import { Phone } from "lucide-react";
+import { useAuth } from "@/lib/supabase/auth-provider";
+import { useAuthModalStore } from "@/app/api/hooks/useAuthModalStore";
 
 export function Footer() {
+  const { user } = useAuth();
+  const { openModal } = useAuthModalStore();
+
+  const handleLinkClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    requireAuth?: boolean
+  ) => {
+    if (requireAuth && !user) {
+      e.preventDefault();
+      openModal("login");
+    }
+  };
+
   return (
     <footer id="contact" className="w-full mt-16 md:mt-24 lg:mt-28 bg-[#E7DCDA] border-t border-brand-primary-brown/10">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-12 sm:pt-14 pb-8 flex flex-col gap-10 sm:gap-12">
@@ -31,7 +48,6 @@ export function Footer() {
                 {[
                   { label: "All Products", href: "/product" },
                   { label: "Skin Routine Quiz", href: "/skincare-test" },
-                  { label: "About DayStar", href: "/about" },
                   { label: "My Cart", href: "/cart" },
                 ].map((link) => (
                   <Link
@@ -52,15 +68,16 @@ export function Footer() {
               </h3>
               <nav className="flex flex-col gap-2.5">
                 {[
-                  { label: "My Account", href: "/account" },
-                  { label: "Saved Addresses", href: "/account/addresses" },
-                  { label: "Order History", href: "/account/orders" },
-                  { label: "Contact & Support", href: "/contact" },
+                  { label: "My Account", href: "/account", requireAuth: true },
+                  { label: "Saved Addresses", href: "/account/addresses", requireAuth: true },
+                  { label: "Order History", href: "/account/orders", requireAuth: true },
+                  { label: "Contact & Support", href: "/contact", requireAuth: false },
                 ].map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="text-sm text-[#8A756C] hover:text-brand-primary-brown transition-all hover:translate-x-0.5 inline-block font-sans"
+                    onClick={(e) => handleLinkClick(e, link.requireAuth)}
+                    className="text-sm text-[#8A756C] hover:text-brand-primary-brown transition-all hover:translate-x-0.5 inline-block font-sans cursor-pointer"
                   >
                     {link.label}
                   </Link>

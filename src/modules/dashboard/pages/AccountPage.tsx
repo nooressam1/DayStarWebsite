@@ -30,7 +30,7 @@ export default function DashboardPage() {
   }, [user]);
 
   return (
-    <div className="flex flex-col gap-6 font-sans">
+    <div className="flex w-full flex-col gap-6 font-sans">
       <div>
         <h1 className="text-2xl font-serif font-bold text-brand-primary-brown">
           Profile Overview
@@ -43,12 +43,12 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         {/* Profile Card */}
         <div className="bg-[#FAF5F3]/50 p-6 rounded-xl border border-[#78534a]/10 flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-brand-primary-brown uppercase tracking-wider font-sans">
+          <h2 className="break-all text-sm font-semibold flex-wrap text-brand-primary-brown uppercase tracking-wider font-sans">
             Personal Information
           </h2>
           <div className="flex flex-col gap-1">
             <span className="text-xs text-brand-gray">Email Address</span>
-            <span className="text-sm font-medium text-brand-primary-brown">
+            <span className="text-sm break-all font-medium   text-brand-primary-brown">
               {user?.email || "Not Available"}
             </span>
           </div>
