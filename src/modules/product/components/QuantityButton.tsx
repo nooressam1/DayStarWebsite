@@ -21,34 +21,35 @@ export default function QuantityButton({
   const isMax = disabled || value >= max;
 
   return (
-    <div className="rounded-sm h-full w-full flex items-center justify-center border border-brand-primary-brown">
+    <div className="rounded-md h-full w-full flex items-stretch justify-between border border-brand-primary-brown overflow-hidden">
       <button
         type="button"
         onClick={onDecrement}
         disabled={isMin}
-        className={`h-full w-full py-2 px-5 transition-colors ${
-          isMin
-            ? "opacity-40 cursor-not-allowed text-gray-400"
-            : "cursor-pointer hover:text-white hover:bg-brand-primary-brown"
-        }`}
+        className={`px-2.5 sm:px-3 py-1 flex items-center justify-center transition-colors select-none ${isMin
+          ? "opacity-35 cursor-not-allowed text-gray-400"
+          : "cursor-pointer hover:text-white hover:bg-brand-primary-brown text-brand-primary-brown font-medium"
+          }`}
+        aria-label="Decrease quantity"
       >
         -
       </button>
-      <div className="border flex justify-center items-center border-t-0 border-b-0 h-full px-5 w-full border-brand-primary-brown text-center">
-        <h1 className="text-black text-sm p-2">{value}</h1>
+      <div className="border-x flex items-center justify-center px-2 sm:px-3 flex-1 border-brand-primary-brown text-center bg-transparent">
+        <span className="text-stone-900 text-xs sm:text-sm font-medium select-none">{value}</span>
       </div>
       <button
         type="button"
         onClick={onIncrement}
         disabled={isMax}
-        className={`h-full w-full py-2 px-5 transition-colors ${
-          isMax
-            ? "opacity-40 cursor-not-allowed text-gray-400"
-            : "cursor-pointer hover:text-white hover:bg-brand-primary-brown"
-        }`}
+        className={`px-2.5 sm:px-3 py-1 flex items-center justify-center transition-colors select-none ${isMax
+          ? "opacity-35 cursor-not-allowed text-gray-400"
+          : "cursor-pointer hover:text-white hover:bg-brand-primary-brown text-brand-primary-brown font-medium"
+          }`}
+        aria-label="Increase quantity"
       >
         +
       </button>
     </div>
   );
 }
+
