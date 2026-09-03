@@ -20,6 +20,7 @@ const ShoppingCart = () => {
   });
 
   const handleProceedToCheckout = () => {
+    if (cart.length === 0) return;
     if (!user) {
       openModal("login");
       return;

@@ -20,7 +20,7 @@ export default function CustomButton({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center   tracking-wider text-sm transition-all duration-300 rounded-md px-4 py-2 cursor-pointer focus:outline-none";
+    "inline-flex items-center justify-center tracking-wider text-sm transition-all duration-300 rounded-md px-4 py-2 cursor-pointer focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none disabled:shadow-none";
   const selectedVariantStyles = BUTTON_VARIANTS[colorScheme][variant];
   return (
     <button
