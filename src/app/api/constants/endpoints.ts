@@ -17,6 +17,7 @@ export const ENDPOINTS = {
     GET: (id: string) => `/orders/${id}`,
     LIST: "/orders",
     CANCEL: (orderId: string) => `/orders/${orderId}/cancel`,
+    REFUND: (orderId: string) => `/orders/${orderId}/refund`,
   },
   USER: {
     ME: "/me",

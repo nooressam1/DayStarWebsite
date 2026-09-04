@@ -68,8 +68,8 @@ export default function OrdersPage() {
                     <span className="font-serif font-bold text-brand-primary-brown text-lg">
                       Order #{order.order_number}
                     </span>
-                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${getStatusColor(order.status)}`}>
-                      {order.status}
+                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${getStatusColor(order.order_status)}`}>
+                      {order.order_status}
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-brand-gray">

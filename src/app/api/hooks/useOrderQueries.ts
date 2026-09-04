@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getOrders, getOrder, processCheckout, cancelOrder, ProcessCheckoutParams } from "@/app/api/endpoints/order.endpoint";
+import { getOrders, getOrder, processCheckout, cancelOrder, refundOrder, ProcessCheckoutParams } from "@/app/api/endpoints/order.endpoint";
 
 // 1. Fetch Orders List with Caching
 export function useOrdersQuery(limit = 10, offset = 0) {
@@ -44,3 +44,18 @@ export function useCancelOrderMutation() {
     },
   });
 }
+
+// 5. Refund Order Mutation
+export function useRefundOrderMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ orderId, reason }: { orderId: string; reason?: string }) =>
+      refundOrder(orderId, reason),
+    onSuccess: (_, { orderId }) => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["order", orderId] });
+    },
+  });
+}
+

@@ -1,6 +1,7 @@
 import { ENDPOINTS } from "@/app/api/constants/endpoints";
 import { apiClient } from "@/app/api/utils/client";
-import { Order, CheckoutResponse, CancelOrderResponse } from "@/app/api/types";
+import { Order, CheckoutResponse, CancelOrderResponse, RefundOrderResponse } from "@/app/api/types";
+
 
 export interface CheckoutAddressPayload {
     city: string;
@@ -81,3 +82,20 @@ export async function cancelOrder(orderId: string): Promise<CancelOrderResponse 
         return null;
     }
 }
+
+export async function refundOrder(orderId: string, reason?: string): Promise<RefundOrderResponse | null> {
+    try {
+        return await apiClient.request<RefundOrderResponse>(
+            ENDPOINTS.ORDER.REFUND(orderId),
+            undefined,
+            {
+                method: 'PATCH',
+                body: JSON.stringify({ reason }),
+            }
+        );
+    } catch (error) {
+        console.error("Error refunding order", error);
+        return null;
+    }
+}
+
