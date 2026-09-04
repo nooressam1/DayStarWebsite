@@ -27,7 +27,7 @@ export default function RegisterModal() {
       setError(error.message);
       return;
     }
-    setMessage('Account created! Check your email to confirm, then sign in.');
+    setMessage('Account created! ');
   }
 
   return (

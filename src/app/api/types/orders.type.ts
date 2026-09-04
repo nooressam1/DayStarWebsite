@@ -21,18 +21,19 @@ export interface DetailedOrderItem extends OrderItem {
 
 export interface Order {
   id: string;
-  order_number: number;
+  created_at: string;
   user_id: string;
   address_id: string;
-  status: string;
+  order_status: string;
   total: number;
-  created_at: string;
-  discount_amount?: number;
-  full_name?: string;
-  phone_number?: string;
-  email?: string;
-  payment_method?: string;
-  payment_status?: string;
+  order_number: number;
+  discount_amount?: number | null;
+  discount_id?: number | null;
+  phone_number?: number | string | null;
+  full_name?: string | null;
+  payment_status?: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED' | string | null;
+  payment_method?: string | null;
+  email?: string | null;
   addresses?: Address | Address[];
   items?: DetailedOrderItem[];
 }
@@ -49,3 +50,10 @@ export interface CancelOrderResponse {
   message?: string;
   order?: Order;
 }
+
+export interface RefundOrderResponse {
+  success?: boolean;
+  message?: string;
+  order?: Order;
+}
+
