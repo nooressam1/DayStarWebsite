@@ -5,6 +5,7 @@ export const ENDPOINTS = {
     VARIANTS: (productId: string) => `/product/${productId}/variants`,
     REVIEWS: (productId: string) => `/product/${productId}/reviews`,
     BEST_SELLERS: "/product/best-sellers",
+    NEW_ARRIVALS: "/product/new-arrivals",
   },
   DISCOUNT: {
     GET: (code: string) => `/discount/${code}`,

@@ -45,6 +45,19 @@ export async function getBestSellers(): Promise<Product[]> {
     }
 }
 
+export async function getNewArrivals(): Promise<Product[]> {
+    try {
+        return await apiClient.request<Product[]>(ENDPOINTS.PRODUCT.NEW_ARRIVALS);
+    } catch (error) {
+        console.error("Error fetching best sellers:", error);
+        return [];
+    }
+}
+
+
+
+
+
 // Fetch reviews for a product
 export async function getProductReviews(productId: string): Promise<Review[]> {
     try {

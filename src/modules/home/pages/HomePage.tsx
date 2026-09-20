@@ -21,17 +21,21 @@ interface HomePageProps {
     initialCategories?: Category[];
     initialBestSellers?: Product[];
     initialSaleProducts?: Product[];
+    initialnewArrivals?: Product[];
 }
 
 export default function HomePage({
     initialCategories = [],
     initialBestSellers = [],
     initialSaleProducts = [],
+    initialnewArrivals = [],
 }: HomePageProps = {}) {
     const { data: categories = initialCategories, isLoading: categoriesLoading } = useCategoriesQuery(
         initialCategories.length > 0 ? initialCategories : undefined
     );
     const { data: bestSellers = initialBestSellers, isLoading: bestSellersLoading } = useBestSellersQuery(
+        initialBestSellers.length > 0 ? initialBestSellers : undefined
+    ); const { data: newArrivals = initialnewArrivals, isLoading: newArrivalsLoading } = useBestSellersQuery(
         initialBestSellers.length > 0 ? initialBestSellers : undefined
     );
     const { data: saleData, isLoading: saleLoading } = useProductsQuery(
@@ -47,15 +51,18 @@ export default function HomePage({
 
     return (
         <div className="flex flex-col gap-12 md:gap-25">
+
             <BannerImage />
-            <div className="flex flex-col gap-12 md:gap-20">
+            <div className="flex flex-col gap-8 md:gap-12 items-start px-10 sm:px-10 md:px-15">
+                <PersonalizedRoutineSection /> </div>
+            <div className="flex flex-col gap-10 md:gap-20">
                 {/* Popular Categories */}
                 <div className="flex flex-col gap-8">
                     <div className="flex flex-col justify-center items-center text-center px-4">
-                        <h1 className="text-brand-primary-brown font-bold font-serif text-2xl md:text-3xl">
+                        <h1 className="text-brand-primary-brown text-center font-bold font-serif text-2xl md:text-3xl">
                             Popular Categories
                         </h1>
-                        <h1 className="text-brand-primary-brown/70 font-light font-sans text-base md:text-lg">
+                        <h1 className="text-brand-primary-brown/70 text-center font-light font-sans text-base md:text-lg">
                             Everything you need to care for &amp; more
                         </h1>
                     </div>
@@ -74,7 +81,7 @@ export default function HomePage({
                             </div>
 
                             {/* Desktop: infinite marquee slider */}
-                            <div className="hidden gap-5 lg:flex w-max animate-slide">
+                            <div className="hidden gap-0 lg:flex w-max animate-slide">
                                 {[...categories, ...categories].map((cat, index) => (
                                     <Link
                                         key={`${cat.id}-${index}`}
@@ -89,19 +96,22 @@ export default function HomePage({
                     )}
                 </div>
 
-                <div className="flex flex-col gap-8 md:gap-12 items-start px-10 sm:px-10 md:px-15">
+                <div className="flex flex-col gap-8 md:gap-20 items-start px-10 sm:px-10 md:px-15">
+
                     {/* Best Selling Products */}
-                    <div className="flex flex-col gap-5 items-start w-full">
-                        <div className="flex flex-row justify-between items-center w-full">
-                            <h1 className="text-brand-primary-brown font-bold font-serif text-2xl md:text-3xl">
+                    <div className="flex flex-col gap-10 items-start w-full">
+                        <div className="relative flex items-center justify-center w-full">
+                            <h1 className="text-brand-primary-brown text-center font-bold font-serif text-2xl md:text-3xl">
                                 Best Selling Products
                             </h1>
-                            <Link href="/product?collection=best-sellers">
-                                <h1 className="text-brand-primary-brown/70 font-regular font-sans text-sm md:text-md cursor-pointer hover:underline">
-                                    View More
-                                </h1>
+                            <Link
+                                href="/product?collection=best-sellers"
+                                className="absolute right-0 text-brand-primary-brown/70 font-sans text-sm md:text-base cursor-pointer hover:underline"
+                            >
+                                View More
                             </Link>
                         </div>
+
 
                         {bestSellersLoading && bestSellers.length === 0 ? (
                             <ProductCardSkeletonGrid
@@ -125,8 +135,39 @@ export default function HomePage({
                     <SkincareBanner />
 
                     {/* Personalized Skincare Routine Carousel (shows when routine is cached) */}
-                    <PersonalizedRoutineSection />
 
+                    <div className="flex flex-col gap-10 items-start w-full">
+                        <div className="relative flex items-center justify-center w-full">
+                            <h1 className="text-brand-primary-brown text-center font-bold font-serif text-2xl md:text-3xl">
+                                New Arrivals
+                            </h1>
+                            <Link
+                                href="/product?collection=new-arrivals"
+                                className="absolute right-0 text-brand-primary-brown/70 font-sans text-sm md:text-base cursor-pointer hover:underline"
+                            >
+                                View More
+                            </Link>
+                        </div>
+
+
+                        {bestSellersLoading && bestSellers.length === 0 ? (
+                            <ProductCardSkeletonGrid
+                                count={4}
+                                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full"
+                            />
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full">
+                                {bestSellers.slice(0, 4).map((product, index) => (
+                                    <div
+                                        key={product.id}
+                                        className={index === 2 ? "hidden md:block" : index === 3 ? "hidden lg:block" : ""}
+                                    >
+                                        <ProductCard product={product} />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     {/* Sale Banner + Product Carousel side by side (or full-width if no 50% products) */}
                     <div className="flex flex-col md:flex-row gap-5 w-full items-stretch">
                         <div className={`flex ${hasSaleProducts || saleLoading ? "flex-[4]" : "w-full"} w-full min-h-[350px] md:min-h-0`}>

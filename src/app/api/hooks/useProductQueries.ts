@@ -8,6 +8,7 @@ import {
   getProductVariants,
   getProductReviews,
   createProductReview,
+  getNewArrivals,
 } from "@/app/api/endpoints/product.endpoint";
 import { getCategories } from "@/app/api/endpoints/category.endpoint";
 import { Product, Category, Variant } from "@/app/api/types";
@@ -57,6 +58,13 @@ export function useBestSellersQuery(initialData?: Product[]) {
   return useQuery({
     queryKey: ["best-sellers"],
     queryFn: getBestSellers,
+    initialData,
+  });
+}
+export function useNewArrivalsQuery(initialData?: Product[]) {
+  return useQuery({
+    queryKey: ["new-arrivals"],
+    queryFn: getNewArrivals,
     initialData,
   });
 }
