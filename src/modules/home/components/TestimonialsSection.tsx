@@ -30,7 +30,7 @@ export function TestimonialsSection() {
     return (
         <div className="flex flex-col gap-6 items-center w-full">
 
-            <h1 className="text-brand-primary-brown text-start md:text-center font-bold font-serif text-xl md:text-2xl">
+            <h1 className="text-brand-primary-brown text-start md:text-center font-bold font-serif text-md md:text-2xl">
                 What Our Clients Say
             </h1>
 
