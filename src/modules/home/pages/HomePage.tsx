@@ -62,10 +62,10 @@ export default function HomePage({
                 {/* Popular Categories */}
                 <div className="flex flex-col gap-8">
                     <div className="flex flex-col justify-center items-center text-center px-4">
-                        <h1 className="text-brand-primary-brown text-center font-bold font-serif text-2xl md:text-3xl">
+                        <h1 className="text-brand-primary-brown text-center font-bold font-serif text-lg md:text-3xl">
                             Popular Categories
                         </h1>
-                        <h1 className="text-brand-primary-brown/70 text-center font-light font-sans text-base md:text-lg">
+                        <h1 className="text-brand-primary-brown/70 text-center font-light font-sans text-sm md:text-lg">
                             Everything you need to care for &amp; more
                         </h1>
                     </div>
@@ -103,13 +103,13 @@ export default function HomePage({
 
                     {/* Best Selling Products */}
                     <div className="flex flex-col gap-10 items-start w-full">
-                        <div className="relative flex text-start md:items-center justify-start md:justify-center w-full">
-                            <h1 className="text-brand-primary-brown text-start md:text-center font-bold font-serif text-xl md:text-2xl">
+                        <div className="relative flex text-start md:items-center justify-between  md:justify-center w-full">
+                            <h1 className="text-brand-primary-brown flex text-start md:text-center font-bold font-serif text-lg flex-wrap md:text-2xl">
                                 Best Selling Products
                             </h1>
                             <Link
                                 href="/product?collection=best-sellers"
-                                className="absolute right-0 text-brand-primary-brown/70 font-sans text-sm md:text-base cursor-pointer hover:underline"
+                                className="md:absolute md:right-0 text-brand-primary-brown/70 font-sans text-sm md:text-base cursor-pointer hover:underline"
                             >
                                 View More
                             </Link>
@@ -140,13 +140,14 @@ export default function HomePage({
                     {/* Personalized Skincare Routine Carousel (shows when routine is cached) */}
 
                     <div className="flex flex-col gap-10 items-start w-full">
-                        <div className="relative flex text-start md:items-center justify-start md:justify-center w-full">
-                            <h1 className="text-brand-primary-brown text-start md:text-center font-bold font-serif text-xl md:text-2xl">
+                        <div className="relative flex text-start md:items-center justify-between  md:justify-center w-full">
+                            <h1 className="text-brand-primary-brown flex text-start md:text-center font-bold font-serif text-lg flex-wrap md:text-2xl">
+
                                 New Arrivals
                             </h1>
                             <Link
                                 href="/product?collection=new-arrivals"
-                                className="absolute right-0 text-brand-primary-brown/70 font-sans text-sm md:text-base cursor-pointer hover:underline"
+                                className="md:absolute md:right-0 text-brand-primary-brown/70 font-sans text-sm md:text-base cursor-pointer hover:underline"
                             >
                                 View More
                             </Link>
@@ -190,6 +191,6 @@ export default function HomePage({
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

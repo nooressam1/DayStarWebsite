@@ -31,7 +31,7 @@ export function CategoriesBox({ photo, categoryName }: categoryProps) {
 
             <div className="w-full h-full bg-brand-primary-brown/20" />
             <div className="absolute inset-0 bg-black/30" />
-            <span className="absolute inset-0 flex items-center justify-center text-white font-serif font-semibold text-lg z-10 text-center px-2">
+            <span className="absolute inset-0 flex items-center justify-center text-white font-serif font-semibold text-sm md:text-lg z-10 text-center px-2">
                 {categoryName}
             </span>
         </div>
