@@ -103,8 +103,8 @@ export default function HomePage({
 
                     {/* Best Selling Products */}
                     <div className="flex flex-col gap-10 items-start w-full">
-                        <div className="relative flex items-center justify-center w-full">
-                            <h1 className="text-brand-primary-brown text-center font-bold font-serif text-2xl md:text-3xl">
+                        <div className="relative flex text-start md:items-center justify-start md:justify-center w-full">
+                            <h1 className="text-brand-primary-brown text-start md:text-center font-bold font-serif text-xl md:text-2xl">
                                 Best Selling Products
                             </h1>
                             <Link
@@ -140,8 +140,8 @@ export default function HomePage({
                     {/* Personalized Skincare Routine Carousel (shows when routine is cached) */}
 
                     <div className="flex flex-col gap-10 items-start w-full">
-                        <div className="relative flex items-center justify-center w-full">
-                            <h1 className="text-brand-primary-brown text-center font-bold font-serif text-2xl md:text-3xl">
+                        <div className="relative flex text-start md:items-center justify-start md:justify-center w-full">
+                            <h1 className="text-brand-primary-brown text-start md:text-center font-bold font-serif text-xl md:text-2xl">
                                 New Arrivals
                             </h1>
                             <Link
