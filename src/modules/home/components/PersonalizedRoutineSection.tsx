@@ -125,50 +125,53 @@ export function PersonalizedRoutineSection() {
     }
 
     return (
-        <div className="flex flex-col gap-8 items-start w-full">
-            <div className="relative flex flex-col sm:flex-row justify-center sm:justify-center items-center sm:items-center gap-4 w-full">
-                <div className="flex flex-col flex-wrap items-center gap-3 md:gap-4">
-                    <h1 className="text-brand-primary-brown font-bold font-serif text-2xl md:text-3xl">
-                        Your New Skincare Routine
-                    </h1>
-                    <CustomButton
-                        onClick={handleAddRoutineToCart}
-                        disabled={isAddedToCart || !hasPurchasableItems}
-                        icon={isAddedToCart ? Check : ShoppingBag}
-                        variant="solid"
-                        colorScheme="primary"
-                        className={`!rounded-lg !py-2 !px-4 text-xs md:text-sm font-medium ${isAddedToCart ? "!bg-emerald-700 hover:!bg-emerald-700" : ""
-                            } ${!hasPurchasableItems ? "opacity-50 cursor-not-allowed" : ""}`}
-                    >
-                        {isAddedToCart
-                            ? "Added to Cart!"
-                            : !hasPurchasableItems
-                                ? "Unavailable"
-                                : "Add Routine to Cart"}
-                    </CustomButton>
+        <div className="flex flex-col gap-8 md:gap-12 items-start px-6 sm:px-10 md:px-15 w-full min-w-0">
+
+            <div className="flex flex-col gap-8 items-start w-full">
+                <div className="relative flex flex-col sm:flex-row justify-center sm:justify-center items-center sm:items-center gap-4 w-full">
+                    <div className="flex flex-col flex-wrap items-center gap-3 md:gap-4">
+                        <h1 className="text-brand-primary-brown font-bold font-serif text-2xl md:text-3xl">
+                            Your New Skincare Routine
+                        </h1>
+                        <CustomButton
+                            onClick={handleAddRoutineToCart}
+                            disabled={isAddedToCart || !hasPurchasableItems}
+                            icon={isAddedToCart ? Check : ShoppingBag}
+                            variant="solid"
+                            colorScheme="primary"
+                            className={`!rounded-lg !py-2 !px-4 text-xs md:text-sm font-medium ${isAddedToCart ? "!bg-emerald-700 hover:!bg-emerald-700" : ""
+                                } ${!hasPurchasableItems ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                            {isAddedToCart
+                                ? "Added to Cart!"
+                                : !hasPurchasableItems
+                                    ? "Unavailable"
+                                    : "Add Routine to Cart"}
+                        </CustomButton>
+                    </div>
+
+                    <div className="absolute right-0 flex items-center gap-3 sm:gap-4 self-end sm:self-auto">
+                        {/* View More button */}
+                        <Link href="/skincare-test/results">
+                            <span className="text-brand-primary-brown/70 font-regular font-sans text-sm md:text-md cursor-pointer hover:underline">
+                                View More
+                            </span>
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="absolute right-0 flex items-center gap-3 sm:gap-4 self-end sm:self-auto">
-                    {/* View More button */}
-                    <Link href="/skincare-test/results">
-                        <span className="text-brand-primary-brown/70 font-regular font-sans text-sm md:text-md cursor-pointer hover:underline">
-                            View More
-                        </span>
-                    </Link>
-                </div>
+                {/* Reusable Items Carousel */}
+                <ItemsCarousel
+                    items={uniqueProducts}
+                    itemsPerPage={4}
+                    responsive={{
+                        md: 2,
+                        sm: 2,
+                    }}
+                    gridClassName="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full"
+                    renderItem={(product) => <ProductCard product={product} />}
+                />
             </div>
-
-            {/* Reusable Items Carousel */}
-            <ItemsCarousel
-                items={uniqueProducts}
-                itemsPerPage={4}
-                responsive={{
-                    md: 2,
-                    sm: 2,
-                }}
-                gridClassName="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full"
-                renderItem={(product) => <ProductCard product={product} />}
-            />
         </div>
     );
 }

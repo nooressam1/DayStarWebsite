@@ -56,9 +56,8 @@ export default function HomePage({
         <div className="flex flex-col gap-12 md:gap-25 w-full overflow-x-clip">
 
             <BannerImage />
-            <div className="flex flex-col gap-8 md:gap-12 items-start px-6 sm:px-10 md:px-15 w-full min-w-0">
 
-                <PersonalizedRoutineSection /> </div>
+            <PersonalizedRoutineSection />
             <div className="flex flex-col gap-10 md:gap-20 w-full min-w-0">
                 {/* Popular Categories */}
                 <div className="flex flex-col gap-8">
