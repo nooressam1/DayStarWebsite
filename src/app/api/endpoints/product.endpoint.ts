@@ -49,45 +49,10 @@ export async function getNewArrivals(): Promise<Product[]> {
     try {
         return await apiClient.request<Product[]>(ENDPOINTS.PRODUCT.NEW_ARRIVALS);
     } catch (error) {
-        console.error("Error fetching best sellers:", error);
+        console.error("Error fetching new arrivals:", error);
         return [];
     }
 }
 
-
-
-
-
-// Fetch reviews for a product
-export async function getProductReviews(productId: string): Promise<Review[]> {
-    try {
-        const reviews = await apiClient.request<Review[]>(ENDPOINTS.PRODUCT.REVIEWS(productId));
-        // Map backend relation profile.username to username if username is empty
-        return reviews.map(r => ({
-            ...r,
-            username: r.username || r.profile?.username || "Anonymous"
-        }));
-    } catch {
-        return [];
-    }
-}
-
-// Create a new review for a product (requires auth)
-export async function createProductReview(
-    productId: string,
-    reviewData: { rating: number; title: string; body: string }
-): Promise<Review | null> {
-    try {
-        const data = await apiClient.request<Review>(ENDPOINTS.PRODUCT.REVIEWS(productId), undefined, {
-            method: "POST",
-            body: JSON.stringify(reviewData),
-        });
-        return {
-            ...data,
-            username: data.username || data.profile?.username || "Anonymous"
-        };
-    } catch (error) {
-        console.error("Error creating review:", error);
-        return null;
-    }
-}
+// Re-export reviews from dedicated review endpoint
+export * from "./review.endpoint";

@@ -14,6 +14,7 @@ import {
 import ProductDetailPageSkeleton from "../components/ProductDetailPageSkeleton";
 
 import { Product, Variant } from "@/app/api/types";
+import { ItemsCarousel } from "@/modules/shared";
 
 interface ProductPageProps {
   params?: Promise<{ slug: string }>;
@@ -78,11 +79,11 @@ export default function ProductDetailPage({
 
   return (
     <div className="py-10 px-10 flex flex-col gap-16">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-14 items-start w-full">
-        <div className="w-full md:w-1/2 shrink-0">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-10 lg:gap-14 items-start w-full">
+        <div className="w-full lg:w-[600px] lg:shrink-0">
           <ImageCarousel images={product.images} productName={product.name} />
         </div>
-        <div className="w-full md:w-1/2">
+        <div className="w-full flex-1 min-w-0">
           <ProductDetails product={product} variants={variants} />
         </div>
       </div>
@@ -99,11 +100,17 @@ export default function ProductDetailPage({
               Similar Products
             </h1>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full">
-            {similarProducts.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
+          <ItemsCarousel
+            items={similarProducts}
+            itemsPerPage={4}
+            responsive={{
+              md: 2,
+              sm: 2,
+            }}
+            gridClassName="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 w-full"
+            renderItem={(similarProducts) => <ProductCard product={similarProducts} />}
+          />
+
         </div>
       )}
     </div>

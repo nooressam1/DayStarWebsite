@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { ShoppingBag, Search, Menu, X } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, ArrowRight } from "lucide-react";
 import { useCartStore } from "@/app/api/hooks";
 import { AiSkincareChat } from "@/modules/skincare-test/components/AiSkincareChat";
 import NavAccountDropdown from "./NavAccountDropdown";
@@ -99,28 +99,50 @@ export default function Navbar() {
         {/* Right Action Icons */}
         <div className="flex items-center gap-1 sm:gap-2">
           {/* Search Icon with Slide-out Input */}
-          <div className="relative flex items-center gap-1.5">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSearchSubmit();
+            }}
+            className="relative flex items-center gap-1.5"
+          >
             {searchOpen && (
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearchSubmit();
-                  }
-                }}
-                onBlur={() => {
-                  setTimeout(() => {
-                    if (!searchQuery.trim()) setSearchOpen(false);
-                  }, 150);
-                }}
-                className="bg-[#FAF5F3] border border-brand-primary-brown/20 rounded-full px-4 py-1 text-sm text-brand-primary-brown outline-none focus:border-brand-primary-brown w-[48vw] sm:w-56 md:w-56 transition-all duration-300 animate-in slide-in-from-right-2"
-                autoFocus
-              />
+              <div className="relative flex items-center">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearchSubmit();
+                    }
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => {
+                      if (!searchQuery.trim()) setSearchOpen(false);
+                    }, 200);
+                  }}
+                  className={`bg-[#FAF5F3] border border-brand-primary-brown/20 rounded-full pl-4 ${
+                    searchQuery.trim() ? "pr-18" : "pr-4"
+                  } py-1 text-sm text-brand-primary-brown outline-none focus:border-brand-primary-brown w-[48vw] sm:w-60 md:w-64 transition-all duration-300 animate-in slide-in-from-right-2`}
+                  autoFocus
+                />
+                {searchQuery.trim() && (
+                  <button
+                    type="submit"
+                    onMouseDown={(e) => e.preventDefault()}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-brand-primary-brown text-white hover:bg-[#5e413a] px-2 py-0.5 rounded-full text-xs font-sans font-medium flex items-center gap-1 transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95"
+                    aria-label="Submit search"
+                  >
+                    <span>Search</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
             )}
             <button
+              type="button"
               onClick={() => {
                 if (searchOpen) {
                   if (searchQuery.trim()) {
@@ -137,7 +159,7 @@ export default function Navbar() {
             >
               <Search className="h-5 w-5" />
             </button>
-          </div>
+          </form>
 
           {/* Cart Icon */}
           <Link

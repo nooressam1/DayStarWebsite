@@ -8,6 +8,7 @@ export { default as Navbar } from "./components/NavBar";
 export { default as NavAccountDropdown } from "./components/NavAccountDropdown";
 export { default as SelectionCard } from "./components/SelectionCard";
 export { default as TextInput } from "./components/TextInput";
+export { default as ItemsCarousel } from "./components/ItemsCarousel";
 export { Spinner } from "./components/Spinner";
 export { ProductCardSkeleton, ProductCardSkeletonGrid } from "./components/ProductCardSkeleton";
 export { CategorySkeleton, CategorySkeletonGrid } from "./components/CategorySkeleton";

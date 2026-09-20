@@ -4,7 +4,7 @@ import React, { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ArrowLeft, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { ProductCard } from "@/modules/home/components/ProductCard";
 import { Dropdown, ProductCardSkeletonGrid } from "@/modules/shared";
 import { useProductsQuery, useCategoriesQuery } from "@/app/api/hooks/useProductQueries";
@@ -130,8 +130,8 @@ function ProductsCatalogContent({
             availability === "in-stock"
                 ? inStock
                 : availability === "out-of-stock"
-                ? !inStock
-                : true;
+                    ? !inStock
+                    : true;
         return matchesAvailability;
     });
 
@@ -189,9 +189,8 @@ function ProductsCatalogContent({
                                         handleCategorySelect("");
                                         setShowCategoriesDropdown(false);
                                     }}
-                                    className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] flex items-center justify-between cursor-pointer ${
-                                        !categoryId ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
-                                    }`}
+                                    className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] flex items-center justify-between cursor-pointer ${!categoryId ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
+                                        }`}
                                 >
                                     <span>All Categories</span>
                                 </button>
@@ -202,9 +201,8 @@ function ProductsCatalogContent({
                                             handleCategorySelect(cat.id);
                                             setShowCategoriesDropdown(false);
                                         }}
-                                        className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] flex items-center justify-between cursor-pointer ${
-                                            categoryId === cat.id ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
-                                        }`}
+                                        className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] flex items-center justify-between cursor-pointer ${categoryId === cat.id ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
+                                            }`}
                                     >
                                         <span>{cat.name}</span>
                                     </button>
@@ -235,9 +233,8 @@ function ProductsCatalogContent({
                                             setAvailability(item.val);
                                             setShowAvailabilityDropdown(false);
                                         }}
-                                        className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] cursor-pointer ${
-                                            availability === item.val ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
-                                        }`}
+                                        className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] cursor-pointer ${availability === item.val ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
+                                            }`}
                                     >
                                         {item.label}
                                     </button>
@@ -259,9 +256,8 @@ function ProductsCatalogContent({
                                         setSortBy("newest");
                                         setShowPriceDropdown(false);
                                     }}
-                                    className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] cursor-pointer ${
-                                        sortBy === "newest" ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
-                                    }`}
+                                    className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] cursor-pointer ${sortBy === "newest" ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
+                                        }`}
                                 >
                                     Newest
                                 </button>
@@ -270,9 +266,8 @@ function ProductsCatalogContent({
                                         setSortBy("price-asc");
                                         setShowPriceDropdown(false);
                                     }}
-                                    className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] cursor-pointer ${
-                                        sortBy === "price-asc" ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
-                                    }`}
+                                    className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] cursor-pointer ${sortBy === "price-asc" ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
+                                        }`}
                                 >
                                     Price: Low to High
                                 </button>
@@ -281,9 +276,8 @@ function ProductsCatalogContent({
                                         setSortBy("price-desc");
                                         setShowPriceDropdown(false);
                                     }}
-                                    className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] cursor-pointer ${
-                                        sortBy === "price-desc" ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
-                                    }`}
+                                    className={`w-full text-left px-4 py-2.5 text-xs font-sans hover:bg-[#faf5f3] cursor-pointer ${sortBy === "price-desc" ? "font-bold text-[#78534a]" : "text-[#78534a]/80"
+                                        }`}
                                 >
                                     Price: High to Low
                                 </button>
@@ -297,17 +291,28 @@ function ProductsCatalogContent({
                                 value={searchVal}
                                 onChange={(e) => setSearchVal(e.target.value)}
                                 placeholder="Search skincare products..."
-                                className="w-full pl-9 pr-8 py-2 border border-[#78534a]/20 rounded-md text-xs font-sans focus:outline-hidden focus:border-[#78534a] text-[#78534a] placeholder-[#78534a]/40"
+                                className={`w-full pl-9 ${searchVal.trim() ? "pr-24" : "pr-8"} py-2 border border-[#78534a]/20 rounded-md text-xs font-sans focus:outline-hidden focus:border-[#78534a] text-[#78534a] placeholder-[#78534a]/40 transition-all`}
                             />
                             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#78534a]/40" />
                             {searchVal && (
-                                <button
-                                    type="button"
-                                    onClick={handleSearchClear}
-                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#78534a]/40 hover:text-[#78534a] cursor-pointer"
-                                >
-                                    <X className="w-3.5 h-3.5" />
-                                </button>
+                                <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                                    <button
+                                        type="button"
+                                        onClick={handleSearchClear}
+                                        className="text-[#78534a]/40 hover:text-[#78534a] p-1 cursor-pointer"
+                                        aria-label="Clear search"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-[#78534a] text-white hover:bg-[#5e413a] transition-colors rounded px-2.5 py-1 text-xs font-sans font-medium flex items-center gap-1 cursor-pointer shadow-xs animate-in fade-in zoom-in-95"
+                                        aria-label="Submit search"
+                                    >
+                                        <span>Search</span>
+                                        <ArrowRight className="w-3 h-3" />
+                                    </button>
+                                </div>
                             )}
                         </form>
                     </div>
@@ -373,7 +378,7 @@ function ProductsCatalogContent({
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {filteredProducts.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
@@ -394,11 +399,10 @@ function ProductsCatalogContent({
                             <button
                                 key={p}
                                 onClick={() => handlePageChange(p)}
-                                className={`w-8 h-8 rounded-md text-xs font-sans font-medium transition-all cursor-pointer ${
-                                    page === p
-                                        ? "bg-[#78534a] text-white"
-                                        : "border border-[#78534a]/20 text-[#78534a] hover:border-[#78534a]"
-                                }`}
+                                className={`w-8 h-8 rounded-md text-xs font-sans font-medium transition-all cursor-pointer ${page === p
+                                    ? "bg-[#78534a] text-white"
+                                    : "border border-[#78534a]/20 text-[#78534a] hover:border-[#78534a]"
+                                    }`}
                             >
                                 {p}
                             </button>

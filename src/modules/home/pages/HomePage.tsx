@@ -12,10 +12,12 @@ import { ProductCarousel } from "../components/ProductCarousel";
 import {
     useCategoriesQuery,
     useBestSellersQuery,
+    useNewArrivalsQuery,
     useProductsQuery,
 } from "@/app/api/hooks/useProductQueries";
 import { Category, Product } from "@/app/api/types";
-import { ProductCardSkeletonGrid, CategorySkeletonGrid } from "@/modules/shared";
+import { ProductCardSkeletonGrid, CategorySkeletonGrid, ItemsCarousel } from "@/modules/shared";
+import { TestimonialsSection } from "../components/TestimonialsSection";
 
 interface HomePageProps {
     initialCategories?: Category[];
@@ -35,8 +37,9 @@ export default function HomePage({
     );
     const { data: bestSellers = initialBestSellers, isLoading: bestSellersLoading } = useBestSellersQuery(
         initialBestSellers.length > 0 ? initialBestSellers : undefined
-    ); const { data: newArrivals = initialnewArrivals, isLoading: newArrivalsLoading } = useBestSellersQuery(
-        initialBestSellers.length > 0 ? initialBestSellers : undefined
+    );
+    const { data: newArrivals = initialnewArrivals, isLoading: newArrivalsLoading } = useNewArrivalsQuery(
+        initialnewArrivals.length > 0 ? initialnewArrivals : undefined
     );
     const { data: saleData, isLoading: saleLoading } = useProductsQuery(
         {
@@ -50,12 +53,13 @@ export default function HomePage({
     const hasSaleProducts = Boolean(fiftyPercentOffProducts && fiftyPercentOffProducts.length > 0);
 
     return (
-        <div className="flex flex-col gap-12 md:gap-25">
+        <div className="flex flex-col gap-12 md:gap-25 w-full overflow-x-clip">
 
             <BannerImage />
-            <div className="flex flex-col gap-8 md:gap-12 items-start px-10 sm:px-10 md:px-15">
+            <div className="flex flex-col gap-8 md:gap-12 items-start px-6 sm:px-10 md:px-15 w-full min-w-0">
+
                 <PersonalizedRoutineSection /> </div>
-            <div className="flex flex-col gap-10 md:gap-20">
+            <div className="flex flex-col gap-10 md:gap-20 w-full min-w-0">
                 {/* Popular Categories */}
                 <div className="flex flex-col gap-8">
                     <div className="flex flex-col justify-center items-center text-center px-4">
@@ -96,7 +100,7 @@ export default function HomePage({
                     )}
                 </div>
 
-                <div className="flex flex-col gap-8 md:gap-20 items-start px-10 sm:px-10 md:px-15">
+                <div className="flex flex-col gap-8 md:gap-20 items-start px-6 sm:px-10 md:px-15 w-full min-w-0">
 
                     {/* Best Selling Products */}
                     <div className="flex flex-col gap-10 items-start w-full">
@@ -116,19 +120,19 @@ export default function HomePage({
                         {bestSellersLoading && bestSellers.length === 0 ? (
                             <ProductCardSkeletonGrid
                                 count={4}
-                                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full"
+                                className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 w-full"
                             />
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full">
-                                {bestSellers.slice(0, 4).map((product, index) => (
-                                    <div
-                                        key={product.id}
-                                        className={index === 2 ? "hidden md:block" : index === 3 ? "hidden lg:block" : ""}
-                                    >
-                                        <ProductCard product={product} />
-                                    </div>
-                                ))}
-                            </div>
+                            <ItemsCarousel
+                                items={bestSellers}
+                                itemsPerPage={4}
+                                responsive={{
+                                    md: 2,
+                                    sm: 2,
+                                }}
+                                gridClassName="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 w-full"
+                                renderItem={(product) => <ProductCard product={product} />}
+                            />
                         )}
                     </div>
 
@@ -150,35 +154,37 @@ export default function HomePage({
                         </div>
 
 
-                        {bestSellersLoading && bestSellers.length === 0 ? (
+                        {newArrivalsLoading && newArrivals.length === 0 ? (
                             <ProductCardSkeletonGrid
                                 count={4}
-                                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full"
+                                className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 w-full"
                             />
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-full">
-                                {bestSellers.slice(0, 4).map((product, index) => (
-                                    <div
-                                        key={product.id}
-                                        className={index === 2 ? "hidden md:block" : index === 3 ? "hidden lg:block" : ""}
-                                    >
-                                        <ProductCard product={product} />
-                                    </div>
-                                ))}
-                            </div>
+                            <ItemsCarousel
+                                items={newArrivals}
+                                itemsPerPage={4}
+                                responsive={{
+                                    md: 2,
+                                    sm: 2,
+                                }}
+                                gridClassName="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 w-full"
+                                renderItem={(product) => <ProductCard product={product} />}
+                            />
                         )}
                     </div>
-                    {/* Sale Banner + Product Carousel side by side (or full-width if no 50% products) */}
-                    <div className="flex flex-col md:flex-row gap-5 w-full items-stretch">
-                        <div className={`flex ${hasSaleProducts || saleLoading ? "flex-[4]" : "w-full"} w-full min-h-[350px] md:min-h-0`}>
+                    <TestimonialsSection></TestimonialsSection>
+
+                    {/* Sale Banner + Product Carousel side by side on desktop, stacked on mobile/tablet */}
+                    <div className="flex flex-col lg:flex-row gap-6 w-full items-stretch min-w-0">
+                        <div className={`flex ${hasSaleProducts || saleLoading ? "flex-1" : "w-full"} min-w-0`}>
                             <SaleBanner hasDiscountProducts={hasSaleProducts || saleLoading} />
                         </div>
                         {saleLoading && fiftyPercentOffProducts.length === 0 ? (
-                            <div className="hidden sm:flex flex-[2] w-full">
+                            <div className="w-full lg:w-[300px] xl:w-[340px] lg:shrink-0 min-w-0">
                                 <ProductCardSkeletonGrid count={1} className="w-full h-full" />
                             </div>
                         ) : hasSaleProducts ? (
-                            <div className="flex flex-[2] w-full">
+                            <div className="w-full lg:w-[300px] xl:w-[340px] lg:shrink-0 min-w-0">
                                 <ProductCarousel products={fiftyPercentOffProducts.slice(0, 4)} />
                             </div>
                         ) : null}

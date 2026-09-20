@@ -4,7 +4,7 @@ import { CustomButton } from "@/modules/shared";
 
 export function SaleBanner({ hasDiscountProducts = true }: { hasDiscountProducts?: boolean }) {
     return (
-        <div className="w-full rounded-md flex overflow-hidden justify-center items-center h-[300px] sm:h-[400px] md:h-full min-h-[300px] sm:min-h-[400px] md:min-h-0 relative">
+        <div className="w-full rounded-lg flex overflow-hidden justify-center items-center h-full min-h-[260px] sm:min-h-[320px] md:min-h-[360px] lg:min-h-[420px] relative min-w-0">
             <Image
                 src="/assets/images/SaleImage.jpg"
                 alt="Banner"
@@ -15,24 +15,24 @@ export function SaleBanner({ hasDiscountProducts = true }: { hasDiscountProducts
             />
             <div className="absolute inset-0 bg-black/40 z-5" />
 
-            <div className="relative px-6 sm:px-12 md:pl-20 p-6 md:p-15 h-fit w-full z-10 flex flex-col items-start justify-center gap-2 sm:gap-3">
+            <div className="relative px-6 py-8 sm:px-10 sm:py-10 md:px-12 lg:px-10 xl:px-14 h-full w-full z-10 flex flex-col items-start justify-center gap-2 sm:gap-3 min-w-0">
                 {hasDiscountProducts ? (
-                    <h1 className="text-5xl md:text-8xl font-bold text-white font-serif leading-none">
+                    <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white font-serif leading-tight">
                         50% <br />
                         OFF
                     </h1>
                 ) : (
-                    <h1 className="text-5xl md:text-8xl font-bold text-white font-serif leading-none">
+                    <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white font-serif leading-tight">
                         Sale <br />
                         Offers
                     </h1>
                 )}
-                <p className="text-xs sm:text-sm md:text-lg font-light text-white font-sans max-w-xs sm:max-w-md">
+                <p className="text-xs sm:text-sm md:text-base font-light text-white/90 font-sans max-w-xs sm:max-w-md">
                     Choose from our selection of beauty care products
                 </p>
                 <Link href={hasDiscountProducts ? "/product?collection=sale&discount=50" : "/product?collection=sale"}>
                     <CustomButton
-                        className="px-6 py-2.5 sm:px-15 sm:py-4 sm:text-xl font-serif mt-2"
+                        className="px-6 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-serif mt-2 rounded-lg"
                         variant="opacity"
                         colorScheme="secondary"
                     >
