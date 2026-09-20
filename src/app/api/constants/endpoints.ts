@@ -3,8 +3,15 @@ export const ENDPOINTS = {
     BY_SLUG: (slug: string) => `/product/${slug}`,
     LIST: "/product",
     VARIANTS: (productId: string) => `/product/${productId}/variants`,
-    REVIEWS: (productId: string) => `/product/${productId}/reviews`,
+    REVIEWS: (productId: string) => `/reviews/${productId}`,
     BEST_SELLERS: "/product/best-sellers",
+    NEW_ARRIVALS: "/product/new-arrivals",
+    FEATURED_REVIEWS: "/reviews/featured",
+  },
+  REVIEWS: {
+    BY_PRODUCT: (productId: string) => `/reviews/${productId}`,
+    FEATURED: "/reviews/featured",
+    CREATE: (productId: string) => `/reviews/${productId}`,
   },
   DISCOUNT: {
     GET: (code: string) => `/discount/${code}`,

@@ -5,8 +5,8 @@ import Image from "next/image";
 import { sanitizeImageUrl } from "@/utils/image/image.utils";
 
 export interface categoryProps {
-  photo?: string | null;
-  categoryName: string;
+    photo?: string | null;
+    categoryName: string;
 }
 
 export function CategoriesBox({ photo, categoryName }: categoryProps) {
@@ -17,7 +17,7 @@ export function CategoriesBox({ photo, categoryName }: categoryProps) {
     }, [photo]);
 
     return (
-        <div className="relative rounded-sm md:rounded-2xl w-full md:h-[412px] h-[150px] overflow-hidden cursor-pointer group bg-brand-primary-brown/10">
+        <div className="relative rounded-sm md:rounded-none w-full md:h-[430px] h-[150px] overflow-hidden cursor-pointer group bg-brand-primary-brown/10">
             <Image
                 src={imgSrc}
                 alt={categoryName || "Category"}

@@ -8,9 +8,11 @@ import {
   getProductVariants,
   getProductReviews,
   createProductReview,
+  getNewArrivals,
+  getFeaturedReviews,
 } from "@/app/api/endpoints/product.endpoint";
 import { getCategories } from "@/app/api/endpoints/category.endpoint";
-import { Product, Category, Variant } from "@/app/api/types";
+import { Product, Category, Variant, Review } from "@/app/api/types";
 
 // 1. Fetch Product Catalog List with Automatic Caching
 export function useProductsQuery(
@@ -60,6 +62,13 @@ export function useBestSellersQuery(initialData?: Product[]) {
     initialData,
   });
 }
+export function useNewArrivalsQuery(initialData?: Product[]) {
+  return useQuery({
+    queryKey: ["new-arrivals"],
+    queryFn: getNewArrivals,
+    initialData,
+  });
+}
 
 // 5. Fetch Product Variants
 export function useProductVariantsQuery(productId: string, initialData?: Variant[]) {
@@ -77,6 +86,15 @@ export function useProductReviewsQuery(productId: string) {
     queryKey: ["product-reviews", productId],
     queryFn: () => getProductReviews(productId),
     enabled: !!productId,
+  });
+}
+
+// 7. Fetch Featured Reviews for Testimonials
+export function useFeaturedReviewsQuery(limit = 10, initialData?: Review[]) {
+  return useQuery({
+    queryKey: ["featured-reviews", limit],
+    queryFn: () => getFeaturedReviews(limit),
+    initialData,
   });
 }
 

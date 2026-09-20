@@ -21,17 +21,17 @@ export default function ImageCarousel({
   const displayImages = validImages.length > 0 ? validImages : ["/no-image.png"];
 
   return (
-    <div className="w-full max-w-lg  flex flex-col md:flex-row  items-start">
+    <div className="w-full  flex flex-col md:flex-row gap-4 items-start">
       {/* Thumbnail List */}
       {displayImages.length >= 1 && (
-        <div className="flex flex-row md:flex-col gap-3 order-2 md:order-1 w-full md:w-28 pb-2 md:pb-0 scrollbar-none shrink-0 overflow-x-auto md:overflow-y-auto">
+        <div className="flex flex-row md:flex-col gap-3 order-2 md:order-1 w-full md:w-20 lg:w-24 pb-2 md:pb-0 scrollbar-none shrink-0 overflow-x-auto md:overflow-y-auto">
           {displayImages.map((src, index) => {
             const isActive = index === currentIndex;
             return (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
-                className={`w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-24 rounded-xl overflow-hidden border-2 cursor-pointer transition-all shrink-0 focus:outline-none ${isActive
+                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 cursor-pointer transition-all shrink-0 focus:outline-none ${isActive
                   ? "border-brand-primary-brown scale-95 shadow-sm"
                   : "border-transparent opacity-60 hover:opacity-100"
                   }`}
@@ -50,8 +50,8 @@ export default function ImageCarousel({
         </div>
       )}
 
-      {/* Main Image Display Box with Fixed Consistent Dimensions */}
-      <div className="relative order-1 md:order-2 aspect-square w-full h-[320px] sm:h-[450px] md:h-[500px] bg-white rounded-2xl overflow-hidden border border-brand-light-brown/10 shadow-sm group shrink-0">
+      {/* Main Image Display Box with Fluid Responsive Dimensions */}
+      <div className="relative order-1 md:order-2 aspect-square flex-1 min-w-0 w-full max-h-[500px] bg-white rounded-2xl overflow-hidden border border-brand-light-brown/10 shadow-sm group">
         <div
           className="flex h-full w-full transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}

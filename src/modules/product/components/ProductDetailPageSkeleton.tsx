@@ -8,14 +8,14 @@ export function ProductDetailPageSkeleton() {
     return (
         <div className="py-10 px-6 sm:px-10 flex flex-col gap-16 animate-pulse">
             {/* Upper Section: Carousel + Details */}
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-14 items-start w-full">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start w-full">
                 {/* Image Carousel Skeleton Column */}
-                <div className="w-full md:w-1/2 shrink-0">
+                <div className="w-full min-w-0">
                     <ImageCarouselSkeleton />
                 </div>
 
                 {/* Product Details Skeleton Column */}
-                <div className="w-full md:w-1/2 flex flex-col gap-6">
+                <div className="w-full min-w-0 flex flex-col gap-6">
                     {/* Title & Price */}
                     <div className="flex flex-col gap-3">
                         <div className="h-8 w-3/4 bg-stone-300/90 rounded-md animate-pulse" />

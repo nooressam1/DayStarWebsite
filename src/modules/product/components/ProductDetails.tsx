@@ -129,7 +129,7 @@ export default function ProductDetails({ product, variants = [] }: { product: Pr
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-1 min-w-0 flex-col gap-6 ">
       <div className="flex flex-col gap-2">
         <h1 className="text-brand-primary-brown font-bold font-serif text-2xl md:text-3xl">
           {product.name}
@@ -188,11 +188,10 @@ export default function ProductDetails({ product, variants = [] }: { product: Pr
                     setQuantity(1);
                     setErrorMessage(null);
                   }}
-                  className={`py-2 px-4 text-sm rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
-                    isSelected
-                      ? "bg-[#78534a] text-white border-[#78534a] shadow-sm font-medium"
-                      : "bg-white text-stone-700 border-stone-300 hover:border-[#78534a]/60 hover:bg-stone-50"
-                  } ${sizeOutOfStock ? "opacity-60" : ""}`}
+                  className={`py-2 px-4 text-sm rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${isSelected
+                    ? "bg-[#78534a] text-white border-[#78534a] shadow-sm font-medium"
+                    : "bg-white text-stone-700 border-stone-300 hover:border-[#78534a]/60 hover:bg-stone-50"
+                    } ${sizeOutOfStock ? "opacity-60" : ""}`}
                 >
                   <span>{size.size}</span>
                   {sizeOutOfStock && (
@@ -247,9 +246,8 @@ export default function ProductDetails({ product, variants = [] }: { product: Pr
             onClick={handleAddToCart}
             disabled={isOutOfStock}
             icon={isAdded ? Check : undefined}
-            className={`py-4 px-2 w-full flex-1 text-sm font-normal rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-              isAdded ? "bg-[#557b55] text-white border-[#557b55] hover:bg-[#466946]" : ""
-            }`}
+            className={`py-4 px-2 w-full flex-1 text-sm font-normal rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${isAdded ? "bg-[#557b55] text-white border-[#557b55] hover:bg-[#466946]" : ""
+              }`}
           >
             {isOutOfStock ? "Out of Stock" : isAdded ? "Added to Cart" : "Add to Cart"}
           </CustomButton>
