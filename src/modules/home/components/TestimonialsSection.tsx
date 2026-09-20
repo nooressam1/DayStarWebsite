@@ -29,9 +29,10 @@ export function TestimonialsSection() {
 
     return (
         <div className="flex flex-col gap-6 items-center w-full">
-            <h2 className="text-brand-primary-brown items-center justify-center  font-bold font-serif text-2xl md:text-3xl text-center">
+
+            <h1 className="text-brand-primary-brown text-start md:text-center font-bold font-serif text-xl md:text-2xl">
                 What Our Clients Say
-            </h2>
+            </h1>
 
             <ItemsCarousel
                 items={validTestimonials}

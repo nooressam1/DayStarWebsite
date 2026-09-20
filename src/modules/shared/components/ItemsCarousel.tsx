@@ -114,7 +114,7 @@ export function ItemsCarousel<T>({
                     <button
                         type="button"
                         onClick={handlePrev}
-                        className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 backdrop-blur-xs border border-[#78534a]/20 shadow-md text-brand-primary-brown flex items-center justify-center hover:bg-brand-primary-brown hover:text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
+                        className="hidden sm:flex absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 backdrop-blur-xs border border-[#78534a]/20 shadow-md text-brand-primary-brown items-center justify-center hover:bg-brand-primary-brown hover:text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
                         aria-label="Previous page"
                     >
                         <ChevronLeft className="w-5 h-5" />
@@ -142,7 +142,7 @@ export function ItemsCarousel<T>({
                     <button
                         type="button"
                         onClick={handleNext}
-                        className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 backdrop-blur-xs border border-[#78534a]/20 shadow-md text-brand-primary-brown flex items-center justify-center hover:bg-brand-primary-brown hover:text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
+                        className="hidden sm:flex absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 backdrop-blur-xs border border-[#78534a]/20 shadow-md text-brand-primary-brown items-center justify-center hover:bg-brand-primary-brown hover:text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
                         aria-label="Next page"
                     >
                         <ChevronRight className="w-5 h-5" />

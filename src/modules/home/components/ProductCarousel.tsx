@@ -65,7 +65,7 @@ export function ProductCarousel({ products }: { products: Product[] }) {
                         <button
                             type="button"
                             onClick={handlePrev}
-                            className="absolute -left-2.5 sm:-left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/95 border border-[#78534a]/20 shadow-md text-brand-primary-brown flex items-center justify-center hover:bg-brand-primary-brown hover:text-white transition-all cursor-pointer"
+                            className="hidden sm:flex absolute -left-2.5 sm:-left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/95 border border-[#78534a]/20 shadow-md text-brand-primary-brown items-center justify-center hover:bg-brand-primary-brown hover:text-white transition-all cursor-pointer"
                             aria-label="Previous product"
                         >
                             <ChevronLeft className="w-4 h-4" />
@@ -73,7 +73,7 @@ export function ProductCarousel({ products }: { products: Product[] }) {
                         <button
                             type="button"
                             onClick={handleNext}
-                            className="absolute -right-2.5 sm:-right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/95 border border-[#78534a]/20 shadow-md text-brand-primary-brown flex items-center justify-center hover:bg-brand-primary-brown hover:text-white transition-all cursor-pointer"
+                            className="hidden sm:flex absolute -right-2.5 sm:-right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/95 border border-[#78534a]/20 shadow-md text-brand-primary-brown items-center justify-center hover:bg-brand-primary-brown hover:text-white transition-all cursor-pointer"
                             aria-label="Next product"
                         >
                             <ChevronRight className="w-4 h-4" />
