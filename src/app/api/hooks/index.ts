@@ -7,3 +7,4 @@ export * from "./useProductQueries";
 export * from "./useOrderQueries";
 export * from "./useAddressQueries";
 export * from "./useContactQueries";
+export * from "./useQuizQueries";
